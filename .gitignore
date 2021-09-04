@@ -8,3 +8,6 @@ Thumbs.db
 /vendor/
 composer.phar
 composer.lock
+
+# Project
+/tests/PhpUnit/.phpunit.cache/
