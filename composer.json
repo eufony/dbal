@@ -1,6 +1,6 @@
 {
   "name": "eufony/orm",
-  "description": "Model-based ",
+  "description": "Model-based zero-configuration extensible PHP ORM library.",
   "keywords": [ "eufony", "orm", "database", "sql" ],
   "type": "library",
   "license": "LGPL-3.0-or-later",
