@@ -41,8 +41,7 @@ class SqlLogger extends \Psr\Log\AbstractLogger {
         $database = Database::get();
 
         // Temporarily turn off logging (creates an infinite loop otherwise)
-        $null_logger = new NullLogger();
-        $prev_logger = $database->logger($null_logger);
+        $logger = $database->logger(new \Psr\Log\NullLogger());
 
         // Ensure log table exists
         try {
@@ -85,7 +84,7 @@ class SqlLogger extends \Psr\Log\AbstractLogger {
         $database->query($sql, $values);
 
         // Restore previous logger
-        $database->logger($prev_logger);
+        $database->logger($logger);
     }
 
 }
