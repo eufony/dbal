@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Adapters;
+namespace Eufony\ORM\DBAL\Adapters;
 
 use Eufony\ORM\QueryException;
 

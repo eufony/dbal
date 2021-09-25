@@ -19,7 +19,7 @@
 
 namespace Eufony\ORM;
 
-use Eufony\ORM\Adapters\SqlAdapterInterface;
+use Eufony\ORM\DBAL\Adapters\SqlAdapterInterface;
 use Eufony\ORM\Loggers\SqlLogger;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -45,7 +45,7 @@ class Database {
     /**
      * A backend driver for translating and executing SQL queries.
      *
-     * @var \Eufony\ORM\Adapters\SqlAdapterInterface $adapter
+     * @var \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface $adapter
      */
     private SqlAdapterInterface $adapter;
 
@@ -104,7 +104,7 @@ class Database {
      * used internally by the ORM for schema validation, logging, etc.
      *
      * @param string $key
-     * @param \Eufony\ORM\Adapters\SqlAdapterInterface $adapter
+     * @param \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface $adapter
      *
      * @see \Eufony\ORM\Database::get()
      */
@@ -126,7 +126,7 @@ class Database {
     /**
      * Returns the current SQL adapter.
      *
-     * @return \Eufony\ORM\Adapters\SqlAdapterInterface
+     * @return \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface
      */
     public function adapter(): SqlAdapterInterface {
         return $this->adapter;
