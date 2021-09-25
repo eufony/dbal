@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Adapters;
+namespace Eufony\ORM\DBAL\Adapters;
 
 /**
  * Provides a common interface for connecting to and querying different
@@ -27,7 +27,7 @@ namespace Eufony\ORM\Adapters;
  * The queries are then translated for other database engines and schemas using
  * the `SqlAdapterInterface::translate()` method.
  *
- * @see \Eufony\ORM\Adapters\SqlAdapterInterface::translate()
+ * @see \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface::translate()
  */
 interface SqlAdapterInterface {
 
