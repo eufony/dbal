@@ -23,7 +23,7 @@ namespace Eufony\ORM\Loggers;
  * Provides a logging implementation for logging to the error log.
  * The messages will be sent to the SAPI logging handler directly.
  */
-class SapiLogger extends \Psr\Log\AbstractLogger {
+class ErrorLogger extends \Psr\Log\AbstractLogger {
 
     use LoggerTrait;
 

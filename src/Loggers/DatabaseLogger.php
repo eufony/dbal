@@ -28,7 +28,7 @@ use Eufony\ORM\QueryException;
  * along with the log level, current timestamp, and, if one occurred, the
  * exception.
  */
-class SqlLogger extends \Psr\Log\AbstractLogger {
+class DatabaseLogger extends \Psr\Log\AbstractLogger {
 
     use LoggerTrait;
 

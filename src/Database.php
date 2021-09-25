@@ -20,7 +20,7 @@
 namespace Eufony\ORM;
 
 use Eufony\ORM\DBAL\Adapters\SqlAdapterInterface;
-use Eufony\ORM\Loggers\SqlLogger;
+use Eufony\ORM\Loggers\DatabaseLogger;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 
@@ -51,7 +51,7 @@ class Database {
 
     /**
      * A PSR-3 compliant logger.
-     * Defaults to an instance of `\Eufony\ORM\Loggers\SqlLogger`.
+     * Defaults to an instance of `\Eufony\ORM\Loggers\DatabaseLogger`.
      *
      * @var \Psr\Log\LoggerInterface $logger
      */
@@ -97,8 +97,8 @@ class Database {
      * The key can later be used to fetch this instance using the
      * `Database::get()` method.
      *
-     * By default, sets up a `\Eufony\ORM\Loggers\SqlLogger` for logging and an
-     * array cache pool for caching.
+     * By default, sets up a `\Eufony\ORM\Loggers\DatabaseLogger` for logging
+     * and an array cache pool for caching.
      *
      * Notice: A database with the key `default` MUST be set up. This will be
      * used internally by the ORM for schema validation, logging, etc.
@@ -111,7 +111,7 @@ class Database {
     public function __construct(string $key, SqlAdapterInterface $adapter) {
         static::$connections[$key] = $this;
         $this->adapter = $adapter;
-        $this->logger = new SqlLogger();
+        $this->logger = new DatabaseLogger();
         $this->cache = new \Cache\Adapter\PHPArray\ArrayCachePool();
     }
 
