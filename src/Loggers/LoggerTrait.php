@@ -47,7 +47,7 @@ trait LoggerTrait {
      * Returns the current minimum log level.
      * If `$level` is set, sets the new minimum and returns the previous value.
      *
-     * Notice: This method is not a part of the PSR-3 standard.
+     * **Notice:** This method is not a part of the PSR-3 standard.
      *
      * @param string|null $level
      * @return string
@@ -62,7 +62,7 @@ trait LoggerTrait {
      * Returns the current maximum log level.
      * If `$level` is set, sets the new maximum and returns the previous value.
      *
-     * Notice: This method is not a part of the PSR-3 standard.
+     * **Notice:** This method is not a part of the PSR-3 standard.
      *
      * @param string|null $level
      * @return string
