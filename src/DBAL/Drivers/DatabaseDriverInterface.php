@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Adapters;
+namespace Eufony\DBAL\Drivers;
 
 use Eufony\DBAL\Queries\Query;
 
@@ -27,16 +27,16 @@ use Eufony\DBAL\Queries\Query;
  *
  * Allows the query logic to be written using the query builders in the
  * `\Eufony\DBAL\Queries` namespace.
- * The implementations of this adapter then generate the query string for their
- * own vendor-specific database backends using the `generate()` method.
+ * The implementations of this interface then generate the query string for
+ * their own vendor-specific database backends using the `generate()` method.
  *
- * The `\Eufony\DBAL\Adapters\AbstractAdapter` class provides some boilerplate
- * code to ease the implementation of this interface.
+ * The `\Eufony\DBAL\Drivers\AbstractDatabaseDriver` class provides some
+ * boilerplate code to ease the implementation of this interface.
  *
  * @see \Eufony\DBAL\Queries\Query
- * @see \Eufony\DBAL\Adapters\AbstractAdapter
+ * @see \Eufony\DBAL\Drivers\AbstractDatabaseDriver
  */
-interface QueryAdapterInterface {
+interface DatabaseDriverInterface {
 
     /**
      * Generates the query string to be executed from a query builder.
