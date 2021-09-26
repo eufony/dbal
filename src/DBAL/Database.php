@@ -120,14 +120,6 @@ class Database {
     }
 
     /**
-     * Class destructor.
-     * Breaks the connection to the database.
-     */
-    public function __destruct() {
-        $this->driver->disconnect();
-    }
-
-    /**
      * Returns the current database driver.
      *
      * @return \Eufony\DBAL\Drivers\DatabaseDriverInterface

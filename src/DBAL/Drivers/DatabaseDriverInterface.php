@@ -33,6 +33,11 @@ use Eufony\DBAL\Queries\Query;
  * The `\Eufony\DBAL\Drivers\AbstractDatabaseDriver` class provides some
  * boilerplate code to ease the implementation of this interface.
  *
+ * The connection to the database MUST be kept alive for as long as the
+ * lifetime of the driver instance.
+ * If the database requires specific instructions to finish a session, these
+ * instructions SHOULD be issued in the destructor of the object class.
+ *
  * @see \Eufony\DBAL\Queries\Query
  * @see \Eufony\DBAL\Drivers\AbstractDatabaseDriver
  */
@@ -130,10 +135,5 @@ interface DatabaseDriverInterface {
      * @throws \Eufony\DBAL\BadMethodCallException
      */
     public function rollback(): void;
-
-    /**
-     * Breaks the connection to the database.
-     */
-    public function disconnect(): void;
 
 }
