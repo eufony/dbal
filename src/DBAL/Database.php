@@ -21,8 +21,8 @@ namespace Eufony\DBAL;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
 use Eufony\DBAL\Adapters\QueryAdapterInterface;
+use Eufony\DBAL\Loggers\DatabaseLogger;
 use Eufony\DBAL\Queries\Query;
-use Eufony\ORM\Loggers\DatabaseLogger;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionObject;
@@ -55,7 +55,7 @@ class Database {
 
     /**
      * A PSR-3 compliant logger.
-     * Defaults to an instance of `\Eufony\ORM\Loggers\DatabaseLogger`.
+     * Defaults to an instance of `\Eufony\DBAL\Loggers\DatabaseLogger`.
      *
      * @var \Psr\Log\LoggerInterface $logger
      */
@@ -101,7 +101,7 @@ class Database {
      * The key can later be used to fetch this instance using the
      * `Database::get()` method.
      *
-     * By default, sets up a `\Eufony\ORM\Loggers\DatabaseLogger` for logging
+     * By default, sets up a `\Eufony\DBAL\Loggers\DatabaseLogger` for logging
      * and an array cache pool for caching.
      *
      * **Notice:** A database with the key `default` MUST be set up. This will be
