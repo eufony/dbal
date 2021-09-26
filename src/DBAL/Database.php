@@ -17,21 +17,25 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM;
+namespace Eufony\DBAL;
 
-use Eufony\ORM\DBAL\Adapters\SqlAdapterInterface;
+use Cache\Adapter\PHPArray\ArrayCachePool;
+use Eufony\DBAL\Adapters\QueryAdapterInterface;
+use Eufony\DBAL\Queries\Query;
 use Eufony\ORM\Loggers\DatabaseLogger;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionObject;
+use Throwable;
 
 /**
  * Represents a connection to a database.
- * Provides a method to send queries to the database.
+ * Provides methods to send queries to the database.
  *
  * Instances of this class can be statically retrieved after initialization
  * using the `Database::get()` method.
  *
- * @see \Eufony\ORM\Database::get()
+ * @see \Eufony\DBAL\Database::get()
  */
 class Database {
 
@@ -43,11 +47,11 @@ class Database {
     private static array $connections = [];
 
     /**
-     * A backend driver for translating and executing SQL queries.
+     * A backend driver for generating and executing queries.
      *
-     * @var \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface $adapter
+     * @var \Eufony\DBAL\Adapters\QueryAdapterInterface $adapter
      */
-    private SqlAdapterInterface $adapter;
+    private QueryAdapterInterface $adapter;
 
     /**
      * A PSR-3 compliant logger.
@@ -59,7 +63,7 @@ class Database {
 
     /**
      * A PSR-16 compliant cache.
-     * Defaults to an array cache pool implementation.
+     * Defaults to an instance of an array cache pool implementation.
      *
      * @var \Psr\SimpleCache\CacheInterface
      */
@@ -67,10 +71,10 @@ class Database {
 
     /**
      * Returns a previously initialized instance of a database connection.
-     * If no key is specified, the default database will be returned.
+     * If no key is specified, the default database is returned.
      *
      * @param string $key
-     * @return \Eufony\ORM\Database
+     * @return \Eufony\DBAL\Database
      */
     public static function get(string $key = "default"): Database {
         if (!array_key_exists($key, static::$connections)) {
@@ -83,7 +87,7 @@ class Database {
     /**
      * Returns all active instances of database connections.
      *
-     * @return array<\Eufony\ORM\Database>
+     * @return array<\Eufony\DBAL\Database>
      */
     public static function connections(): array {
         return static::$connections;
@@ -91,28 +95,28 @@ class Database {
 
     /**
      * Class constructor.
-     * Creates a connection to a database.
+     * Creates a new connection to a database.
      *
-     * Requires a key to refer to the database and an SQL adapter backend.
+     * Requires a key to refer to the connection and a database driver backend.
      * The key can later be used to fetch this instance using the
      * `Database::get()` method.
      *
      * By default, sets up a `\Eufony\ORM\Loggers\DatabaseLogger` for logging
      * and an array cache pool for caching.
      *
-     * Notice: A database with the key `default` MUST be set up. This will be
-     * used internally by the ORM for schema validation, logging, etc.
+     * **Notice:** A database with the key `default` MUST be set up. This will be
+     * used internally by the DBAL for schema validation, logging, etc.
      *
      * @param string $key
-     * @param \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface $adapter
+     * @param \Eufony\DBAL\Adapters\QueryAdapterInterface $adapter
      *
-     * @see \Eufony\ORM\Database::get()
+     * @see \Eufony\DBAL\Database::get()
      */
-    public function __construct(string $key, SqlAdapterInterface $adapter) {
+    public function __construct(string $key, QueryAdapterInterface $adapter) {
         static::$connections[$key] = $this;
         $this->adapter = $adapter;
         $this->logger = new DatabaseLogger();
-        $this->cache = new \Cache\Adapter\PHPArray\ArrayCachePool();
+        $this->cache = new ArrayCachePool();
     }
 
     /**
@@ -124,11 +128,11 @@ class Database {
     }
 
     /**
-     * Returns the current SQL adapter.
+     * Returns the current query adapter.
      *
-     * @return \Eufony\ORM\DBAL\Adapters\SqlAdapterInterface
+     * @return \Eufony\DBAL\Adapters\QueryAdapterInterface
      */
-    public function adapter(): SqlAdapterInterface {
+    public function adapter(): QueryAdapterInterface {
         return $this->adapter;
     }
 
@@ -161,89 +165,143 @@ class Database {
     }
 
     /**
-     * Executes the given SQL query.
+     * Executes the given query.
      *
      * Additionally handles caching (for read-only queries), logging, and
-     * translation of the query into different database backends.
+     * generation of the query string from a query builder.
      * The caching can be turned on or off using the `$cache` parameter.
      *
-     * The query, along with the context array, is first passed to the
-     * `SqlParser::prepare()` method, providing easy protection against SQL
-     * injection attacks using prepared statements.
+     * The query, whether passed in as a strict directly or built using a query
+     * builder, is passed to the `QueryAdapterInterface::execute()` method
+     * along with the context array, providing easy protection against SQL
+     * injection attacks.
      *
-     * Throws a `\Eufony\ORM\QueryException` on failure.
+     * Throws a `\Eufony\DBAL\QueryException` on failure.
      *
-     * @param string $sql
+     * @param string|\Eufony\DBAL\Queries\Query $query
      * @param array<mixed> $context
      * @param bool $cache
      * @return array<array<mixed>>
-     * @throws \Eufony\ORM\QueryException
+     * @throws \Eufony\DBAL\QueryException
      *
-     * @see \Eufony\ORM\SqlParser::prepare()
+     * @see \Eufony\DBAL\Adapters\QueryAdapterInterface::execute()
      */
-    public function query(string $sql, array $context = [], bool $cache = true): array {
-        // Parse placeholders in query
-        $sql = SqlParser::prepare($sql, $context);
+    public function query(string|Query $query, array $context = [], bool $cache = true): array {
+        // If the query was built using a query builder, generate the query string
+        if ($query instanceof Query) {
+            $query = $this->adapter->generate($query);
+        }
+
+        /** @var string $query */
 
         // Determine if query mutates data in the database with the first keyword
-        $mutation_keywords = ["INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "ALTER"];
-        $is_mutation = preg_match("/^" . implode("|", $mutation_keywords) . "/", $sql) === 1;
+        // TODO: This assumes an SQL query is passed
+        $is_mutation = preg_match("/^SELECT/", $query) !== 1;
 
         // For read-only queries, check if the result is cached first
         if (!$is_mutation && $cache) {
             // Hashing the query ensures the cache key matches PSR-16 standards
             // on the valid character set and maximum supported length
-            $cache_key = hash("sha256", $sql);
+            $cache_key = hash("sha256", $query);
 
             if ($this->cache->has($cache_key)) {
-                $this->logger->debug("Query cache hit: $sql");
+                $this->logger->debug("Query cache hit: $query");
                 return $this->cache->get($cache_key);
             }
         }
 
-        // Translate SQL into the query language of the backend
-        // Log translated query if backend changed it
-        $query = $this->adapter->translate($sql);
-        if ($query !== $sql) $this->logger->debug("Query SQL translated to: $query");
-
         // Execute query
         try {
-            $query_result = $this->adapter->execute($query, $sql);
-        } catch (QueryException $e) {
-            $message = "Query failed: $sql";
+            $query_result = $this->adapter->execute($query, $context);
+        } catch (InvalidArgumentException | QueryException $e) {
+            if ($e instanceof InvalidArgumentException) {
+                $message = "Mismatched placeholders and parameters in the query and context array.";
+            } else {
+                $message = "Query failed: $query";
+            }
 
-            // Overwrite exception message with query string if message is empty
+            // Overwrite exception message with default message if it is empty
             if (strlen($e->getMessage()) === 0) {
-                $prop = (new \ReflectionObject($e))->getProperty("message");
+                $prop = (new ReflectionObject($e))->getProperty("message");
                 $prop->setAccessible(true);
                 $prop->setValue($e, $message);
                 $prop->setAccessible(false);
             }
 
-            $this->logger->error($message, context: ["exception" => $e]);
+            if ($e instanceof QueryException) {
+                $this->logger->error($message, context: ["exception" => $e]);
+            }
+
             throw $e;
         }
 
         if ($is_mutation) {
             // Log notice for write operations
-            $this->logger->notice("Query write op: $sql");
+            $this->logger->notice("Query write op: $query");
 
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $this->cache->clear();
         } else {
             // Log info for read operations
-            $this->logger->info("Query read op: $sql");
+            $this->logger->info("Query read op: $query");
 
             // Cache result
             if ($cache) {
                 $this->cache->set($cache_key, $query_result, ttl: 3600);
-                $this->logger->debug("Query cached result: $sql");
+                $this->logger->debug("Query cached result: $query");
             }
         }
 
         // Return result
         return $query_result;
+    }
+
+    /**
+     * Wraps a given callback function within a transaction.
+     * Changes to the database are only committed if the callback does not
+     * result in an exception being thrown.
+     *
+     * If an exception occurs, the changes are rolled back and the exception is
+     * re-thrown.
+     *
+     * This method can be nested within itself.
+     * This does not actually nest real transactions, the nested call to start
+     * a transaction is simply be ignored without resulting in error.
+     *
+     * @param callable $callback
+     * @throws Throwable
+     */
+    public function transactional(callable $callback): void {
+        // Check for nested transactions
+        // Only the root transaction issues calls to begin transactions, commits, and rollbacks
+        $is_root_transaction = !$this->adapter->inTransaction();
+
+        if ($is_root_transaction) {
+            // Start transaction
+            $this->logger->debug("Start query transaction");
+            $this->adapter->beginTransaction();
+        }
+
+        try {
+            // Call callback function
+            call_user_func_array($callback, [$this]);
+        } catch (Throwable $e) {
+            if ($is_root_transaction) {
+                // Transaction failed, rollback
+                $this->adapter->rollback();
+                $this->logger->error("Transaction failed, rolling back.", context: ["exception" => $e]);
+            }
+
+            // Propagate error
+            throw $e;
+        }
+
+        if ($is_root_transaction) {
+            // Transaction didn't throw errors, commit to database
+            $this->adapter->commit();
+            $this->logger->debug("Commit transaction");
+        }
     }
 
 }

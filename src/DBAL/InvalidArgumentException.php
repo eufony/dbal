@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM;
+namespace Eufony\DBAL;
 
 /**
- * Thrown whenever an executed query results in an error.
+ * Thrown whenever an invalid argument is supplied to any of the DBAL methods.
  */
-class QueryException extends \RuntimeException {
+class InvalidArgumentException extends \InvalidArgumentException {
 }

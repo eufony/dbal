@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM;
+namespace Eufony\DBAL;
 
 /**
- * Thrown whenever an invalid argument is supplied to any of the ORM's methods.
+ * Thrown whenever a call to a method is performed in an illegal state.
  */
-class InvalidArgumentException extends \InvalidArgumentException {
+class BadMethodCallException extends \BadMethodCallException {
 }
