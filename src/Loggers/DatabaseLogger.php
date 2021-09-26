@@ -19,16 +19,18 @@
 
 namespace Eufony\ORM\Loggers;
 
-use Eufony\ORM\Database;
-use Eufony\ORM\QueryException;
+use Eufony\DBAL\Database;
+use Eufony\DBAL\QueryException;
+use Psr\Log\AbstractLogger;
+use Psr\Log\NullLogger;
 
 /**
  * Provides a logging implementation for logging into the database directly.
- * The messages will be logged into the `__log` table in the default database;
+ * The messages are logged into the `__log` table in the default database;
  * along with the log level, current timestamp, and, if one occurred, the
  * exception.
  */
-class DatabaseLogger extends \Psr\Log\AbstractLogger {
+class DatabaseLogger extends AbstractLogger {
 
     use LoggerTrait;
 
@@ -41,7 +43,7 @@ class DatabaseLogger extends \Psr\Log\AbstractLogger {
         $database = Database::get();
 
         // Temporarily turn off logging (creates an infinite loop otherwise)
-        $logger = $database->logger(new \Psr\Log\NullLogger());
+        $logger = $database->logger(new NullLogger());
 
         // Ensure log table exists
         try {

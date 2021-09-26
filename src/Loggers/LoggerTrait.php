@@ -19,8 +19,11 @@
 
 namespace Eufony\ORM\Loggers;
 
+use Exception;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
+use ReflectionClass;
+use Stringable;
 
 /**
  * Provides common functionality for implementing the PSR-3 logging standards.
@@ -94,7 +97,7 @@ trait LoggerTrait {
 
         // Compare index of constants defined in the LogLevel class
         // Lower index means higher priority
-        $levels = array_values((new \ReflectionClass(LogLevel::class))->getConstants());
+        $levels = array_values((new ReflectionClass(LogLevel::class))->getConstants());
         $i1 = array_search($minLevel, $levels);
         $i2 = array_search($level, $levels);
         $i3 = array_search($maxLevel, $levels);
@@ -119,13 +122,13 @@ trait LoggerTrait {
 
         foreach ($levels as $level) {
             // Ensure log level can be typecast to string
-            if (!is_scalar($level) && !($level instanceof \Stringable)) {
+            if (!is_scalar($level) && !($level instanceof Stringable)) {
                 throw new InvalidArgumentException("Log level must be a string");
             }
 
             // Ensure valid log level is passed
             // Grab valid log levels from constants defined in the LogLevel class
-            $levels = (new \ReflectionClass(LogLevel::class))->getConstants();
+            $levels = (new ReflectionClass(LogLevel::class))->getConstants();
 
             if (!in_array($level, $levels)) {
                 throw new InvalidArgumentException("Invalid log level '$level'");
@@ -153,19 +156,19 @@ trait LoggerTrait {
      * ```
      *
      * @param string $level
-     * @param \Stringable|string $message
+     * @param Stringable|string $message
      * @param array<mixed> $context
      * @return array
      */
     private function validateParams($level, $message, array $context = []): array {
         // Ensure log message can be typecast to string
-        if ($message !== null && !is_scalar($message) && !($message instanceof \Stringable)) {
+        if ($message !== null && !is_scalar($message) && !($message instanceof Stringable)) {
             throw new InvalidArgumentException("Log message must be a string");
         }
 
         // If "exception" key exists, ensure it is an instance of Exception
-        if (array_key_exists("exception", $context) && !($context['exception'] instanceof \Exception)) {
-            throw new InvalidArgumentException("'exception' key in context array must be an instance of Exception");
+        if (array_key_exists("exception", $context) && !($context['exception'] instanceof Exception)) {
+            throw new InvalidArgumentException("'exception' key in context array must be an instance of \Exception");
         }
 
         // Ensure objects are cast to strings

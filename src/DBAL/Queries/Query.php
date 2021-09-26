@@ -17,25 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Loggers;
+namespace Eufony\DBAL\Queries;
 
-use Psr\Log\AbstractLogger;
-
-/**
- * Provides a logging implementation for logging to the error log.
- * The messages are sent to the SAPI logging handler directly.
- */
-class ErrorLogger extends AbstractLogger {
-
-    use LoggerTrait;
-
-    /** @inheritdoc */
-    public function log($level, $message, array $context = []) {
-        [$level, $message, $context] = $this->validateParams($level, $message, $context);
-        if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
-
-        // Send log level and message to the SAPI logging handler (the error log)
-        error_log("$level: $message", 4);
-    }
-
+abstract class Query {
 }
