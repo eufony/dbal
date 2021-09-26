@@ -20,7 +20,7 @@
 namespace Eufony\DBAL;
 
 use Cache\Adapter\PHPArray\ArrayCachePool;
-use Eufony\DBAL\Adapters\QueryAdapterInterface;
+use Eufony\DBAL\Drivers\DatabaseDriverInterface;
 use Eufony\DBAL\Loggers\DatabaseLogger;
 use Eufony\DBAL\Queries\Query;
 use Psr\Log\LoggerInterface;
@@ -49,9 +49,9 @@ class Database {
     /**
      * A backend driver for generating and executing queries.
      *
-     * @var \Eufony\DBAL\Adapters\QueryAdapterInterface $adapter
+     * @var \Eufony\DBAL\Drivers\DatabaseDriverInterface $driver
      */
-    private QueryAdapterInterface $adapter;
+    private DatabaseDriverInterface $driver;
 
     /**
      * A PSR-3 compliant logger.
@@ -108,13 +108,13 @@ class Database {
      * used internally by the DBAL for schema validation, logging, etc.
      *
      * @param string $key
-     * @param \Eufony\DBAL\Adapters\QueryAdapterInterface $adapter
+     * @param \Eufony\DBAL\Drivers\DatabaseDriverInterface $driver
      *
      * @see \Eufony\DBAL\Database::get()
      */
-    public function __construct(string $key, QueryAdapterInterface $adapter) {
+    public function __construct(string $key, DatabaseDriverInterface $driver) {
         static::$connections[$key] = $this;
-        $this->adapter = $adapter;
+        $this->driver = $driver;
         $this->logger = new DatabaseLogger();
         $this->cache = new ArrayCachePool();
     }
@@ -124,16 +124,16 @@ class Database {
      * Breaks the connection to the database.
      */
     public function __destruct() {
-        $this->adapter->disconnect();
+        $this->driver->disconnect();
     }
 
     /**
-     * Returns the current query adapter.
+     * Returns the current database driver.
      *
-     * @return \Eufony\DBAL\Adapters\QueryAdapterInterface
+     * @return \Eufony\DBAL\Drivers\DatabaseDriverInterface
      */
-    public function adapter(): QueryAdapterInterface {
-        return $this->adapter;
+    public function driver(): DatabaseDriverInterface {
+        return $this->driver;
     }
 
     /**
@@ -172,7 +172,7 @@ class Database {
      * The caching can be turned on or off using the `$cache` parameter.
      *
      * The query, whether passed in as a strict directly or built using a query
-     * builder, is passed to the `QueryAdapterInterface::execute()` method
+     * builder, is passed to the `DatabaseDriverInterface::execute()` method
      * along with the context array, providing easy protection against SQL
      * injection attacks.
      *
@@ -184,12 +184,12 @@ class Database {
      * @return array<array<mixed>>
      * @throws \Eufony\DBAL\QueryException
      *
-     * @see \Eufony\DBAL\Adapters\QueryAdapterInterface::execute()
+     * @see \Eufony\DBAL\Drivers\DatabaseDriverInterface::execute()
      */
     public function query(string|Query $query, array $context = [], bool $cache = true): array {
         // If the query was built using a query builder, generate the query string
         if ($query instanceof Query) {
-            $query = $this->adapter->generate($query);
+            $query = $this->driver->generate($query);
         }
 
         /** @var string $query */
@@ -212,7 +212,7 @@ class Database {
 
         // Execute query
         try {
-            $query_result = $this->adapter->execute($query, $context);
+            $query_result = $this->driver->execute($query, $context);
         } catch (InvalidArgumentException | QueryException $e) {
             if ($e instanceof InvalidArgumentException) {
                 $message = "Mismatched placeholders and parameters in the query and context array.";
@@ -275,12 +275,12 @@ class Database {
     public function transactional(callable $callback): void {
         // Check for nested transactions
         // Only the root transaction issues calls to begin transactions, commits, and rollbacks
-        $is_root_transaction = !$this->adapter->inTransaction();
+        $is_root_transaction = !$this->driver->inTransaction();
 
         if ($is_root_transaction) {
             // Start transaction
             $this->logger->debug("Start query transaction");
-            $this->adapter->beginTransaction();
+            $this->driver->beginTransaction();
         }
 
         try {
@@ -289,7 +289,7 @@ class Database {
         } catch (Throwable $e) {
             if ($is_root_transaction) {
                 // Transaction failed, rollback
-                $this->adapter->rollback();
+                $this->driver->rollback();
                 $this->logger->error("Transaction failed, rolling back.", context: ["exception" => $e]);
             }
 
@@ -299,7 +299,7 @@ class Database {
 
         if ($is_root_transaction) {
             // Transaction didn't throw errors, commit to database
-            $this->adapter->commit();
+            $this->driver->commit();
             $this->logger->debug("Commit transaction");
         }
     }
