@@ -23,6 +23,7 @@ use Cache\Adapter\PHPArray\ArrayCachePool;
 use Eufony\DBAL\Drivers\DatabaseDriverInterface;
 use Eufony\DBAL\Loggers\DatabaseLogger;
 use Eufony\DBAL\Queries\Query;
+use Eufony\DBAL\Queries\Select;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionObject;
@@ -179,38 +180,33 @@ class Database {
      * @see \Eufony\DBAL\Drivers\DatabaseDriverInterface::execute()
      */
     public function query(string|Query $query, array $context = [], bool $cache = true): array {
+        // If a query builder is passed, determine if it mutates data in the database
+        // Otherwise, cannot determine if the string is a mutation, set to null
+        /** @var bool|null $is_mutation */
+        $is_mutation = $query instanceof Query ? get_class($query) === Select::class : null;
+
         // If the query was built using a query builder, generate the query string
-        if ($query instanceof Query) {
-            $query = $this->driver->generate($query);
-        }
-
-        /** @var string $query */
-
-        // Determine if query mutates data in the database with the first keyword
-        // TODO: This assumes an SQL query is passed
-        $is_mutation = preg_match("/^SELECT/", $query) !== 1;
+        $query_string = $query instanceof Query ? $this->driver->generate($query) : $query;
 
         // For read-only queries, check if the result is cached first
-        if (!$is_mutation && $cache) {
+        if ($is_mutation === false && $cache) {
             // Hashing the query ensures the cache key matches PSR-16 standards
             // on the valid character set and maximum supported length
-            $cache_key = hash("sha256", $query);
+            $cache_key = hash("sha256", $query_string);
 
             if ($this->cache->has($cache_key)) {
-                $this->logger->debug("Query cache hit: $query");
+                $this->logger->debug("Query cache hit: $query_string");
                 return $this->cache->get($cache_key);
             }
         }
 
         // Execute query
         try {
-            $query_result = $this->driver->execute($query, $context);
+            $query_result = $this->driver->execute($query_string, $context);
         } catch (InvalidArgumentException | QueryException $e) {
-            if ($e instanceof InvalidArgumentException) {
-                $message = "Mismatched placeholders and parameters in the query and context array.";
-            } else {
-                $message = "Query failed: $query";
-            }
+            $message = $e instanceof InvalidArgumentException
+                ? "Mismatched placeholders and parameters in the query and context array."
+                : "Query failed: $query_string";
 
             // Overwrite exception message with default message if it is empty
             if (strlen($e->getMessage()) === 0) {
@@ -220,6 +216,7 @@ class Database {
                 $prop->setAccessible(false);
             }
 
+            // Log error for query exceptions
             if ($e instanceof QueryException) {
                 $this->logger->error($message, context: ["exception" => $e]);
             }
@@ -227,22 +224,28 @@ class Database {
             throw $e;
         }
 
-        if ($is_mutation) {
+        if ($is_mutation === true) {
             // Log notice for write operations
-            $this->logger->notice("Query write op: $query");
+            $this->logger->notice("Query write op: $query_string");
 
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $this->cache->clear();
-        } else {
+        } elseif ($is_mutation === false) {
             // Log info for read operations
-            $this->logger->info("Query read op: $query");
+            $this->logger->info("Query read op: $query_string");
 
             // Cache result
             if ($cache) {
                 $this->cache->set($cache_key, $query_result, ttl: 3600);
-                $this->logger->debug("Query cached result: $query");
+                $this->logger->debug("Query cached result: $query_string");
             }
+        } else {
+            // Log notice of unknown operations
+            $this->logger->notice("Query (unknown type): $query_string");
+
+            // Invalidate the entire cache, just to be safe
+            $this->cache->clear();
         }
 
         // Return result
@@ -250,9 +253,9 @@ class Database {
     }
 
     /**
-     * Wraps a given callback function within a transaction.
+     * Wraps the given callback function in a transaction.
      * Changes to the database are only committed if the callback does not
-     * result in an exception being thrown.
+     * result in an exception.
      *
      * If an exception occurs, the changes are rolled back and the exception is
      * re-thrown.
@@ -271,7 +274,7 @@ class Database {
 
         if ($is_root_transaction) {
             // Start transaction
-            $this->logger->debug("Start query transaction");
+            $this->logger->debug("Start transaction");
             $this->driver->beginTransaction();
         }
 
@@ -280,9 +283,9 @@ class Database {
             call_user_func_array($callback, [$this]);
         } catch (Throwable $e) {
             if ($is_root_transaction) {
-                // Transaction failed, rollback
+                // Transaction failed, roll back
                 $this->driver->rollback();
-                $this->logger->error("Transaction failed, rolling back.", context: ["exception" => $e]);
+                $this->logger->error("Transaction failed, roll back", context: ["exception" => $e]);
             }
 
             // Propagate error
