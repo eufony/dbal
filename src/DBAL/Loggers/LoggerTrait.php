@@ -80,8 +80,7 @@ trait LoggerTrait {
      * Checks if a log level falls between a set minimum and maximum.
      * Returns true if the log level is within the set range, false otherwise.
      *
-     * This function can be conveniently used to break out of the `log()`
-     * method:
+     * Example usage:
      * ```
      * if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
      * ```
@@ -109,7 +108,7 @@ trait LoggerTrait {
      * Validates the log levels passed to various logger methods.
      * Returns an array of the validated log levels for easy processing.
      *
-     * This function can be conveniently used with the list syntax:
+     * Example usage:
      * ```
      * [$l1, $l2] = $this->validateLevels($l1, $l2);
      * ```
@@ -123,7 +122,7 @@ trait LoggerTrait {
         foreach ($levels as $level) {
             // Ensure log level can be typecast to string
             if (!is_scalar($level) && !($level instanceof Stringable)) {
-                throw new InvalidArgumentException("Log level must be a string");
+                throw new InvalidArgumentException("Log level must be able to be typecast to a string");
             }
 
             // Ensure valid log level is passed
@@ -150,7 +149,7 @@ trait LoggerTrait {
      * Validates parameters passed to the `LoggerInterface::log()` method.
      * Returns an array of the validated parameters for easy processing.
      *
-     * This function can be conveniently used with the list syntax:
+     * Example usage:
      * ```
      * [$level, $message, $context] = $this->validateParams($level, $message, $context);
      * ```
@@ -163,7 +162,7 @@ trait LoggerTrait {
     private function validateParams($level, $message, array $context = []): array {
         // Ensure log message can be typecast to string
         if ($message !== null && !is_scalar($message) && !($message instanceof Stringable)) {
-            throw new InvalidArgumentException("Log message must be a string");
+            throw new InvalidArgumentException("Log message must be able to be typecast to a string");
         }
 
         // If "exception" key exists, ensure it is an instance of Exception
@@ -180,6 +179,44 @@ trait LoggerTrait {
 
         // Return result
         return [$level, $message, $context];
+    }
+
+    /**
+     * Interpolates context values into the message placeholders.
+     * Returns the interpolated message for easy processing.
+     *
+     * Example usage:
+     * ```
+     * $message = $this->interpolate($message, $context);
+     * ```
+     *
+     * @param $message
+     * @param array $context
+     * @return string
+     */
+    private function interpolate($message, array $context = []) {
+        // Build a replacement array with braces around the context keys
+        $replace = [];
+
+        foreach ($context as $key => $val) {
+            // Ensure log value can be typecast to string
+            if ($val !== null && !is_scalar($val) && !($val instanceof Stringable)) {
+                throw new InvalidArgumentException("Value in context array must be able to be typecast to a string");
+            }
+
+            // Ensure objects are cast to strings
+            /** @var string $val */
+            $val = "$val";
+
+            // Add key-value pair to replacement array
+            $replace['{' . $key . '}'] = $val;
+        }
+
+        // Interpolate replacement values into the message
+        $message = strtr($message, $replace);
+
+        // Return result
+        return $message;
     }
 
 }

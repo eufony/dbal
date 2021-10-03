@@ -27,8 +27,7 @@ use Psr\Log\NullLogger;
 /**
  * Provides a logging implementation for logging into a database directly.
  * The messages are logged into the `__log` table in the database; along with
- * the log level, current timestamp, and, if one occurred, the
- * exception.
+ * the log level, current timestamp, and, if one occurred, the exception.
  */
 class DatabaseLogger extends AbstractLogger {
 
@@ -55,6 +54,7 @@ class DatabaseLogger extends AbstractLogger {
     public function log($level, $message, array $context = []) {
         [$level, $message, $context] = $this->validateParams($level, $message, $context);
         if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
+        $message = $this->interpolate($message, $context);
 
         // TODO: Use query builders for this.
 
