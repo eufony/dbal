@@ -51,7 +51,7 @@ class DatabaseLogger extends AbstractLogger {
     }
 
     /** @inheritdoc */
-    public function log($level, $message, array $context = []) {
+    public function log($level, $message, array $context = []): void {
         [$level, $message, $context] = $this->validateParams($level, $message, $context);
         if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
         $message = $this->interpolate($message, $context);
