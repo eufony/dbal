@@ -33,6 +33,7 @@ class ErrorLogger extends AbstractLogger {
     public function log($level, $message, array $context = []) {
         [$level, $message, $context] = $this->validateParams($level, $message, $context);
         if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
+        $message = $this->interpolate($message, $context);
 
         // Send log level and message to the SAPI logging handler (the error log)
         error_log("$level: $message", 4);
