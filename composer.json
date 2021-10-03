@@ -22,7 +22,8 @@
   },
   "suggest": {
     "ext-pdo": "Required by all current officially supported database drivers.",
-    "monolog/monolog": "Well-supported and popular logging library.",
+    "monolog/monolog": "Well-maintained and popular logging library.",
+    "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
     "psr/simple-cache-implementation": "Virutal package for PSR-16 caching implementations."
   },
   "provide": {
