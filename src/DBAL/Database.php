@@ -19,7 +19,6 @@
 
 namespace Eufony\DBAL;
 
-use Cache\Adapter\PHPArray\ArrayCachePool;
 use Eufony\DBAL\Drivers\DatabaseDriverInterface;
 use Eufony\DBAL\Log\DatabaseLogger;
 use Eufony\DBAL\Queries\Query;
@@ -27,6 +26,7 @@ use Eufony\DBAL\Queries\Select;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionObject;
+use Sabre\Cache\Memory;
 use Throwable;
 
 /**
@@ -114,7 +114,7 @@ class Database {
         static::$connections[$key] = $this;
         $this->driver = $driver;
         $this->logger = new DatabaseLogger($this);
-        $this->cache = new ArrayCachePool();
+        $this->cache = new Memory();
     }
 
     /**
@@ -185,13 +185,17 @@ class Database {
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false) {
-            // Hashing the query ensures the cache key matches PSR-16 standards
-            // on the valid character set and maximum supported length
-            $cache_key = hash("sha256", $query_string);
+            // Hashing the query along with the context array ensures the cache
+            // key matches PSR-16 standards on the valid character set and
+            // maximum supported length
+            // Sorting the context array ensures predictability when hashing
+            asort($context);
+            $cache_key = hash("sha256", $query_string . implode("|", $context));
+            $cache_result = $this->cache->get($cache_key);
 
-            if ($this->cache->has($cache_key)) {
+            if ($cache_result !== null) {
                 $this->logger->debug("Query cache hit: $query_string");
-                return $this->cache->get($cache_key);
+                return $cache_result;
             }
         }
 
