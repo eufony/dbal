@@ -155,7 +155,7 @@ trait LoggerTrait {
      * ```
      *
      * @param string $level
-     * @param Stringable|string $message
+     * @param string|Stringable $message
      * @param array<mixed> $context
      * @return array
      */
@@ -190,11 +190,11 @@ trait LoggerTrait {
      * $message = $this->interpolate($message, $context);
      * ```
      *
-     * @param $message
+     * @param string $message
      * @param array $context
      * @return string
      */
-    private function interpolate($message, array $context = []) {
+    private function interpolate(string $message, array $context = []): string {
         // Build a replacement array with braces around the context keys
         $replace = [];
 
