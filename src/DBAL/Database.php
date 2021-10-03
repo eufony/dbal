@@ -159,7 +159,6 @@ class Database {
      *
      * Additionally handles caching (for read-only queries), logging, and
      * generation of the query string from a query builder.
-     * The caching can be turned on or off using the `$cache` parameter.
      *
      * The query, whether passed in as a strict directly or built using a query
      * builder, is passed to the `DatabaseDriverInterface::execute()` method
@@ -170,13 +169,12 @@ class Database {
      *
      * @param string|\Eufony\DBAL\Queries\Query $query
      * @param array<mixed> $context
-     * @param bool $cache
      * @return array<array<mixed>>
      * @throws \Eufony\DBAL\QueryException
      *
      * @see \Eufony\DBAL\Drivers\DatabaseDriverInterface::execute()
      */
-    public function query(string|Query $query, array $context = [], bool $cache = true): array {
+    public function query(string|Query $query, array $context = []): array {
         // If a query builder is passed, determine if it mutates data in the database
         // Otherwise, cannot determine if the string is a mutation, set to null
         /** @var bool|null $is_mutation */
@@ -186,7 +184,7 @@ class Database {
         $query_string = $query instanceof Query ? $this->driver->generate($query) : $query;
 
         // For read-only queries, check if the result is cached first
-        if ($is_mutation === false && $cache) {
+        if ($is_mutation === false) {
             // Hashing the query ensures the cache key matches PSR-16 standards
             // on the valid character set and maximum supported length
             $cache_key = hash("sha256", $query_string);
@@ -234,10 +232,8 @@ class Database {
             $this->logger->info("Query read op: $query_string");
 
             // Cache result
-            if ($cache) {
-                $this->cache->set($cache_key, $query_result, ttl: 3600);
-                $this->logger->debug("Query cached result: $query_string");
-            }
+            $this->cache->set($cache_key, $query_result, ttl: 3600);
+            $this->logger->debug("Query cached result: $query_string");
         } else {
             // Log notice of unknown operations
             $this->logger->notice("Query (unknown type): $query_string");
