@@ -160,7 +160,7 @@ class Database {
      * Additionally handles caching (for read-only queries), logging, and
      * generation of the query string from a query builder.
      *
-     * The query, whether passed in as a strict directly or built using a query
+     * The query, whether passed in as a string directly or built using a query
      * builder, is passed to the `DatabaseDriverInterface::execute()` method
      * along with the context array, providing easy protection against SQL
      * injection attacks.
