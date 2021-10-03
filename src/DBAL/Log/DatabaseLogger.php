@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Loggers;
+namespace Eufony\DBAL\Log;
 
 use Eufony\DBAL\Database;
 use Eufony\DBAL\QueryException;

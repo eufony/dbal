@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Loggers;
+namespace Eufony\DBAL\Log;
 
 use Exception;
 use Psr\Log\InvalidArgumentException;
