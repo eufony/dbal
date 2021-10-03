@@ -81,7 +81,7 @@ class DatabaseLogger extends AbstractLogger {
         }
 
         // Fetch ID from table
-        $result = $this->database->query("SELECT \"id\" FROM \"__log\" ORDER BY \"id\" DESC", cache: false);
+        $result = $this->database->query("SELECT \"id\" FROM \"__log\" ORDER BY \"id\" DESC");
         $id = !empty($result) ? $result[0]['id'] + 1 : 1;
 
         $values = [
