@@ -21,9 +21,9 @@
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
-    "ext-pdo": "*",
-    "monolog/monolog": "^2.3",
-    "psr/simple-cache-implementation": "^1.0"
+    "ext-pdo": "Required by all current officially supported database drivers.",
+    "monolog/monolog": "Well-supported and popular logging library.",
+    "psr/simple-cache-implementation": "Virutal package for PSR-16 caching implementations."
   },
   "provide": {
     "psr/log-implementation": "^1.0"
