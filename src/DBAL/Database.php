@@ -72,7 +72,7 @@ class Database {
 
     /**
      * Returns a previously initialized instance of a database connection.
-     * If no key is specified, the default database is returned.
+     * If no key is specified, the "default" database is returned.
      *
      * @param string $key
      * @return \Eufony\DBAL\Database
@@ -98,25 +98,22 @@ class Database {
      * Class constructor.
      * Creates a new connection to a database.
      *
-     * Requires a key to refer to the connection and a database driver backend.
+     * Requires a database driver backend and a key to refer to the connection.
      * The key can later be used to fetch this instance using the
      * `Database::get()` method.
      *
      * By default, sets up a `\Eufony\DBAL\Loggers\DatabaseLogger` for logging
      * and an array cache pool for caching.
      *
-     * **Notice:** A database with the key `default` MUST be set up. This will be
-     * used internally by the DBAL for schema validation, logging, etc.
-     *
-     * @param string $key
      * @param \Eufony\DBAL\Drivers\DatabaseDriverInterface $driver
+     * @param string $key
      *
      * @see \Eufony\DBAL\Database::get()
      */
-    public function __construct(string $key, DatabaseDriverInterface $driver) {
+    public function __construct(DatabaseDriverInterface $driver, string $key = "default") {
         static::$connections[$key] = $this;
         $this->driver = $driver;
-        $this->logger = new DatabaseLogger();
+        $this->logger = new DatabaseLogger($this);
         $this->cache = new ArrayCachePool();
     }
 
@@ -231,6 +228,7 @@ class Database {
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $this->cache->clear();
+            $this->logger->debug("Clear cache");
         } elseif ($is_mutation === false) {
             // Log info for read operations
             $this->logger->info("Query read op: $query_string");
@@ -246,6 +244,7 @@ class Database {
 
             // Invalidate the entire cache, just to be safe
             $this->cache->clear();
+            $this->logger->debug("Clear cache");
         }
 
         // Return result
