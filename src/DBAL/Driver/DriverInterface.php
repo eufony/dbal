@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,31 +17,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Drivers;
+namespace Eufony\DBAL\Driver;
 
-use Eufony\DBAL\Queries\Query;
+use Eufony\DBAL\Query\Query;
 
 /**
  * Provides a common interface for connecting to and querying different
  * database backends.
  *
  * Allows the query logic to be written using the query builders in the
- * `\Eufony\DBAL\Queries` namespace.
+ * `\Eufony\DBAL\Query` namespace.
  * The implementations of this interface then generate the query string for
  * their own vendor-specific database backends using the `generate()` method.
  *
- * The `\Eufony\DBAL\Drivers\AbstractDatabaseDriver` class provides some
- * boilerplate code to ease the implementation of this interface.
+ * The `\Eufony\DBAL\Driver\AbstractDriver` class provides some boilerplate
+ * code to ease the implementation of this interface.
  *
  * The connection to the database MUST be kept alive for as long as the
  * lifetime of the driver instance.
  * If the database requires specific instructions to finish a session, these
  * instructions SHOULD be issued in the destructor of the object class.
  *
- * @see \Eufony\DBAL\Queries\Query
- * @see \Eufony\DBAL\Drivers\AbstractDatabaseDriver
+ * @see \Eufony\DBAL\Query\Query
+ * @see \Eufony\DBAL\Driver\AbstractDriver
  */
-interface DatabaseDriverInterface {
+interface DriverInterface {
 
     /**
      * Generates the query string to be executed from a query builder.
@@ -71,11 +71,12 @@ interface DatabaseDriverInterface {
      *
      * If the query mixes both positional and named parameters, or if the
      * keys in the context array don't match the parameters in the query, a
-     * `\Eufony\DBAL\InvalidArgumentException` MUST be thrown.
+     * `\Eufony\DBAL\Exception\InvalidArgumentException` MUST be thrown.
      * The message of the `InvalidArgumentException` MAY be empty, in which
      * case it is overridden with a default message.
      *
-     * If the query fails, a `\Eufony\DBAL\QueryException` MUST be thrown.
+     * If the query fails, a `\Eufony\DBAL\Exception\QueryException` MUST be
+     * thrown.
      * If another exception is re-thrown as a `QueryException`, the original
      * exception SHOULD be chained onto the `QueryException` using the
      * `previous` parameter in the exception constructor.
@@ -85,8 +86,8 @@ interface DatabaseDriverInterface {
      * @param string $query
      * @param array $context
      * @return array<array<mixed>>
-     * @throws \Eufony\DBAL\InvalidArgumentException
-     * @throws \Eufony\DBAL\QueryException
+     * @throws \Eufony\DBAL\Exception\InvalidArgumentException
+     * @throws \Eufony\DBAL\Exception\QueryException
      */
     public function execute(string $query, array $context): array;
 
@@ -106,9 +107,9 @@ interface DatabaseDriverInterface {
      *
      * Transactions cannot be nested.
      * If this method is called when a transaction is already active a
-     * `\Eufony\DBAL\BadMethodCallException` MUST be thrown.
+     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\BadMethodCallException
+     * @throws \Eufony\DBAL\Exception\BadMethodCallException
      */
     public function beginTransaction(): void;
 
@@ -118,9 +119,9 @@ interface DatabaseDriverInterface {
      * Buffered modifications to the database MUST be applied.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\DBAL\BadMethodCallException` MUST be thrown.
+     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\BadMethodCallException
+     * @throws \Eufony\DBAL\Exception\BadMethodCallException
      */
     public function commit(): void;
 
@@ -130,9 +131,9 @@ interface DatabaseDriverInterface {
      * Buffered modifications to the database MUST be discarded.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\DBAL\BadMethodCallException` MUST be thrown.
+     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\BadMethodCallException
+     * @throws \Eufony\DBAL\Exception\BadMethodCallException
      */
     public function rollback(): void;
 

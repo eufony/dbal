@@ -1,7 +1,7 @@
 <?php
 
 echo "\n";
-echo "Unit tests for the Eufony ORM Package by Alpin Gencer.\n";
+echo "Testing suite for the Eufony ORM Package by Alpin Gencer.\n";
 echo "Using php.ini file: '" . php_ini_loaded_file() . "'\n";
 echo "\n";
 

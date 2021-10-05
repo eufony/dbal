@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,12 @@
 
 namespace Eufony\DBAL;
 
-use Eufony\DBAL\Drivers\DatabaseDriverInterface;
+use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\DBAL\Exception\InvalidArgumentException;
+use Eufony\DBAL\Exception\QueryException;
 use Eufony\DBAL\Log\DatabaseLogger;
-use Eufony\DBAL\Queries\Query;
-use Eufony\DBAL\Queries\Select;
+use Eufony\DBAL\Query\Query;
+use Eufony\DBAL\Query\Select;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionObject;
@@ -50,9 +52,9 @@ class Database {
     /**
      * A backend driver for generating and executing queries.
      *
-     * @var \Eufony\DBAL\Drivers\DatabaseDriverInterface $driver
+     * @var \Eufony\DBAL\Driver\DriverInterface $driver
      */
-    private DatabaseDriverInterface $driver;
+    private DriverInterface $driver;
 
     /**
      * A PSR-3 compliant logger.
@@ -105,12 +107,12 @@ class Database {
      * By default, sets up a `\Eufony\DBAL\Log\DatabaseLogger` for logging and
      * an array cache pool for caching.
      *
-     * @param \Eufony\DBAL\Drivers\DatabaseDriverInterface $driver
+     * @param \Eufony\DBAL\Driver\DriverInterface $driver
      * @param string $key
      *
      * @see \Eufony\DBAL\Database::get()
      */
-    public function __construct(DatabaseDriverInterface $driver, string $key = "default") {
+    public function __construct(DriverInterface $driver, string $key = "default") {
         static::$connections[$key] = $this;
         $this->driver = $driver;
         $this->logger = new DatabaseLogger($this);
@@ -120,9 +122,9 @@ class Database {
     /**
      * Returns the current database driver.
      *
-     * @return \Eufony\DBAL\Drivers\DatabaseDriverInterface
+     * @return \Eufony\DBAL\Driver\DriverInterface
      */
-    public function driver(): DatabaseDriverInterface {
+    public function driver(): DriverInterface {
         return $this->driver;
     }
 
@@ -161,18 +163,18 @@ class Database {
      * generation of the query string from a query builder.
      *
      * The query, whether passed in as a string directly or built using a query
-     * builder, is passed to the `DatabaseDriverInterface::execute()` method
-     * along with the context array, providing easy protection against SQL
-     * injection attacks.
+     * builder, is passed to the `DriverInterface::execute()` method along with
+     * the context array, providing easy protection against SQL injection
+     * attacks.
      *
-     * Throws a `\Eufony\DBAL\QueryException` on failure.
+     * Throws a `\Eufony\DBAL\Exception\QueryException` on failure.
      *
-     * @param string|\Eufony\DBAL\Queries\Query $query
+     * @param string|\Eufony\DBAL\Query\Query $query
      * @param array<mixed> $context
      * @return array<array<mixed>>
-     * @throws \Eufony\DBAL\QueryException
+     * @throws \Eufony\DBAL\Exception\QueryException
      *
-     * @see \Eufony\DBAL\Drivers\DatabaseDriverInterface::execute()
+     * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
     public function query(string|Query $query, array $context = []): array {
         // If a query builder is passed, determine if it mutates data in the database
