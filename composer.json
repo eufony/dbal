@@ -18,6 +18,7 @@
     "sabre/cache": "^1.0"
   },
   "require-dev": {
+    "mockery/mockery": "^1.4",
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
@@ -31,13 +32,14 @@
   },
   "autoload": {
     "psr-4": {
-      "Eufony\\ORM\\": "src/",
-      "Eufony\\DBAL\\": "src/DBAL/"
+      "Eufony\\DBAL\\": "src/DBAL/",
+      "Eufony\\ORM\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Eufony\\ORM\\Tests\\": "tests/"
+      "App\\": "spec/src/",
+      "Tests\\": "tests/"
     }
   },
   "config": {

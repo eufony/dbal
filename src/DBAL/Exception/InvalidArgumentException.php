@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL;
+namespace Eufony\DBAL\Exception;
 
 /**
- * Thrown whenever a call to a method is performed in an illegal state.
+ * Thrown whenever an invalid argument is supplied to a method.
  */
-class BadMethodCallException extends \BadMethodCallException {
+class InvalidArgumentException extends \InvalidArgumentException {
 }
