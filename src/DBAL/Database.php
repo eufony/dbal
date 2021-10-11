@@ -19,6 +19,7 @@
 
 namespace Eufony\DBAL;
 
+use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Exception\InvalidArgumentException;
 use Eufony\DBAL\Exception\QueryException;
@@ -167,16 +168,21 @@ class Database {
      * the context array, providing easy protection against SQL injection
      * attacks.
      *
+     * The cached result's TTL can be set using the `$ttl` parameter, either as
+     * a `DateInterval` object or an integer number of minutes.
+     * Defaults to 1 minute.
+     *
      * Throws a `\Eufony\DBAL\Exception\QueryException` on failure.
      *
      * @param string|\Eufony\DBAL\Query\Query $query
      * @param array<mixed> $context
+     * @param DateInterval|int $ttl
      * @return array<array<mixed>>
      * @throws \Eufony\DBAL\Exception\QueryException
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
-    public function query(string|Query $query, array $context = []): array {
+    public function query(string|Query $query, array $context = [], DateInterval|int $ttl = 1): array {
         // If a query builder is passed, determine if it mutates data in the database
         // Otherwise, cannot determine if the string is a mutation, set to null
         /** @var bool|null $is_mutation */
@@ -238,7 +244,7 @@ class Database {
             $this->logger->info("Query read op: $query_string");
 
             // Cache result
-            $this->cache->set($cache_key, $query_result, ttl: 3600);
+            $this->cache->set($cache_key, $query_result, ttl: $ttl);
             $this->logger->debug("Query cached result: $query_string");
         } else {
             // Log notice of unknown operations
