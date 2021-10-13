@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony DBAL Package
+ * The Eufony ORM Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Log;
+namespace Eufony\ORM\Log;
 
-use Eufony\DBAL\Database;
-use Eufony\DBAL\Exception\QueryException;
+use Eufony\DBAL\Connection;
+use Eufony\ORM\Exception\QueryException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
@@ -36,17 +36,17 @@ class DatabaseLogger extends AbstractLogger {
     /**
      * The database connection to log into.
      *
-     * @var Database $database
+     * @var Connection $database
      */
-    public Database $database;
+    public Connection $database;
 
     /**
      * Class constructor.
      * Creates a new logger that logs into the given database.
      *
-     * @param Database $database
+     * @param Connection $database
      */
-    public function __construct(Database $database) {
+    public function __construct(Connection $database) {
         $this->database = $database;
     }
 

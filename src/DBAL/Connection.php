@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony DBAL Package
+ * The Eufony ORM Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,11 @@ namespace Eufony\DBAL;
 
 use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
-use Eufony\DBAL\Exception\InvalidArgumentException;
-use Eufony\DBAL\Exception\QueryException;
-use Eufony\DBAL\Log\DatabaseLogger;
 use Eufony\DBAL\Query\Query;
 use Eufony\DBAL\Query\Select;
+use Eufony\ORM\Exception\InvalidArgumentException;
+use Eufony\ORM\Exception\QueryException;
+use Eufony\ORM\Log\DatabaseLogger;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use ReflectionObject;
@@ -34,14 +34,14 @@ use Throwable;
 
 /**
  * Represents a connection to a database.
- * Provides methods to send queries to the database.
+ * Provides methods to query the database engine.
  *
  * Instances of this class can be statically retrieved after initialization
- * using the `Database::get()` method.
+ * using the `Connection::get()` method.
  *
- * @see \Eufony\DBAL\Database::get()
+ * @see \Eufony\DBAL\Connection::get()
  */
-class Database {
+class Connection {
 
     /**
      * Stores active instances of database connections.
@@ -59,7 +59,7 @@ class Database {
 
     /**
      * A PSR-3 compliant logger.
-     * Defaults to an instance of `\Eufony\DBAL\Log\DatabaseLogger`.
+     * Defaults to an instance of `\Eufony\ORM\Log\DatabaseLogger`.
      *
      * @var \Psr\Log\LoggerInterface $logger
      */
@@ -78,9 +78,9 @@ class Database {
      * If no key is specified, the "default" database is returned.
      *
      * @param string $key
-     * @return \Eufony\DBAL\Database
+     * @return \Eufony\DBAL\Connection
      */
-    public static function get(string $key = "default"): Database {
+    public static function get(string $key = "default"): Connection {
         if (!array_key_exists($key, static::$connections)) {
             throw new InvalidArgumentException("Unknown database connection '$key'");
         }
@@ -91,7 +91,7 @@ class Database {
     /**
      * Returns all active instances of database connections.
      *
-     * @return array<\Eufony\DBAL\Database>
+     * @return array<\Eufony\DBAL\Connection>
      */
     public static function connections(): array {
         return static::$connections;
@@ -103,15 +103,15 @@ class Database {
      *
      * Requires a database driver backend and a key to refer to the connection.
      * The key can later be used to fetch this instance using the
-     * `Database::get()` method.
+     * `Connection::get()` method.
      *
-     * By default, sets up a `\Eufony\DBAL\Log\DatabaseLogger` for logging and
+     * By default, sets up a `\Eufony\ORM\Log\DatabaseLogger` for logging and
      * an array cache pool for caching.
      *
      * @param \Eufony\DBAL\Driver\DriverInterface $driver
      * @param string $key
      *
-     * @see \Eufony\DBAL\Database::get()
+     * @see \Eufony\DBAL\Connection::get()
      */
     public function __construct(DriverInterface $driver, string $key = "default") {
         static::$connections[$key] = $this;
@@ -172,13 +172,13 @@ class Database {
      * a `DateInterval` object or an integer number of minutes.
      * Defaults to 1 minute.
      *
-     * Throws a `\Eufony\DBAL\Exception\QueryException` on failure.
+     * Throws a `\Eufony\ORM\Exception\QueryException` on failure.
      *
      * @param string|\Eufony\DBAL\Query\Query $query
      * @param array<mixed> $context
      * @param DateInterval|int $ttl
      * @return array<array<mixed>>
-     * @throws \Eufony\DBAL\Exception\QueryException
+     * @throws \Eufony\ORM\Exception\QueryException
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
