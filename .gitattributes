@@ -3,6 +3,5 @@
 .gitignore  export-ignore
 
 # Project
-/doc/  export-ignore
-/spec/  export-ignore
+/docs/  export-ignore
 /tests/  export-ignore

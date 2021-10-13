@@ -39,8 +39,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Spec\\": "spec/",
-      "Tests\\": "tests/"
+      "App\\": "tests/App/",
+      "Eufony\\ORM\\Tests\\": "tests/"
     }
   },
   "config": {
