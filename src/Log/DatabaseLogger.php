@@ -19,35 +19,26 @@
 
 namespace Eufony\ORM\Log;
 
-use Eufony\DBAL\Connection;
+use Eufony\ORM\ORM;
 use Eufony\ORM\QueryException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
 /**
  * Provides a logging implementation for logging into a database directly.
- * The messages are logged into the `__log` table in the database; along with
- * the log level, current timestamp, and, if one occurred, the exception.
+ * The messages are logged into the `__log` table in the `default` database;
+ * along with the log level, current timestamp, and, if one occurred, the
+ * exception.
  */
 class DatabaseLogger extends AbstractLogger {
 
     use LoggerTrait;
 
     /**
-     * The database connection to log into.
-     *
-     * @var Connection $database
-     */
-    public Connection $database;
-
-    /**
      * Class constructor.
-     * Creates a new logger that logs into the given database.
-     *
-     * @param Connection $database
+     * Creates a new logger that logs into the `default` database.
      */
-    public function __construct(Connection $database) {
-        $this->database = $database;
+    public function __construct() {
     }
 
     /** @inheritdoc */
@@ -58,8 +49,11 @@ class DatabaseLogger extends AbstractLogger {
 
         // TODO: Use query builders for this.
 
+        // Fetch default database connection
+        $database = ORM::connection();
+
         // Temporarily turn off logging (creates an infinite loop otherwise)
-        $logger = $this->database->logger(new NullLogger());
+        $logger = ORM::logger(new NullLogger());
 
         // Ensure log table exists
         try {
@@ -75,13 +69,13 @@ class DatabaseLogger extends AbstractLogger {
             );
             SQL;
 
-            $this->database->query($sql);
+            $database->query($sql);
         } catch (QueryException) {
             // table already exists, silently ignore
         }
 
         // Fetch ID from table
-        $result = $this->database->query("SELECT \"id\" FROM \"__log\" ORDER BY \"id\" DESC");
+        $result = $database->query("SELECT \"id\" FROM \"__log\" ORDER BY \"id\" DESC");
         $id = !empty($result) ? $result[0]['id'] + 1 : 1;
 
         $values = [
@@ -99,10 +93,10 @@ class DatabaseLogger extends AbstractLogger {
         $placeholders = implode(",", array_map(fn($key) => ":$key", array_keys($values)));
         $sql = "INSERT INTO \"__log\" ($fields) VALUES ($placeholders)";
 
-        $this->database->query($sql, $values);
+        $database->query($sql, $values);
 
         // Restore previous logger
-        $this->database->logger($logger);
+        ORM::logger($logger);
     }
 
 }
