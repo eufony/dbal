@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Exception;
+namespace Eufony\ORM;
 
 /**
  * Thrown whenever an executed query results in an error.
