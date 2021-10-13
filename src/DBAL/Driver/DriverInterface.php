@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony DBAL Package
+ * The Eufony ORM Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -71,11 +71,11 @@ interface DriverInterface {
      *
      * If the query mixes both positional and named parameters, or if the
      * keys in the context array don't match the parameters in the query, a
-     * `\Eufony\DBAL\Exception\InvalidArgumentException` MUST be thrown.
+     * `\Eufony\ORM\Exception\InvalidArgumentException` MUST be thrown.
      * The message of the `InvalidArgumentException` MAY be empty, in which
      * case it is overridden with a default message.
      *
-     * If the query fails, a `\Eufony\DBAL\Exception\QueryException` MUST be
+     * If the query fails, a `\Eufony\ORM\Exception\QueryException` MUST be
      * thrown.
      * If another exception is re-thrown as a `QueryException`, the original
      * exception SHOULD be chained onto the `QueryException` using the
@@ -86,8 +86,8 @@ interface DriverInterface {
      * @param string $query
      * @param array $context
      * @return array<array<mixed>>
-     * @throws \Eufony\DBAL\Exception\InvalidArgumentException
-     * @throws \Eufony\DBAL\Exception\QueryException
+     * @throws \Eufony\ORM\Exception\InvalidArgumentException
+     * @throws \Eufony\ORM\Exception\QueryException
      */
     public function execute(string $query, array $context): array;
 
@@ -107,9 +107,9 @@ interface DriverInterface {
      *
      * Transactions cannot be nested.
      * If this method is called when a transaction is already active a
-     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
+     * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\Exception\BadMethodCallException
+     * @throws \Eufony\ORM\Exception\BadMethodCallException
      */
     public function beginTransaction(): void;
 
@@ -119,9 +119,9 @@ interface DriverInterface {
      * Buffered modifications to the database MUST be applied.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
+     * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\Exception\BadMethodCallException
+     * @throws \Eufony\ORM\Exception\BadMethodCallException
      */
     public function commit(): void;
 
@@ -131,9 +131,9 @@ interface DriverInterface {
      * Buffered modifications to the database MUST be discarded.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\DBAL\Exception\BadMethodCallException` MUST be thrown.
+     * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\DBAL\Exception\BadMethodCallException
+     * @throws \Eufony\ORM\Exception\BadMethodCallException
      */
     public function rollback(): void;
 

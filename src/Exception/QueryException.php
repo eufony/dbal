@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony DBAL Package
+ * The Eufony ORM Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Exception;
+namespace Eufony\ORM\Exception;
 
 /**
  * Thrown whenever an executed query results in an error.
