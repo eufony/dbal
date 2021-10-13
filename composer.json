@@ -34,7 +34,7 @@
   "autoload": {
     "psr-4": {
       "Eufony\\DBAL\\": "src/DBAL/",
-      "Eufony\\ORM\\": [ "src/", "src/Exception/" ]
+      "Eufony\\ORM\\": [ "src/Exception/", "src/" ]
     }
   },
   "autoload-dev": {
