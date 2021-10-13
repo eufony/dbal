@@ -20,7 +20,7 @@
 namespace Eufony\ORM\Log;
 
 use Eufony\DBAL\Connection;
-use Eufony\ORM\Exception\QueryException;
+use Eufony\ORM\QueryException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
