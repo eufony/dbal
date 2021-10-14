@@ -122,7 +122,7 @@ class ORM {
         $prev = static::$cache;
 
         // Wrap PSR-6 caches in a PSR-16 adapter
-        if ($cache instanceof CacheItemPoolInterface) {
+        if ($cache instanceof CacheItemPoolInterface && (!$cache instanceof CacheInterface)) {
             $cache = new Psr16Adapter($cache);
         }
 
