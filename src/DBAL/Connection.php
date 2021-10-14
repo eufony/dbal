@@ -26,7 +26,7 @@ use Eufony\DBAL\Query\Select;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\ORM;
 use Eufony\ORM\QueryException;
-use ReflectionObject;
+use Eufony\ORM\TransactionException;
 use Throwable;
 
 /**
@@ -83,7 +83,6 @@ class Connection {
      * @param array<mixed> $context
      * @param int|\DateInterval $ttl
      * @return array<array<mixed>>
-     * @throws \Eufony\ORM\QueryException
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
@@ -120,21 +119,9 @@ class Connection {
         try {
             $query_result = $this->driver->execute($query_string, $context);
         } catch (InvalidArgumentException | QueryException $e) {
-            $message = $e instanceof InvalidArgumentException
-                ? "Mismatched placeholders and parameters in the query and context array."
-                : "Query failed: $query_string";
-
-            // Overwrite exception message with default message if it is empty
-            if (strlen($e->getMessage()) === 0) {
-                $prop = (new ReflectionObject($e))->getProperty("message");
-                $prop->setAccessible(true);
-                $prop->setValue($e, $message);
-                $prop->setAccessible(false);
-            }
-
             // Log error for query exceptions
             if ($e instanceof QueryException) {
-                $logger->error($message, context: ["exception" => $e]);
+                $logger->error("Query failed: $query_string", context: ["exception" => $e]);
             }
 
             throw $e;
@@ -173,15 +160,14 @@ class Connection {
      * Changes to the database are only committed if the callback does not
      * result in an exception.
      *
-     * If an exception occurs, the changes are rolled back and the exception is
-     * re-thrown.
+     * If an exception occurs, the changes are rolled back and a
+     * `\Eufony\ORM\TransactionException` is thrown.
      *
      * This method can be nested within itself.
      * This does not actually nest real transactions, the nested call to start
      * a transaction is simply be ignored without resulting in error.
      *
      * @param callable $callback
-     * @throws \Throwable
      */
     public function transactional(callable $callback): void {
         // Fetch logging implementation
@@ -208,7 +194,7 @@ class Connection {
             }
 
             // Propagate error
-            throw $e;
+            throw new TransactionException("Transaction failed", previous: $e);
         }
 
         if ($is_root_transaction) {
