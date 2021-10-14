@@ -86,8 +86,8 @@ interface DriverInterface {
      * @param string $query
      * @param array $context
      * @return array<array<mixed>>
-     * @throws \Eufony\ORM\\InvalidArgumentException
-     * @throws \Eufony\ORM\\QueryException
+     * @throws \Eufony\ORM\InvalidArgumentException
+     * @throws \Eufony\ORM\QueryException
      */
     public function execute(string $query, array $context): array;
 
@@ -109,7 +109,7 @@ interface DriverInterface {
      * If this method is called when a transaction is already active a
      * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\ORM\\BadMethodCallException
+     * @throws \Eufony\ORM\BadMethodCallException
      */
     public function beginTransaction(): void;
 
@@ -121,7 +121,7 @@ interface DriverInterface {
      * If this method is called when a transaction is not active a
      * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\ORM\\BadMethodCallException
+     * @throws \Eufony\ORM\BadMethodCallException
      */
     public function commit(): void;
 
@@ -133,7 +133,7 @@ interface DriverInterface {
      * If this method is called when a transaction is not active a
      * `\Eufony\ORM\Exception\BadMethodCallException` MUST be thrown.
      *
-     * @throws \Eufony\ORM\\BadMethodCallException
+     * @throws \Eufony\ORM\BadMethodCallException
      */
     public function rollback(): void;
 

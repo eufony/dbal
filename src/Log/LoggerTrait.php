@@ -105,7 +105,7 @@ trait LoggerTrait {
     }
 
     /**
-     * Validates the log levels passed to various logger methods.
+     * Validates the log levels passed to the various logger methods.
      * Returns an array of the validated log levels for easy processing.
      *
      * Example usage:
