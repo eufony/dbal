@@ -88,7 +88,7 @@ class Connection {
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
     public function query(string|Query $query, array $context = [], DateInterval|int $ttl = 1): array {
-        // Fetch logging and cache implementations
+        // Fetch logging and caching implementations
         $logger = ORM::logger();
         $cache = ORM::cache();
 
