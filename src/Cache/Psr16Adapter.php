@@ -35,9 +35,9 @@ class Psr16Adapter implements CacheInterface {
      * The PSR-6 cache used internally to provide the real caching
      * implementation.
      *
-     * @var \Psr\Cache\CacheItemPoolInterface
+     * @var \Psr\Cache\CacheItemPoolInterface $cache
      */
-    private CacheItemPoolInterface $cache;
+    private $cache;
 
     /**
      * Class constructor.
@@ -46,7 +46,22 @@ class Psr16Adapter implements CacheInterface {
      * @param \Psr\Cache\CacheItemPoolInterface $cache
      */
     public function __construct(CacheItemPoolInterface $cache) {
-        $this->cache = $cache;
+        // Wrap cache in an anonymous class to cast PSR-6 exceptions to PSR-16 exceptions.
+        $this->cache = new class ($cache) {
+            public CacheItemPoolInterface $cache;
+
+            public function __construct(CacheItemPoolInterface $cache) {
+                $this->cache = $cache;
+            }
+
+            public function __call($name, $arguments) {
+                try {
+                    return $this->cache->$name(...$arguments);
+                } catch (\Psr\Cache\InvalidArgumentException $e) {
+                    throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
+                }
+            }
+        };
     }
 
     /**
@@ -55,42 +70,25 @@ class Psr16Adapter implements CacheInterface {
      * @return CacheItemPoolInterface
      */
     public function cache(): CacheItemPoolInterface {
-        return $this->cache;
+        return $this->cache->cache;
     }
 
     /** @inheritdoc */
     public function get($key, $default = null) {
-        try {
-            $item = $this->cache->getItem($key);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
-
+        $item = $this->cache->getItem($key);
         return $item->isHit() ? $item->get() : $default;
     }
 
     /** @inheritdoc */
     public function set($key, $value, $ttl = null): bool {
-        try {
-            $item = $this->cache->getItem($key);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
-
+        $item = $this->cache->getItem($key);
         $item->set($value)->expiresAfter($ttl);
         return $this->cache->save($item);
     }
 
     /** @inheritdoc */
     public function delete($key): bool {
-        try {
-            return $this->cache->deleteItem($key);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
+        return $this->cache->deleteItem($key);
     }
 
     /** @inheritdoc */
@@ -101,13 +99,7 @@ class Psr16Adapter implements CacheInterface {
     /** @inheritdoc */
     public function getMultiple($keys, $default = null): array {
         $keys = $this->validateIterable($keys);
-
-        try {
-            $items = $this->cache->getItems($keys);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
+        $items = $this->cache->getItems($keys);
 
         $result = [];
 
@@ -121,13 +113,7 @@ class Psr16Adapter implements CacheInterface {
     /** @inheritdoc */
     public function setMultiple($values, $ttl = null): bool {
         $values = $this->validateIterable($values);
-
-        try {
-            $items = $this->cache->getItems(array_keys($values));
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
+        $items = $this->cache->getItems(array_keys($values));
 
         $result = true;
 
@@ -142,23 +128,12 @@ class Psr16Adapter implements CacheInterface {
     /** @inheritdoc */
     public function deleteMultiple($keys): bool {
         $keys = $this->validateIterable($keys);
-
-        try {
-            return $this->cache->deleteItems($keys);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
+        return $this->cache->deleteItems($keys);
     }
 
     /** @inheritdoc */
     public function has($key): bool {
-        try {
-            return $this->cache->hasItem($key);
-        } catch (\Psr\Cache\InvalidArgumentException $e) {
-            // Rethrow \Psr\Cache\InvalidArgumentException as \Psr\SimpleCache\InvalidArgumentException
-            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-        }
+        return $this->cache->hasItem($key);
     }
 
 }
