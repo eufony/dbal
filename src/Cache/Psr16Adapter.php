@@ -49,6 +49,15 @@ class Psr16Adapter implements CacheInterface {
         $this->cache = $cache;
     }
 
+    /**
+     * Returns the internal PSR-6 cache.
+     *
+     * @return CacheItemPoolInterface
+     */
+    public function cache(): CacheItemPoolInterface {
+        return $this->cache;
+    }
+
     /** @inheritdoc */
     public function get($key, $default = null) {
         try {
