@@ -22,9 +22,11 @@ namespace Eufony\ORM;
 use Eufony\DBAL\Connection;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\ORM\Cache\ArrayCache;
+use Eufony\ORM\Cache\Psr16Adapter;
 use Eufony\ORM\Inflection\DoctrineInflector;
 use Eufony\ORM\Inflection\InflectorInterface;
 use Eufony\ORM\Log\DatabaseLogger;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 
@@ -109,12 +111,21 @@ class ORM {
      * Returns the current PSR-16 cache.
      * If `$cache` is set, sets the new cache and returns the previous
      * instance.
+     * `$cache` can also be an implementation of a PSR-6 cache, in which case
+     * it will be wrapped with a `\Eufony\ORM\Cache\Psr16Adapter` for
+     * interoperability.
      *
-     * @param \Psr\SimpleCache\CacheInterface|null $cache
+     * @param \Psr\SimpleCache\CacheInterface|\Psr\Cache\CacheItemPoolInterface|null $cache
      * @return \Psr\SimpleCache\CacheInterface
      */
-    public static function cache(?CacheInterface $cache = null): CacheInterface {
+    public static function cache(CacheInterface|CacheItemPoolInterface|null $cache = null): CacheInterface {
         $prev = static::$cache;
+
+        // Wrap PSR-6 caches in a PSR-16 adapter
+        if ($cache instanceof CacheItemPoolInterface) {
+            $cache = new Psr16Adapter($cache);
+        }
+
         static::$cache = $cache ?? static::$cache;
         return $prev;
     }
