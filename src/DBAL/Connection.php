@@ -81,13 +81,13 @@ class Connection {
      *
      * @param string|\Eufony\DBAL\Query\Query $query
      * @param array<mixed> $context
-     * @param DateInterval|int $ttl
+     * @param int|\DateInterval $ttl
      * @return array<array<mixed>>
      * @throws \Eufony\ORM\QueryException
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
-    public function query(string|Query $query, array $context = [], DateInterval|int $ttl = 1): array {
+    public function query(string|Query $query, array $context = [], int|DateInterval $ttl = 1): array {
         // Fetch logging and caching implementations
         $logger = ORM::logger();
         $cache = ORM::cache();

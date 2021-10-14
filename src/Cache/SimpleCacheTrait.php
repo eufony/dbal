@@ -37,7 +37,7 @@ trait SimpleCacheTrait {
      * $key = $this->validateKey($key);
      * ```
      *
-     * @param string|Stringable $key
+     * @param string|\Stringable $key
      * @return string
      */
     private function validateKey($key): string {
@@ -87,7 +87,7 @@ trait SimpleCacheTrait {
             return iterator_to_array($iterable);
         }
 
-        // Ensure an iterable is passed
+        // Ensure an iterable object is passed
         throw new InvalidArgumentException('Invalid iterable parameter');
     }
 
