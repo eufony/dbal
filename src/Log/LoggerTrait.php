@@ -155,7 +155,7 @@ trait LoggerTrait {
      * ```
      *
      * @param string $level
-     * @param string|Stringable $message
+     * @param string|\Stringable $message
      * @param array<mixed> $context
      * @return array
      */
