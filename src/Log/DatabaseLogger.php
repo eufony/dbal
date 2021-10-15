@@ -19,6 +19,9 @@
 
 namespace Eufony\ORM\Log;
 
+use Eufony\DBAL\Query\Insert;
+use Eufony\DBAL\Query\Keyword\Op;
+use Eufony\DBAL\Query\Select;
 use Eufony\ORM\ORM;
 use Eufony\ORM\QueryException;
 use Psr\Log\AbstractLogger;
@@ -47,8 +50,6 @@ class DatabaseLogger extends AbstractLogger {
         if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
         $message = $this->interpolate($message, $context);
 
-        // TODO: Use query builders for this.
-
         // Fetch default database connection
         $database = ORM::connection();
 
@@ -56,6 +57,7 @@ class DatabaseLogger extends AbstractLogger {
         $logger = ORM::logger(new NullLogger());
 
         // Ensure log table exists
+        // TODO: Use query builder for this.
         try {
             $sql = <<< SQL
             CREATE TABLE __log
@@ -69,14 +71,15 @@ class DatabaseLogger extends AbstractLogger {
             );
             SQL;
 
-            $database->query($sql);
+            $database->directQuery($sql);
         } catch (QueryException) {
             // table already exists, silently ignore
         }
 
         // Fetch ID from table
-        $result = $database->query("SELECT \"id\" FROM \"__log\" ORDER BY \"id\" DESC");
-        $id = !empty($result) ? $result[0]['id'] + 1 : 1;
+        // TODO: Deal with array keys when using aggregate functions.
+        $result = $database->query(Select::from("__log")->fields(Op::max("id"))->limit(1));
+        $id = !empty($result) ? $result[0]['MAX("id")'] + 1 : 1;
 
         $values = [
             "id" => $id,
@@ -88,12 +91,7 @@ class DatabaseLogger extends AbstractLogger {
         // If an exception was passed, add it to the values array
         if (array_key_exists("exception", $context)) $values['exception'] = $context['exception'];
 
-        // Build and execute query from values array
-        $fields = implode(",", array_map(fn($key) => "\"$key\"", array_keys($values)));
-        $placeholders = implode(",", array_map(fn($key) => ":$key", array_keys($values)));
-        $sql = "INSERT INTO \"__log\" ($fields) VALUES ($placeholders)";
-
-        $database->query($sql, $values);
+        $database->query(Insert::into("__log")->values($values));
 
         // Restore previous logger
         ORM::logger($logger);

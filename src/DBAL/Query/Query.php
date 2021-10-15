@@ -29,7 +29,7 @@ use Eufony\ORM\ORM;
  */
 abstract class Query {
 
-    public array $context;
+    public array $context = [];
 
     public function __clone(): void {
         unserialize(serialize($this));
