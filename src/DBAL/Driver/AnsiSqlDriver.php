@@ -66,7 +66,7 @@ class AnsiSqlDriver extends AbstractDriver {
     /** @inheritdoc */
     public function __construct(string $dsn, ?string $user = null, ?string $password = null) {
         parent::__construct();
-//        $this->connect($dsn, $user, $password);
+        $this->connect($dsn, $user, $password);
     }
 
     /** @inheritdoc */
@@ -112,8 +112,9 @@ class AnsiSqlDriver extends AbstractDriver {
         $sql = "INSERT INTO " . $q . $query->table . $q;
 
         if (isset($query->values)) {
-            $values = implode(",", $query->values);
-            $sql .= " VALUES ($values)";
+            $fields = implode(",", array_map(fn($key) => "$q$key$q", array_keys($query->values)));
+            $values = implode(",", array_values($query->values));
+            $sql .= " ($fields) VALUES ($values)";
         }
 
         return $sql;
@@ -127,7 +128,7 @@ class AnsiSqlDriver extends AbstractDriver {
         if (isset($query->values)) {
             $keys = array_keys($query->values);
             $values = array_values($query->values);
-            $values = implode(", ", array_map(fn($key, $value) => "$key=$value", $keys, $values));
+            $values = implode(", ", array_map(fn($key, $value) => "$q$key$q=$value", $keys, $values));
             $sql .= " SET $values";
         }
 
