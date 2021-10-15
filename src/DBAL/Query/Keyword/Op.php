@@ -17,32 +17,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\DBAL\Query\Keyword;
 
-use Eufony\ORM\ORM;
+class Op {
 
-/**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
- */
-abstract class Query {
+    public string $type;
+    public string $field;
 
-    public array $context;
-
-    public function __clone(): void {
-        unserialize(serialize($this));
+    public static function min(string $field): static {
+        return new static(__FUNCTION__, $field);
     }
 
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+    public static function max(string $field): static {
+        return new static(__FUNCTION__, $field);
+    }
+
+    public static function avg(string $field): static {
+        return new static(__FUNCTION__, $field);
+    }
+
+    public static function count(): static {
+        return new static(__FUNCTION__, "*");
+    }
+
+    private function __construct(string $type, string $field) {
+        $this->type = $type;
+        $this->field = $field;
     }
 
 }

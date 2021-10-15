@@ -17,32 +17,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\DBAL\Query\Clause;
 
-use Eufony\ORM\ORM;
+trait OrderByClauseTrait {
 
-/**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
- */
-abstract class Query {
+    public array $order;
 
-    public array $context;
+    public function orderBy(string|array $fields): static {
+        $this->order = [];
 
-    public function __clone(): void {
-        unserialize(serialize($this));
-    }
+        if (is_string($fields)) {
+            $fields = [$fields];
+        }
 
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+        foreach ($fields as $key => $value) {
+            $this->order = array_merge($this->order, is_int($key) ? [$value => "asc"] : [$key => $value]);
+        }
+
+        return $this;
     }
 
 }

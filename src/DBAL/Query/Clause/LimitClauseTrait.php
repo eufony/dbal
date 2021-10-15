@@ -17,32 +17,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\DBAL\Query\Clause;
 
-use Eufony\ORM\ORM;
+trait LimitClauseTrait {
 
-/**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
- */
-abstract class Query {
+    public int $limit;
+    public int $offset;
 
-    public array $context;
-
-    public function __clone(): void {
-        unserialize(serialize($this));
+    public function limit(int $count): static {
+        $this->limit = $count;
+        return $this;
     }
 
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+    public function offset(int $offset): static {
+        $this->offset = $offset;
+        return $this;
     }
 
 }
