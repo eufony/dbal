@@ -17,32 +17,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
-
-use Eufony\ORM\ORM;
+namespace Eufony\DBAL\Driver;
 
 /**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
+ * Provides a database driver implementation for SQLite using the PDO
+ * extension.
+ * Currently supports SQLite version 3.
+ *
+ * **Notice:** This class requires `ext-pdo` as well as `ext-pdo_sqlite` to be
+ * installed and enabled.
  */
-abstract class Query {
+class SQLiteDriver extends AnsiSqlDriver {
 
-    public array $context;
-
-    public function __clone(): void {
-        unserialize(serialize($this));
-    }
-
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+    public function __construct(string $path) {
+        parent::__construct("sqlite:" . $path);
     }
 
 }

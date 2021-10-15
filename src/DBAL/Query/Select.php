@@ -19,30 +19,31 @@
 
 namespace Eufony\DBAL\Query;
 
-use Eufony\ORM\ORM;
+use Eufony\DBAL\Query\Clause\LimitClauseTrait;
+use Eufony\DBAL\Query\Clause\OrderByClauseTrait;
+use Eufony\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\DBAL\Query\Keyword\Op;
 
-/**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
- */
-abstract class Query {
+class Select extends Query {
 
-    public array $context;
+    use LimitClauseTrait;
+    use OrderByClauseTrait;
+    use WhereClauseTrait;
 
-    public function __clone(): void {
-        unserialize(serialize($this));
+    public array $tables;
+    public array $fields;
+
+    public static function from(string ...$tables): static {
+        return new static($tables);
     }
 
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+    private function __construct(array $tables) {
+        $this->tables = $tables;
+    }
+
+    public function fields(string|Op ...$fields): static {
+        $this->fields = $fields;
+        return $this;
     }
 
 }

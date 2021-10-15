@@ -22,7 +22,6 @@ namespace Eufony\DBAL;
 use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Query\Query;
-use Eufony\DBAL\Query\Select;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\ORM;
 use Eufony\ORM\QueryException;
@@ -63,14 +62,38 @@ class Connection {
     }
 
     /**
-     * Executes the given query.
+     * Builds and executes a query from the given query builder.
+     *
+     * The query string is passed to the `Database:directQuery()` method along
+     * with the internal context array of the query builder, providing easy
+     * protection against SQL injection attacks.
+     *
+     * The cached result's expiration can be set using the `$ttl` parameter;
+     * either as a `DateInterval` object or an integer number of minutes.
+     * Defaults to 1 minute.
+     *
+     * Throws a `\Eufony\ORM\QueryException` on failure.
+     *
+     * @param Query $query
+     * @param int|DateInterval $ttl
+     * @return \mixed[][]
+     */
+    public function query(Query $query, int|DateInterval $ttl = 1): array {
+        // Generate the query string
+        $query_string = $this->driver->generate($query);
+
+        // Execute query string and return result
+        return $this->directQuery($query_string, $query->context, $ttl);
+    }
+
+    /**
+     * Executes the given query string.
      *
      * Additionally handles caching (for read-only queries), logging, and
      * generation of the query string from a query builder.
      *
-     * The query, whether passed in as a string directly or built using a query
-     * builder, is passed to the `DriverInterface::execute()` method along with
-     * the context array, providing easy protection against SQL injection
+     * The query is passed to the `DriverInterface::execute()` method along
+     * with the context array, providing easy protection against SQL injection
      * attacks.
      *
      * The cached result's expiration can be set using the `$ttl` parameter;
@@ -79,25 +102,21 @@ class Connection {
      *
      * Throws a `\Eufony\ORM\QueryException` on failure.
      *
-     * @param string|\Eufony\DBAL\Query\Query $query
+     * @param string $query
      * @param array<mixed> $context
      * @param int|\DateInterval $ttl
      * @return array<array<mixed>>
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
-    public function query(string|Query $query, array $context = [], int|DateInterval $ttl = 1): array {
+    public function directQuery(string $query, array $context = [], int|DateInterval $ttl = 1): array {
         // Fetch logging and caching implementations
         $logger = ORM::logger();
         $cache = ORM::cache();
 
-        // If a query builder is passed, determine if it mutates data in the database
-        // Otherwise, cannot determine if the string is a mutation, set to null
-        /** @var bool|null $is_mutation */
-        $is_mutation = $query instanceof Query ? get_class($query) === Select::class : null;
-
-        // If the query was built using a query builder, generate the query string
-        $query_string = $query instanceof Query ? $this->driver->generate($query) : $query;
+        // Determine if query mutates data in the database depending first keyword
+        // TODO: This assumes query is written in SQL
+        $is_mutation = preg_match("/^SELECT/", $query) !== 1;
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false) {
@@ -106,22 +125,22 @@ class Connection {
             // maximum supported length
             // Sorting the context array ensures predictability when hashing
             asort($context);
-            $cache_key = hash("sha256", $query_string . implode("|", $context));
+            $cache_key = hash("sha256", $query . implode("|", $context));
             $cache_result = $cache->get($cache_key);
 
             if ($cache_result !== null) {
-                $logger->debug("Query cache hit: $query_string");
+                $logger->debug("Query cache hit: $query");
                 return $cache_result;
             }
         }
 
         // Execute query
         try {
-            $query_result = $this->driver->execute($query_string, $context);
+            $query_result = $this->driver->execute($query, $context);
         } catch (InvalidArgumentException | QueryException $e) {
             // Log error for query exceptions
             if ($e instanceof QueryException) {
-                $logger->error("Query failed: $query_string", context: ["exception" => $e]);
+                $logger->error("Query failed: $query", context: ["exception" => $e]);
             }
 
             throw $e;
@@ -129,26 +148,19 @@ class Connection {
 
         if ($is_mutation === true) {
             // Log notice for write operations
-            $logger->notice("Query write op: $query_string");
+            $logger->notice("Query write op: $query");
 
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $cache->clear();
             $logger->debug("Clear cache");
-        } elseif ($is_mutation === false) {
+        } else {
             // Log info for read operations
-            $logger->info("Query read op: $query_string");
+            $logger->info("Query read op: $query");
 
             // Cache result
             $cache->set($cache_key, $query_result, ttl: $ttl);
-            $logger->debug("Query cached result: $query_string");
-        } else {
-            // Log notice of unknown operations
-            $logger->notice("Query (unknown type): $query_string");
-
-            // Invalidate the entire cache, just to be safe
-            $cache->clear();
-            $logger->debug("Clear cache");
+            $logger->debug("Query cached result: $query");
         }
 
         // Return result

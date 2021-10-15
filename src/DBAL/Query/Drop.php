@@ -19,30 +19,6 @@
 
 namespace Eufony\DBAL\Query;
 
-use Eufony\ORM\ORM;
-
-/**
- * Provides abstraction away from vendor-specific query language syntax using
- * object-oriented query builders.
- * The query builder representation can than be translated by the database
- * driver in use.
- */
-abstract class Query {
-
-    public array $context;
-
-    public function __clone(): void {
-        unserialize(serialize($this));
-    }
-
-    /**
-     * Executes this query in the given database connection.
-     *
-     * @param string $key
-     * @return array
-     */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
-    }
+class Drop extends Query {
 
 }
