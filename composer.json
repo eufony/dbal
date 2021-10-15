@@ -51,5 +51,10 @@
     "optimize-autoloader": true,
     "preferred-install": "dist",
     "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "v1.x-dev"
+    }
   }
 }
