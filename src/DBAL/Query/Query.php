@@ -19,6 +19,7 @@
 
 namespace Eufony\DBAL\Query;
 
+use DateInterval;
 use Eufony\ORM\ORM;
 
 /**
@@ -39,10 +40,11 @@ abstract class Query {
      * Executes this query in the given database connection.
      *
      * @param string $key
+     * @param int|DateInterval $ttl
      * @return array
      */
-    public function execute(string $key = "default"): array {
-        return ORM::connection($key)->query($this);
+    public function execute(string $key = "default", int|DateInterval $ttl = 1): array {
+        return ORM::connection($key)->query($this, $ttl);
     }
 
 }
