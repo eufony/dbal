@@ -205,7 +205,14 @@ class Connection {
             throw $e;
         }
 
-        if ($is_mutation === true) {
+        if ($is_mutation === false) {
+            // Log info for read operations
+            $this->logger->info("Query read op: $query");
+
+            // Cache result
+            $this->cache->set($cache_key, $query_result, ttl: $ttl);
+            $this->logger->debug("Query cached result: $query");
+        } else {
             // Log notice for write operations
             $this->logger->notice("Query write op: $query");
 
@@ -213,13 +220,6 @@ class Connection {
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $this->cache->clear();
             $this->logger->debug("Clear cache");
-        } else {
-            // Log info for read operations
-            $this->logger->info("Query read op: $query");
-
-            // Cache result
-            $this->cache->set($cache_key, $query_result, ttl: $ttl);
-            $this->logger->debug("Query cached result: $query");
         }
 
         // Return result
