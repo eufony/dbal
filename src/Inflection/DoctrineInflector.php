@@ -45,12 +45,25 @@ class DoctrineInflector implements InflectorInterface {
     }
 
     /**
-     * Returns the internal Doctrine Inflector object.
+     * Returns the internal Doctrine inflector object.
      *
      * @return \Doctrine\Inflector\Inflector
      */
     public function inflector(): Inflector {
         return $this->inflector;
+    }
+
+    /**
+     * Returns a key-value pair of the singular to plural forms of
+     * words.
+     * This method can be overridden in a subclass of the inflector to
+     * hard-code exceptions that the underlying inflection implementation
+     * missed.
+     *
+     * @return string[]
+     */
+    public function wordExceptions(): array {
+        return [];
     }
 
     /** @inheritdoc */
@@ -70,12 +83,12 @@ class DoctrineInflector implements InflectorInterface {
 
     /** @inheritdoc */
     public function pluralize(string $string): string {
-        return $this->inflector->pluralize($string);
+        return $this->wordExceptions()[$string] ?? $this->inflector->pluralize($string);
     }
 
     /** @inheritdoc */
     public function singularize(string $string): string {
-        return $this->inflector->singularize($string);
+        return array_search($string, $this->wordExceptions()) ?: $this->inflector->singularize($string);
     }
 
 }
