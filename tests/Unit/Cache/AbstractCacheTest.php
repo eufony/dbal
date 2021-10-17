@@ -29,7 +29,7 @@ abstract class AbstractCacheTest extends TestCase {
     /**
      * Data provider for PSR-16 methods that require a cache key parameter.
      *
-     * @return array<array<mixed>>
+     * @return mixed[][]
      */
     public function invalidKeyMethods(): array {
         $methods = ["get", "set", "delete", "getMultiple", "setMultiple", "deleteMultiple", "has"];
@@ -61,7 +61,7 @@ abstract class AbstractCacheTest extends TestCase {
     /**
      * Data provider for PSR-16 methods that require a TTL parameter.
      *
-     * @return array<array<mixed>>
+     * @return mixed[][]
      */
     public function invalidTtlMethods(): array {
         return [
@@ -73,7 +73,7 @@ abstract class AbstractCacheTest extends TestCase {
     /**
      * Data provider for PSR-16 methods that operate on multiple cache items.
      *
-     * @return array<array<string>>
+     * @return string[][]
      */
     public function multipleMethods(): array {
         return [

@@ -34,7 +34,7 @@ class ORM {
     /**
      * Stores active instances of database connections.
      *
-     * @var array<\Eufony\DBAL\Connection> $connections
+     * @var \Eufony\DBAL\Connection[] $connections
      */
     private static array $connections = [];
 
@@ -65,7 +65,7 @@ class ORM {
     /**
      * Returns all active instances of database connections.
      *
-     * @return array<\Eufony\DBAL\Connection>
+     * @return \Eufony\DBAL\Connection[]
      */
     public static function connections(): array {
         return static::$connections;

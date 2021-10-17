@@ -41,7 +41,7 @@ abstract class Query {
      *
      * @param string $key
      * @param int|DateInterval $ttl
-     * @return array
+     * @return mixed[][]
      */
     public function execute(string $key = "default", int|DateInterval $ttl = 1): array {
         return ORM::connection($key)->query($this, $ttl);

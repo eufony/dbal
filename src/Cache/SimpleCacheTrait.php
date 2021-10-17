@@ -76,7 +76,7 @@ trait SimpleCacheTrait {
      * ```
      *
      * @param $keys
-     * @return array
+     * @return string[]
      */
     private function validateKeys($keys): array {
         // Ensure iterable objects are cast to arrays

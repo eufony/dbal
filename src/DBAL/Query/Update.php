@@ -44,11 +44,10 @@ class Update extends Query {
      * Private class constructor.
      * Use `Update::table()` to initialize this class.
      *
-     * @param string $table
+     * @param string[] $tables
      */
     private function __construct(array $tables) {
         $this->tables = $tables;
     }
-
 
 }
