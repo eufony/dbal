@@ -22,5 +22,5 @@ namespace Eufony\ORM;
 /**
  * Thrown whenever an invalid argument is supplied to a method.
  */
-class InvalidArgumentException extends \InvalidArgumentException {
+class InvalidArgumentException extends \InvalidArgumentException implements \Psr\SimpleCache\InvalidArgumentException {
 }

@@ -19,6 +19,8 @@
 
 namespace Eufony\ORM\Cache;
 
+use DateInterval;
+use DateTime;
 use Eufony\ORM\InvalidArgumentException;
 use Stringable;
 use Traversable;
@@ -30,7 +32,7 @@ trait SimpleCacheTrait {
 
     /**
      * Validates the cache key passed to the various cache methods.
-     * Returns the validated key for easy processing
+     * Returns the validated key for easy processing.
      *
      * Example usage:
      * ```
@@ -47,8 +49,8 @@ trait SimpleCacheTrait {
         }
 
         // Ensure key is not an empty string
-        if ($key === '') {
-            throw new InvalidArgumentException('Cache key must not be empty');
+        if ($key === "") {
+            throw new InvalidArgumentException("Cache key must not be empty");
         }
 
         // Ensure key does not contain reserved characters
@@ -62,6 +64,29 @@ trait SimpleCacheTrait {
 
         // Return result
         return $key;
+    }
+
+    /**
+     * Validates the iterable cache keys passed to the various cache methods.
+     * Returns an array of the validated keys for easy processing.
+     *
+     * Example usage:
+     * ```
+     * $keys = $this->validateKeys($keys);
+     * ```
+     *
+     * @param $keys
+     * @return array
+     */
+    private function validateKeys($keys): array {
+        // Ensure iterable objects are cast to arrays
+        $keys = $this->validateIterable($keys);
+
+        // Validate each key in array
+        $keys = array_map(fn($key) => $this->validateKey($key), $keys);
+
+        // Return result
+        return $keys;
     }
 
     /**
@@ -89,6 +114,31 @@ trait SimpleCacheTrait {
 
         // Ensure an iterable object is passed
         throw new InvalidArgumentException('Invalid iterable parameter');
+    }
+
+    /**
+     * Validates the TTL parameter passed to the various cache methods.
+     * Returns the timestamp of the expiration, or null if cache item doesn't
+     * expire for easy processing.
+     *
+     * Example usage:
+     * ```
+     * $ttl = $this->validateTtl($ttl);
+     * ```
+     *
+     * @param $ttl
+     * @return int|null
+     */
+    private function validateTtl($ttl): int|null {
+        if ($ttl === null) {
+            return null;
+        } elseif ($ttl instanceof DateInterval) {
+            return (new DateTime("now"))->add($ttl)->getTimeStamp();
+        } elseif (is_int($ttl)) {
+            return time() + $ttl;
+        } else {
+            throw new InvalidArgumentException("TTL must be a DateInterval or an int");
+        }
     }
 
 }

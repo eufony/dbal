@@ -19,7 +19,6 @@
 
 namespace Eufony\ORM\Cache;
 
-use Eufony\ORM\InvalidArgumentException;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\SimpleCache\CacheInterface;
 
@@ -37,7 +36,7 @@ class Psr16Adapter implements CacheInterface {
      *
      * @var \Psr\Cache\CacheItemPoolInterface $cache
      */
-    private $cache;
+    private CacheItemPoolInterface $cache;
 
     /**
      * Class constructor.
@@ -46,22 +45,7 @@ class Psr16Adapter implements CacheInterface {
      * @param \Psr\Cache\CacheItemPoolInterface $cache
      */
     public function __construct(CacheItemPoolInterface $cache) {
-        // Wrap cache in an anonymous class to cast PSR-6 exceptions to PSR-16 exceptions.
-        $this->cache = new class ($cache) {
-            public CacheItemPoolInterface $cache;
-
-            public function __construct(CacheItemPoolInterface $cache) {
-                $this->cache = $cache;
-            }
-
-            public function __call($name, $arguments) {
-                try {
-                    return $this->cache->$name(...$arguments);
-                } catch (\Psr\Cache\InvalidArgumentException $e) {
-                    throw new InvalidArgumentException($e->getMessage(), $e->getCode(), previous: $e);
-                }
-            }
-        };
+        $this->cache = $cache;
     }
 
     /**
@@ -70,17 +54,19 @@ class Psr16Adapter implements CacheInterface {
      * @return CacheItemPoolInterface
      */
     public function cache(): CacheItemPoolInterface {
-        return $this->cache->cache;
+        return $this->cache;
     }
 
     /** @inheritdoc */
     public function get($key, $default = null) {
+        $key = $this->validateKey($key);
         $item = $this->cache->getItem($key);
         return $item->isHit() ? $item->get() : $default;
     }
 
     /** @inheritdoc */
     public function set($key, $value, $ttl = null): bool {
+        $key = $this->validateKey($key);
         $item = $this->cache->getItem($key);
         $item->set($value)->expiresAfter($ttl);
         return $this->cache->save($item);
@@ -88,6 +74,7 @@ class Psr16Adapter implements CacheInterface {
 
     /** @inheritdoc */
     public function delete($key): bool {
+        $key = $this->validateKey($key);
         return $this->cache->deleteItem($key);
     }
 
@@ -98,7 +85,8 @@ class Psr16Adapter implements CacheInterface {
 
     /** @inheritdoc */
     public function getMultiple($keys, $default = null): array {
-        $keys = $this->validateIterable($keys);
+        $keys = $this->validateKeys($keys);
+
         $items = $this->cache->getItems($keys);
 
         $result = [];
@@ -113,6 +101,8 @@ class Psr16Adapter implements CacheInterface {
     /** @inheritdoc */
     public function setMultiple($values, $ttl = null): bool {
         $values = $this->validateIterable($values);
+        $values = array_combine($this->validateKeys(array_keys($values)), (array)array_values($values));
+
         $items = $this->cache->getItems(array_keys($values));
 
         $result = true;
@@ -127,12 +117,13 @@ class Psr16Adapter implements CacheInterface {
 
     /** @inheritdoc */
     public function deleteMultiple($keys): bool {
-        $keys = $this->validateIterable($keys);
+        $keys = $this->validateKeys($keys);
         return $this->cache->deleteItems($keys);
     }
 
     /** @inheritdoc */
     public function has($key): bool {
+        $key = $this->validateKey($key);
         return $this->cache->hasItem($key);
     }
 
