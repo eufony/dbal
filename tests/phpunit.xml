@@ -4,7 +4,6 @@
          bootstrap="./bootstrap.php"
          cacheResultFile="./.phpunit/results"
          executionOrder="depends,defects"
-         forceCoversAnnotation="true"
          beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
@@ -12,18 +11,18 @@
          failOnWarning="true"
          verbose="true">
     <testsuites>
-        <testsuite name="default">
-            <directory>./</directory>
+        <testsuite name="unit">
+            <directory>./Unit/</directory>
         </testsuite>
     </testsuites>
 
-    <coverage cacheDirectory="./.phpunit/coverage"
+    <coverage cacheDirectory="./.phpunit/coverage/"
               processUncoveredFiles="true">
         <include>
             <directory suffix=".php">../src</directory>
         </include>
         <report>
-            <html outputDirectory="./.phpunit/coverage-html"/>
+            <html outputDirectory="./.phpunit/coverage-html/"/>
         </report>
     </coverage>
 </phpunit>

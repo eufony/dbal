@@ -20,6 +20,7 @@
     "sabre/cache": "^1.0"
   },
   "require-dev": {
+    "cache/array-adapter": "^1.1",
     "fakerphp/faker": "^1.16",
     "mockery/mockery": "^1.4",
     "phpunit/phpunit": "^9.5"
@@ -44,7 +45,7 @@
   "autoload-dev": {
     "psr-4": {
       "App\\": "tests/App/",
-      "Eufony\\ORM\\Tests\\": "tests/"
+      "Tests\\": "tests/"
     }
   },
   "config": {
