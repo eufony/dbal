@@ -24,7 +24,7 @@ use Psr\SimpleCache\CacheInterface;
 
 /**
  * Provides a wrapper class to adapt a PSR-6 caching implementation to the
- * PSR-16 standard.
+ * PSR-16 standards.
  */
 class Psr16Adapter implements CacheInterface {
 
@@ -40,7 +40,7 @@ class Psr16Adapter implements CacheInterface {
 
     /**
      * Class constructor.
-     * Wraps a PSR-6 cache to adapt it to the PSR-16 standard.
+     * Wraps a PSR-6 cache to adapt it to the PSR-16 standards.
      *
      * @param \Psr\Cache\CacheItemPoolInterface $cache
      */

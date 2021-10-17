@@ -40,7 +40,7 @@ abstract class Query {
      * Executes this query in the given database connection.
      *
      * @param string $key
-     * @param int|DateInterval $ttl
+     * @param int|\DateInterval $ttl
      * @return mixed[][]
      */
     public function execute(string $key = "default", int|DateInterval $ttl = 1): array {

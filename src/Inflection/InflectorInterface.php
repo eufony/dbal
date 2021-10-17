@@ -22,7 +22,7 @@ namespace Eufony\ORM\Inflection;
 /**
  * Provides a common interface for linguistic inflection.
  * Features include changing capitalization of strings as well as pluralization
- * and singularization.
+ * and singularization of words.
  */
 interface InflectorInterface {
 

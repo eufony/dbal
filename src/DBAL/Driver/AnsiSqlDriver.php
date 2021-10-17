@@ -63,7 +63,19 @@ class AnsiSqlDriver extends AbstractDriver {
 
     protected static string $exists = "EXISTS";
 
-    /** @inheritdoc */
+    /**
+     * Class constructor.
+     * Creates a new connection to the database using the PHP PDO extension.
+     *
+     * The given parameters are passed directly to the underlying PDO object.
+     * Refer to the official PDO documentation for more details.
+     *
+     * @param string $dsn
+     * @param string|null $user
+     * @param string|null $password
+     *
+     * @see https://www.php.net/manual/en/pdo.construct.php
+     */
     public function __construct(string $dsn, ?string $user = null, ?string $password = null) {
         parent::__construct();
         $this->connect($dsn, $user, $password);

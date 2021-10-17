@@ -28,7 +28,7 @@ use PDOException;
  * Provides common functionality for implementing database drivers using the
  * PHP PDO extension.
  *
- * To use this class, declare it in a `use` statement and call the `connect()`
+ * To use this trait, declare it in a `use` statement and call the `connect()`
  * method in the class constructor.
  *
  * **Notice:** Driver implementations using this trait will require `ext-pdo`

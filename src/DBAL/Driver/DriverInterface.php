@@ -25,28 +25,17 @@ use Eufony\DBAL\Query\Query;
  * Provides a common interface for connecting to and querying different
  * database backends.
  *
- * Allows the query logic to be written using the query builders in the
- * `\Eufony\DBAL\Query` namespace.
- * The implementations of this interface then generate the query string for
- * their own vendor-specific database backends using the `generate()` method.
- *
- * The `\Eufony\DBAL\Driver\AbstractDriver` class provides some boilerplate
- * code to ease the implementation of this interface.
- *
  * The connection to the database MUST be kept alive for as long as the
  * lifetime of the driver instance.
  * If the database requires specific instructions to finish a session, these
  * instructions SHOULD be issued in the destructor of the object class.
- *
- * @see \Eufony\DBAL\Query\Query
- * @see \Eufony\DBAL\Driver\AbstractDriver
  */
 interface DriverInterface {
 
     /**
-     * Generates the query string to be executed from a query builder.
+     * Generates the query string to be executed from the given query builder.
      *
-     * @param Query $query
+     * @param \Eufony\DBAL\Query\Query $query
      * @return string
      */
     public function generate(Query $query): string;
@@ -67,7 +56,7 @@ interface DriverInterface {
      * data, the database MUST NOT interpret them as part of the query.
      * The values in the array MUST be escaped properly for use in the query.
      * If the database provides functionality for prepared statements, taking
-     * advantage of them is highly RECOMMENDED.
+     * advantage of it is highly RECOMMENDED.
      *
      * If the query mixes both positional and named parameters, or if the
      * keys in the context array don't match the parameters in the query, a
@@ -99,7 +88,7 @@ interface DriverInterface {
      * buffered until either `commit()` or `rollback()` is called.
      *
      * Transactions cannot be nested.
-     * If this method is called when a transaction is already active a
+     * If this method is called when a transaction is already active, a
      * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
      */
     public function beginTransaction(): void;

@@ -29,6 +29,13 @@ namespace Eufony\DBAL\Driver;
  */
 class SQLiteDriver extends AnsiSqlDriver {
 
+    /**
+     * Class constructor.
+     * Creates a new connection to the SQLite database with the file path
+     * `$path`.
+     *
+     * @param string $path
+     */
     public function __construct(string $path) {
         parent::__construct("sqlite:" . $path);
     }

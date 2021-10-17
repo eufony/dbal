@@ -26,8 +26,7 @@ use Eufony\ORM\Inflection\InflectorInterface;
 
 /**
  * Manages and oversees the state of the Eufony ORM as a whole.
- * Tasks include managing database connections as well as logging, caching, and
- * inflection interfaces.
+ * Tasks include managing database connections as inflection interfaces.
  */
 class ORM {
 
@@ -39,7 +38,7 @@ class ORM {
     private static array $connections = [];
 
     /**
-     * An implementation of `\Eufony\ORM\Inflection\InflectionInterface`.
+     * An implementation of `InflectionInterface`.
      * Defaults to an instance of `\Eufony\ORM\Inflection\DoctrineInflector`.
      *
      * @var \Eufony\ORM\Inflection\InflectorInterface $inflector
@@ -90,7 +89,7 @@ class ORM {
      * If only a single driver is supplied, it will be treated as the `default`
      * connection.
      * If an array of drivers is supplied, each key-value pair will be treated
-     * as a separate connection to be established.
+     * as a separate connection.
      * The keys can later be used as a reference to the active connections
      * using the `ORM::connection()` method.
      *
@@ -101,8 +100,6 @@ class ORM {
      * establish a duplicate connection occurs.
      *
      * @param \Eufony\DBAL\Driver\DriverInterface|array $drivers
-     *
-     * @see \Eufony\ORM\ORM::connection()
      */
     public static function init(DriverInterface|array $drivers): void {
         // If a single driver is passed, it will be treated as the default driver
