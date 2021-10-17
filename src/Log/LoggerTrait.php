@@ -101,7 +101,7 @@ trait LoggerTrait {
         $i2 = array_search($level, $levels);
         $i3 = array_search($maxLevel, $levels);
 
-        return $i1 >= $i2 && $i2 > $i3;
+        return $i1 >= $i2 && $i2 >= $i3;
     }
 
     /**
