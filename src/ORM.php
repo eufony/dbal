@@ -21,14 +21,8 @@ namespace Eufony\ORM;
 
 use Eufony\DBAL\Connection;
 use Eufony\DBAL\Driver\DriverInterface;
-use Eufony\ORM\Cache\ArrayCache;
-use Eufony\ORM\Cache\Psr16Adapter;
 use Eufony\ORM\Inflection\DoctrineInflector;
 use Eufony\ORM\Inflection\InflectorInterface;
-use Eufony\ORM\Log\DatabaseLogger;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\LoggerInterface;
-use Psr\SimpleCache\CacheInterface;
 
 /**
  * Manages and oversees the state of the Eufony ORM as a whole.
@@ -43,22 +37,6 @@ class ORM {
      * @var array<\Eufony\DBAL\Connection> $connections
      */
     private static array $connections = [];
-
-    /**
-     * A PSR-3 compliant logger.
-     * Defaults to an instance of `\Eufony\ORM\Log\DatabaseLogger`.
-     *
-     * @var \Psr\Log\LoggerInterface $logger
-     */
-    private static LoggerInterface $logger;
-
-    /**
-     * A PSR-16 compliant cache.
-     * Defaults to an instance of `\Eufony\ORM\Cache\ArrayCache`.
-     *
-     * @var \Psr\SimpleCache\CacheInterface
-     */
-    private static CacheInterface $cache;
 
     /**
      * An implementation of `\Eufony\ORM\Inflection\InflectionInterface`.
@@ -94,45 +72,8 @@ class ORM {
     }
 
     /**
-     * Returns the current PSR-3 logger.
-     * If `$logger` is set, sets the new logger and returns the previous
-     * instance.
-     *
-     * @param \Psr\Log\LoggerInterface|null $logger
-     * @return \Psr\Log\LoggerInterface
-     */
-    public static function logger(?LoggerInterface $logger = null): LoggerInterface {
-        $prev = static::$logger;
-        static::$logger = $logger ?? static::$logger;
-        return $prev;
-    }
-
-    /**
-     * Returns the current PSR-16 cache.
-     * If `$cache` is set, sets the new cache and returns the previous
-     * instance.
-     * `$cache` can also be an implementation of a PSR-6 cache, in which case
-     * it will be wrapped with a `\Eufony\ORM\Cache\Psr16Adapter` for
-     * interoperability.
-     *
-     * @param \Psr\SimpleCache\CacheInterface|\Psr\Cache\CacheItemPoolInterface|null $cache
-     * @return \Psr\SimpleCache\CacheInterface
-     */
-    public static function cache(CacheInterface|CacheItemPoolInterface|null $cache = null): CacheInterface {
-        $prev = static::$cache;
-
-        // Wrap PSR-6 caches in a PSR-16 adapter
-        if ($cache instanceof CacheItemPoolInterface && (!$cache instanceof CacheInterface)) {
-            $cache = new Psr16Adapter($cache);
-        }
-
-        static::$cache = $cache ?? static::$cache;
-        return $prev;
-    }
-
-    /**
      * Returns the current inflector.
-     * If `$inflector` is set, sets the new inflector and return the previous
+     * If `$inflector` is set, sets the new inflector and returns the previous
      * instance.
      *
      * @param \Eufony\ORM\Inflection\InflectorInterface|null $inflector
@@ -153,10 +94,8 @@ class ORM {
      * The keys can later be used as a reference to the active connections
      * using the `ORM::connection()` method.
      *
-     * By default, sets up the following interface implementations:
-     * - `\Eufony\ORM\Log\DatabaseLogger` for logging,
-     * - `\Eufony\ORM\Cache\ArrayCache` for caching,
-     * - `\Eufony\ORM\Inflection\DoctrineInflector` for inflection.
+     * By default, sets up a `\Eufony\ORM\Inflection\DoctrineInflector` for
+     * inflection.
      *
      * Throws a `\Eufony\ORM\InvalidArgumentException` if an attempt to
      * establish a duplicate connection occurs.
@@ -181,9 +120,7 @@ class ORM {
             static::$connections[$key] = new Connection($driver);
         }
 
-        // Initialize logger, cache, and inflector
-        static::$logger ??= new DatabaseLogger();
-        static::$cache ??= new ArrayCache();
+        // Initialize inflector
         static::$inflector ??= new DoctrineInflector();
     }
 

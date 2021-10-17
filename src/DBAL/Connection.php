@@ -22,10 +22,15 @@ namespace Eufony\DBAL;
 use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Query\Query;
+use Eufony\ORM\Cache\ArrayCache;
+use Eufony\ORM\Cache\Psr16Adapter;
 use Eufony\ORM\InvalidArgumentException;
-use Eufony\ORM\ORM;
+use Eufony\ORM\Log\DatabaseLogger;
 use Eufony\ORM\QueryException;
 use Eufony\ORM\TransactionException;
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
 use Throwable;
 
 /**
@@ -42,14 +47,35 @@ class Connection {
     private DriverInterface $driver;
 
     /**
+     * A PSR-3 compliant logger.
+     * Defaults to an instance of `\Eufony\ORM\Log\DatabaseLogger`.
+     *
+     * @var \Psr\Log\LoggerInterface $logger
+     */
+    private LoggerInterface $logger;
+
+    /**
+     * A PSR-16 compliant cache.
+     * Defaults to an instance of `\Eufony\ORM\Cache\ArrayCache`.
+     *
+     * @var \Psr\SimpleCache\CacheInterface
+     */
+    private CacheInterface $cache;
+
+    /**
      * Class constructor.
      * Creates a new connection to a database engine using the given driver
      * backend.
+     *
+     * By default, sets up a `\Eufony\ORM\Log\DatabaseLogger` for logging,
+     * and a `\Eufony\ORM\Cache\ArrayCache` for caching.
      *
      * @param \Eufony\DBAL\Driver\DriverInterface $driver
      */
     public function __construct(DriverInterface $driver) {
         $this->driver = $driver;
+        $this->logger = new DatabaseLogger($this);
+        $this->cache = new ArrayCache();
     }
 
     /**
@@ -59,6 +85,43 @@ class Connection {
      */
     public function driver(): DriverInterface {
         return $this->driver;
+    }
+
+    /**
+     * Returns the current PSR-3 logger.
+     * If `$logger` is set, sets the new logger and returns the previous
+     * instance.
+     *
+     * @param \Psr\Log\LoggerInterface|null $logger
+     * @return \Psr\Log\LoggerInterface
+     */
+    public function logger(?LoggerInterface $logger = null): LoggerInterface {
+        $prev = $this->logger;
+        $this->logger = $logger ?? $this->logger;
+        return $prev;
+    }
+
+    /**
+     * Returns the current PSR-16 cache.
+     * If `$cache` is set, sets the new cache and returns the previous
+     * instance.
+     * `$cache` can also be an implementation of a PSR-6 cache, in which case
+     * it will be wrapped with a `\Eufony\ORM\Cache\Psr16Adapter` for
+     * interoperability.
+     *
+     * @param \Psr\SimpleCache\CacheInterface|\Psr\Cache\CacheItemPoolInterface|null $cache
+     * @return \Psr\SimpleCache\CacheInterface
+     */
+    public function cache(CacheInterface|CacheItemPoolInterface|null $cache = null): CacheInterface {
+        $prev = $this->cache;
+
+        // Wrap PSR-6 caches in a PSR-16 adapter
+        if ($cache instanceof CacheItemPoolInterface && !($cache instanceof CacheInterface)) {
+            $cache = new Psr16Adapter($cache);
+        }
+
+        $this->cache = $cache ?? $this->cache;
+        return $prev;
     }
 
     /**
@@ -110,10 +173,6 @@ class Connection {
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
     public function directQuery(string $query, array $context = [], int|DateInterval $ttl = 1): array {
-        // Fetch logging and caching implementations
-        $logger = ORM::logger();
-        $cache = ORM::cache();
-
         // Determine if query mutates data in the database depending first keyword
         // TODO: This assumes query is written in SQL
         $is_mutation = preg_match("/^SELECT/", $query) !== 1;
@@ -126,10 +185,10 @@ class Connection {
             // Sorting the context array ensures predictability when hashing
             asort($context);
             $cache_key = hash("sha256", $query . implode("|", $context));
-            $cache_result = $cache->get($cache_key);
+            $cache_result = $this->cache->get($cache_key);
 
             if ($cache_result !== null) {
-                $logger->debug("Query cache hit: $query");
+                $this->logger->debug("Query cache hit: $query");
                 return $cache_result;
             }
         }
@@ -140,7 +199,7 @@ class Connection {
         } catch (InvalidArgumentException | QueryException $e) {
             // Log error for query exceptions
             if ($e instanceof QueryException) {
-                $logger->error("Query failed: $query", context: ["exception" => $e]);
+                $this->logger->error("Query failed: $query", context: ["exception" => $e]);
             }
 
             throw $e;
@@ -148,19 +207,19 @@ class Connection {
 
         if ($is_mutation === true) {
             // Log notice for write operations
-            $logger->notice("Query write op: $query");
+            $this->logger->notice("Query write op: $query");
 
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
-            $cache->clear();
-            $logger->debug("Clear cache");
+            $this->cache->clear();
+            $this->logger->debug("Clear cache");
         } else {
             // Log info for read operations
-            $logger->info("Query read op: $query");
+            $this->logger->info("Query read op: $query");
 
             // Cache result
-            $cache->set($cache_key, $query_result, ttl: $ttl);
-            $logger->debug("Query cached result: $query");
+            $this->cache->set($cache_key, $query_result, ttl: $ttl);
+            $this->logger->debug("Query cached result: $query");
         }
 
         // Return result
@@ -182,16 +241,13 @@ class Connection {
      * @param callable $callback
      */
     public function transactional(callable $callback): void {
-        // Fetch logging implementation
-        $logger = ORM::logger();
-
         // Check for nested transactions
         // Only the root transaction issues calls to begin transactions, commits, and rollbacks
         $is_root_transaction = !$this->driver->inTransaction();
 
         if ($is_root_transaction) {
             // Start transaction
-            $logger->debug("Start transaction");
+            $this->logger->debug("Start transaction");
             $this->driver->beginTransaction();
         }
 
@@ -202,7 +258,7 @@ class Connection {
             if ($is_root_transaction) {
                 // Transaction failed, roll back
                 $this->driver->rollback();
-                $logger->error("Transaction failed, roll back", context: ["exception" => $e]);
+                $this->logger->error("Transaction failed, roll back", context: ["exception" => $e]);
             }
 
             // Propagate error
@@ -212,7 +268,7 @@ class Connection {
         if ($is_root_transaction) {
             // Transaction didn't throw errors, commit to database
             $this->driver->commit();
-            $logger->debug("Commit transaction");
+            $this->logger->debug("Commit transaction");
         }
     }
 
