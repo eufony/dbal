@@ -79,8 +79,8 @@ interface DriverInterface {
      * `previous` parameter in the exception constructor.
      *
      * @param string $query
-     * @param array $context
-     * @return array<array<mixed>>
+     * @param mixed[] $context
+     * @return mixed[][]
      */
     public function execute(string $query, array $context): array;
 

@@ -166,9 +166,9 @@ class Connection {
      * Throws a `\Eufony\ORM\QueryException` on failure.
      *
      * @param string $query
-     * @param array<mixed> $context
+     * @param mixed[] $context
      * @param int|\DateInterval $ttl
-     * @return array<array<mixed>>
+     * @return mixed[][]
      *
      * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */

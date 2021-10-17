@@ -113,8 +113,8 @@ trait LoggerTrait {
      * [$l1, $l2] = $this->validateLevels($l1, $l2);
      * ```
      *
-     * @param array<string> $levels
-     * @return array<string>
+     * @param string[] $levels
+     * @return string[]
      */
     private function validateLevels(...$levels): array {
         $validated = [];
@@ -156,8 +156,8 @@ trait LoggerTrait {
      *
      * @param string $level
      * @param string|\Stringable $message
-     * @param array<mixed> $context
-     * @return array
+     * @param mixed[] $context
+     * @return mixed[]
      */
     private function validateParams($level, $message, array $context = []): array {
         // Ensure log message can be typecast to string
@@ -191,7 +191,7 @@ trait LoggerTrait {
      * ```
      *
      * @param string $message
-     * @param array $context
+     * @param mixed[] $context
      * @return string
      */
     private function interpolate(string $message, array $context = []): string {
