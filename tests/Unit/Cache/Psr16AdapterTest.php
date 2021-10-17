@@ -7,6 +7,9 @@ use Eufony\ORM\Cache\Psr16Adapter;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * Unit tests for `\Eufony\ORM\Cache\Psr16Adapter`.
+ */
 class Psr16AdapterTest extends AbstractCacheTest {
 
     /**
