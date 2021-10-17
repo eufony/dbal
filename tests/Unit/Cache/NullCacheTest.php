@@ -6,6 +6,9 @@ use DateInterval;
 use Eufony\ORM\Cache\NullCache;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * Unit tests for `\Eufony\ORM\Cache\NullCache`.
+ */
 class NullCacheTest extends AbstractCacheTest {
 
     /** @inheritdoc */
