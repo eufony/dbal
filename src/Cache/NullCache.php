@@ -32,6 +32,7 @@ class NullCache implements CacheInterface {
 
     /**
      * Class constructor.
+     * Sets up a "black-hole" cache implementation.
      */
     public function __construct() {
     }
@@ -45,6 +46,7 @@ class NullCache implements CacheInterface {
     /** @inheritdoc */
     public function set($key, $value, $ttl = null): bool {
         $this->validateKey($key);
+        $this->validateTtl($ttl);
         return false;
     }
 
@@ -61,34 +63,21 @@ class NullCache implements CacheInterface {
 
     /** @inheritdoc */
     public function getMultiple($keys, $default = null): array {
-        $keys = $this->validateIterable($keys);
-
-        foreach ($keys as $value) {
-            $this->validateKey($value);
-        }
-
+        $keys = $this->validateKeys($keys);
         return array_fill_keys($keys, $default);
     }
 
     /** @inheritdoc */
     public function setMultiple($values, $ttl = null): bool {
         $values = $this->validateIterable($values);
-
-        foreach (array_keys($values) as $key) {
-            $this->validateKey($key);
-        }
-
+        $this->validateKeys(array_keys($values));
+        $this->validateTtl($ttl);
         return false;
     }
 
     /** @inheritdoc */
     public function deleteMultiple($keys): bool {
-        $keys = $this->validateIterable($keys);
-
-        foreach ($keys as $value) {
-            $this->validateKey($value);
-        }
-
+        $this->validateKeys($keys);
         return false;
     }
 
