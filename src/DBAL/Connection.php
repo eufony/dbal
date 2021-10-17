@@ -23,12 +23,10 @@ use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Query\Query;
 use Eufony\ORM\Cache\ArrayCache;
-use Eufony\ORM\Cache\Psr16Adapter;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\Log\DatabaseLogger;
 use Eufony\ORM\QueryException;
 use Eufony\ORM\TransactionException;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Throwable;
@@ -105,21 +103,16 @@ class Connection {
      * Returns the current PSR-16 cache.
      * If `$cache` is set, sets the new cache and returns the previous
      * instance.
-     * `$cache` can also be an implementation of a PSR-6 cache, in which case
-     * it will be wrapped with a `\Eufony\ORM\Cache\Psr16Adapter` for
-     * interoperability.
      *
-     * @param \Psr\SimpleCache\CacheInterface|\Psr\Cache\CacheItemPoolInterface|null $cache
+     * **Tip**: If your caching implementation only supports the PSR-6
+     * standards, and not the PSR-16 standards, you can wrap it in a
+     * `\Eufony\ORM\Cache\Psr16Adapter` for easy interoperability.
+     *
+     * @param \Psr\SimpleCache\CacheInterface|null $cache
      * @return \Psr\SimpleCache\CacheInterface
      */
-    public function cache(CacheInterface|CacheItemPoolInterface|null $cache = null): CacheInterface {
+    public function cache(?CacheInterface $cache = null): CacheInterface {
         $prev = $this->cache;
-
-        // Wrap PSR-6 caches in a PSR-16 adapter
-        if ($cache instanceof CacheItemPoolInterface && !($cache instanceof CacheInterface)) {
-            $cache = new Psr16Adapter($cache);
-        }
-
         $this->cache = $cache ?? $this->cache;
         return $prev;
     }
@@ -137,9 +130,9 @@ class Connection {
      *
      * Throws a `\Eufony\ORM\QueryException` on failure.
      *
-     * @param Query $query
-     * @param int|DateInterval $ttl
-     * @return \mixed[][]
+     * @param \Eufony\DBAL\Query\Query $query
+     * @param int|\DateInterval $ttl
+     * @return mixed[][]
      */
     public function query(Query $query, int|DateInterval $ttl = 1): array {
         // Generate the query string
@@ -169,8 +162,6 @@ class Connection {
      * @param mixed[] $context
      * @param int|\DateInterval $ttl
      * @return mixed[][]
-     *
-     * @see \Eufony\DBAL\Driver\DriverInterface::execute()
      */
     public function directQuery(string $query, array $context = [], int|DateInterval $ttl = 1): array {
         // Determine if query mutates data in the database depending first keyword

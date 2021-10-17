@@ -22,8 +22,8 @@ namespace Eufony\ORM\Cache;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Provides a caching implementation using a PHP array, storing everything in
- * memory.
+ * Provides a caching implementation using a PHP array.
+ * The cache items are stored in memory until the end of the process.
  */
 class ArrayCache implements CacheInterface {
 
@@ -32,14 +32,14 @@ class ArrayCache implements CacheInterface {
     /**
      * The PHP array used to store the cache items.
      *
-     * @var array $cache
+     * @var mixed[] $cache
      */
     private array $cache;
 
     /**
      * Stores the timestamps of when cache items should expire.
      *
-     * @var array $expirations
+     * @var int[] $expirations
      */
     private array $expirations;
 

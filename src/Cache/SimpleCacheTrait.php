@@ -75,7 +75,7 @@ trait SimpleCacheTrait {
      * $keys = $this->validateKeys($keys);
      * ```
      *
-     * @param $keys
+     * @param iterable $keys
      * @return string[]
      */
     private function validateKeys($keys): array {
@@ -118,15 +118,15 @@ trait SimpleCacheTrait {
 
     /**
      * Validates the TTL parameter passed to the various cache methods.
-     * Returns the timestamp of the expiration, or null if cache item doesn't
-     * expire for easy processing.
+     * Returns the UNIX timestamp of the expiration, or null if cache item
+     * doesn't expire, for easy processing.
      *
      * Example usage:
      * ```
      * $ttl = $this->validateTtl($ttl);
      * ```
      *
-     * @param $ttl
+     * @param int|\DateInterval $ttl
      * @return int|null
      */
     private function validateTtl($ttl): int|null {

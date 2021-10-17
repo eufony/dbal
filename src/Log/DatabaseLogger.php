@@ -29,9 +29,9 @@ use Psr\Log\NullLogger;
 
 /**
  * Provides a logging implementation for logging into a database directly.
- * The messages are logged into the `__log` table in the `default` database;
- * along with the log level, current timestamp, and, if one occurred, the
- * exception.
+ * The messages are logged into the `__log` table in a given database
+ * connection; along with the log level, current timestamp, and, if one
+ * occurred, the exception.
  */
 class DatabaseLogger extends AbstractLogger {
 

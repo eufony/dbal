@@ -50,7 +50,7 @@ trait LoggerTrait {
      * Returns the current minimum log level.
      * If `$level` is set, sets the new minimum and returns the previous value.
      *
-     * **Notice:** This method is not a part of the PSR-3 standard.
+     * **Notice:** This method is not a part of the PSR-3 standards.
      *
      * @param string|null $level
      * @return string
@@ -65,7 +65,7 @@ trait LoggerTrait {
      * Returns the current maximum log level.
      * If `$level` is set, sets the new maximum and returns the previous value.
      *
-     * **Notice:** This method is not a part of the PSR-3 standard.
+     * **Notice:** This method is not a part of the PSR-3 standards.
      *
      * @param string|null $level
      * @return string
@@ -86,11 +86,11 @@ trait LoggerTrait {
      * ```
      *
      * @param string $level
-     * @param string $minLevel Defaults to the lowest level
-     * @param string $maxLevel Defaults to the highest level
+     * @param string $minLevel
+     * @param string $maxLevel
      * @return bool
      */
-    private function compareLevels($level, $minLevel = LogLevel::DEBUG, $maxLevel = LogLevel::EMERGENCY): bool {
+    private function compareLevels($level, $minLevel, $maxLevel): bool {
         // Validate log levels
         [$minLevel, $level, $maxLevel] = $this->validateLevels($minLevel, $level, $maxLevel);
 
@@ -146,7 +146,7 @@ trait LoggerTrait {
     }
 
     /**
-     * Validates parameters passed to the `LoggerInterface::log()` method.
+     * Validates the parameters passed to the `LoggerInterface::log()` method.
      * Returns an array of the validated parameters for easy processing.
      *
      * Example usage:
@@ -182,7 +182,8 @@ trait LoggerTrait {
     }
 
     /**
-     * Interpolates context values into the message placeholders.
+     * Interpolates context values into the corresponding placeholders in the
+     * message.
      * Returns the interpolated message for easy processing.
      *
      * Example usage:
