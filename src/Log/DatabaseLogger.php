@@ -19,10 +19,10 @@
 
 namespace Eufony\ORM\Log;
 
+use Eufony\DBAL\Connection;
 use Eufony\DBAL\Query\Insert;
 use Eufony\DBAL\Query\Keyword\Op;
 use Eufony\DBAL\Query\Select;
-use Eufony\ORM\ORM;
 use Eufony\ORM\QueryException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
@@ -38,10 +38,34 @@ class DatabaseLogger extends AbstractLogger {
     use LoggerTrait;
 
     /**
-     * Class constructor.
-     * Creates a new logger that logs into the `default` database.
+     * The database connection to log into.
+     *
+     * @var \Eufony\DBAL\Connection $database
      */
-    public function __construct() {
+    public Connection $database;
+
+    /**
+     * Class constructor.
+     * Creates a new logger that logs into the given database.
+     *
+     * @param \Eufony\DBAL\Connection $database
+     */
+    public function __construct(Connection $database) {
+        $this->database = $database;
+    }
+
+    /**
+     * Returns the database connection to be logged into.
+     * If `$database` is set, sets the new connection and returns the previous
+     * instance.
+     *
+     * @param \Eufony\DBAL\Connection|null $database
+     * @return \Eufony\DBAL\Connection
+     */
+    public function database(?Connection $database = null): Connection {
+        $prev = $this->database;
+        $this->database = $database ?? $this->database;
+        return $prev;
     }
 
     /** @inheritdoc */
@@ -50,11 +74,8 @@ class DatabaseLogger extends AbstractLogger {
         if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
         $message = $this->interpolate($message, $context);
 
-        // Fetch default database connection
-        $database = ORM::connection();
-
         // Temporarily turn off logging (creates an infinite loop otherwise)
-        $logger = ORM::logger(new NullLogger());
+        $logger = $this->database->logger(new NullLogger());
 
         // Ensure log table exists
         // TODO: Use query builder for this.
@@ -71,14 +92,14 @@ class DatabaseLogger extends AbstractLogger {
             );
             SQL;
 
-            $database->directQuery($sql);
+            $this->database->directQuery($sql);
         } catch (QueryException) {
             // table already exists, silently ignore
         }
 
         // Fetch ID from table
         // TODO: Deal with array keys when using aggregate functions.
-        $result = $database->query(Select::from("__log")->fields(Op::max("id"))->limit(1));
+        $result = $this->database->query(Select::from("__log")->fields(Op::max("id"))->limit(1));
         $id = !empty($result) ? $result[0]['MAX("id")'] + 1 : 1;
 
         $values = [
@@ -91,10 +112,10 @@ class DatabaseLogger extends AbstractLogger {
         // If an exception was passed, add it to the values array
         if (array_key_exists("exception", $context)) $values['exception'] = $context['exception'];
 
-        $database->query(Insert::into("__log")->values($values));
+        $this->database->query(Insert::into("__log")->values($values));
 
         // Restore previous logger
-        ORM::logger($logger);
+        $this->database->logger($logger);
     }
 
 }
