@@ -22,7 +22,7 @@ abstract class AbstractCacheTest extends TestCase {
     /**
      * Returns a new instance of a PSR-16 cache implementation to test.
      *
-     * @return CacheInterface
+     * @return \Psr\SimpleCache\CacheInterface
      */
     abstract public function getCache(): CacheInterface;
 
@@ -84,7 +84,7 @@ abstract class AbstractCacheTest extends TestCase {
     }
 
     /** @inheritdoc */
-    public function setUp(): void {
+    protected function setUp(): void {
         $this->cache = $this->getCache();
     }
 
@@ -138,6 +138,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGet
+     * @group slow
      */
     public function testSetExpireInt() {
         $this->cache->set('foo', 'bar', 1);
@@ -150,6 +151,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGet
+     * @group slow
      */
     public function testSetExpireDateInterval() {
         $this->cache->set('foo', 'bar', new DateInterval('PT1S'));
@@ -222,6 +224,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGetMultiple
+     * @group slow
      */
     public function testSetMultipleExpireInt() {
         $values = [
@@ -285,6 +288,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGetMultiple
+     * @group slow
      */
     public function testSetMultipleExpireDateIntervalExpired() {
         $values = [
@@ -403,6 +407,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGet
+     * @group slow
      */
     public function testHasExpire() {
         $this->cache->set('foo', 'bar', 1);
@@ -415,6 +420,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * @depends testSetGet
+     * @group slow
      */
     public function testHasExpireDateInterval() {
         $this->cache->set('foo', 'bar', new DateInterval('PT1S'));
