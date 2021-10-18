@@ -21,6 +21,7 @@ namespace Eufony\ORM\Inflection;
 
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
+use Doctrine\Inflector\Language;
 
 /**
  * Provides an inflection implementation using the Doctrine inflector.
@@ -38,10 +39,12 @@ class DoctrineInflector implements InflectorInterface {
     /**
      * Class constructor.
      * Initializes the Doctrine Inflector with the default setup and for the
-     * English language.
+     * given language.
+     *
+     * @param string $language
      */
-    public function __construct() {
-        $this->inflector = InflectorFactory::create()->build();
+    public function __construct(string $language = Language::ENGLISH) {
+        $this->inflector = InflectorFactory::createForLanguage($language)->build();
     }
 
     /**
