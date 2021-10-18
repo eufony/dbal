@@ -22,17 +22,17 @@ namespace Eufony\DBAL\Driver;
 /**
  * Provides a database driver implementation for SQLite using the PDO
  * extension.
- * Currently supports SQLite version 3.
- *
- * **Notice:** This class requires `ext-pdo` as well as `ext-pdo_sqlite` to be
- * installed and enabled.
  */
-class SQLiteDriver extends AnsiSqlDriver {
+class SQLiteDriver extends AnsiSQLDriver {
 
     /**
      * Class constructor.
-     * Creates a new connection to the SQLite database with the file path
-     * `$path`.
+     * Creates a new connection to the database using the PHP PDO_SQLite
+     * extension.
+     *
+     * Requires the file path of the database file to establish the connection.
+     * If the path is `:memory:`, an in-memory database that will be destroyed
+     * at the end of the process will be created.
      *
      * @param string $path
      */

@@ -25,16 +25,17 @@ use PDO;
 use PDOException;
 
 /**
- * Provides common functionality for implementing database drivers using the
- * PHP PDO extension.
+ * Provides an abstract database driver implementation that other drivers can
+ * inherit from.
  *
- * To use this trait, declare it in a `use` statement and call the `connect()`
- * method in the class constructor.
+ * Uses the PHP PDO extension to implement most of the methods in the
+ * `DriverInterface`.
+ * Subclasses of this class only need to implement the `generate()` method.
  *
- * **Notice:** Driver implementations using this trait will require `ext-pdo`
- * as well as their specific PDO drivers to be installed and enabled.
+ * Inherits from the `AbstractDriver` class to delegate the `generate()` method
+ * correspond methods for each of the query builders.
  */
-trait PDODriverTrait {
+abstract class AbstractPDODriver extends AbstractDriver {
 
     /**
      * The PDO object used internally to interface with SQL databases.
@@ -42,15 +43,6 @@ trait PDODriverTrait {
      * @var \PDO $pdo
      */
     private PDO $pdo;
-
-    /**
-     * Returns the internal PDO object.
-     *
-     * @return \PDO
-     */
-    public function pdo(): PDO {
-        return $this->pdo;
-    }
 
     /**
      * Creates a new connection to the database.
@@ -64,7 +56,8 @@ trait PDODriverTrait {
      *
      * @see https://www.php.net/manual/en/pdo.construct.php
      */
-    public function connect(string $dsn, ?string $user = null, ?string $password = null) {
+    public function __construct(string $dsn, ?string $user = null, ?string $password = null) {
+        parent::__construct();
         $this->pdo = new PDO($dsn, $user, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
