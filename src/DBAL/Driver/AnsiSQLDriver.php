@@ -29,71 +29,30 @@ use Eufony\DBAL\Query\Select;
 use Eufony\DBAL\Query\Update;
 use Eufony\ORM\InvalidArgumentException;
 
-class AnsiSqlDriver extends AbstractDriver {
-
-    use PDODriverTrait;
-
-    protected static string $fieldQuote = "\"";
-
-    protected static string $asc = "ASC";
-
-    protected static string $desc = "DESC";
-
-    protected static string $and = "AND";
-
-    protected static string $or = "OR";
-
-    protected static string $not = "NOT";
-
-    protected static string $lt = ">";
-
-    protected static string $le = ">=";
-
-    protected static string $eq = "=";
-
-    protected static string $ge = "<=";
-
-    protected static string $gt = "<";
-
-    protected static string $ne = "!=";
-
-    protected static string $like = "LIKE";
-
-    protected static string $in = "IN";
-
-    protected static string $exists = "EXISTS";
-
-    /**
-     * Class constructor.
-     * Creates a new connection to the database using the PHP PDO extension.
-     *
-     * The given parameters are passed directly to the underlying PDO object.
-     * Refer to the official PDO documentation for more details.
-     *
-     * @param string $dsn
-     * @param string|null $user
-     * @param string|null $password
-     *
-     * @see https://www.php.net/manual/en/pdo.construct.php
-     */
-    public function __construct(string $dsn, ?string $user = null, ?string $password = null) {
-        parent::__construct();
-        $this->connect($dsn, $user, $password);
-    }
+/**
+ * Provides a database driver implementation for database engines that more or
+ * less comply with the ANSI SQL standards.
+ * However, database engines usually never comply with the complete standards,
+ * which might lead to some unpredictability and instability in obscure ways.
+ * Refer to the "SQL compliance" Wikipedia page for a comparison between
+ * different SQL engines.
+ *
+ * @see https://en.wikipedia.org/wiki/SQL_compliance
+ */
+class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function select(Select $query): string {
-        $q = static::$fieldQuote;
         $sql = "SELECT ";
 
         if (!isset($query->fields) || $query->fields === ["*"]) {
             $sql .= "*";
         } else {
-            $fields = array_map(fn($f) => $f instanceof Op ? $this->operation($f) : "$q$f$q", $query->fields);
+            $fields = array_map(fn($f) => $f instanceof Op ? $this->operation($f) : "\"$f\"", $query->fields);
             $sql .= implode(",", $fields);
         }
 
-        $sql .= " FROM " . $q . implode($q . "," . $q, $query->tables) . $q;
+        $sql .= " FROM " . implode(",", array_map(fn($table) => "\"$table\"", $query->tables));
 
         if (isset($query->where)) {
             $where = $this->expression($query->where);
@@ -103,10 +62,11 @@ class AnsiSqlDriver extends AbstractDriver {
         if (isset($query->order)) {
             $keys = array_keys($query->order);
             $values = array_values($query->order);
-            $order = array_map(fn($f, $t) => "$q$f$q " . ($t === "asc" ? static::$asc : static::$desc), $keys, $values);
+            $order = array_map(fn($f, $t) => "\"$f\" " . ($t === "asc" ? "ASC" : "DESC"), $keys, $values);
             $sql .= " ORDER BY " . implode(",", $order);
         }
 
+        // TODO: No LIMIT or OFFSET support in ANSI SQL.
         if (isset($query->limit)) {
             $sql .= " LIMIT " . $query->limit;
 
@@ -120,11 +80,10 @@ class AnsiSqlDriver extends AbstractDriver {
 
     /** @inheritdoc */
     protected function insert(Insert $query): string {
-        $q = static::$fieldQuote;
-        $sql = "INSERT INTO " . $q . $query->table . $q;
+        $sql = "INSERT INTO \"" . $query->table . "\"";
 
         if (isset($query->values)) {
-            $fields = implode(",", array_map(fn($key) => "$q$key$q", array_keys($query->values)));
+            $fields = implode(",", array_map(fn($key) => "\"$key\"", array_keys($query->values)));
             $values = implode(",", array_values($query->values));
             $sql .= " ($fields) VALUES ($values)";
         }
@@ -134,13 +93,12 @@ class AnsiSqlDriver extends AbstractDriver {
 
     /** @inheritdoc */
     protected function update(Update $query): string {
-        $q = static::$fieldQuote;
-        $sql = "UPDATE " . implode(",", array_map(fn($t) => "$q$t$q", $query->tables));
+        $sql = "UPDATE " . implode(",", array_map(fn($t) => "\"$t\"", $query->tables));
 
         if (isset($query->values)) {
             $keys = array_keys($query->values);
             $values = array_values($query->values);
-            $values = implode(", ", array_map(fn($key, $value) => "$q$key$q=$value", $keys, $values));
+            $values = implode(", ", array_map(fn($key, $value) => "\"$key\"=$value", $keys, $values));
             $sql .= " SET $values";
         }
 
@@ -154,8 +112,7 @@ class AnsiSqlDriver extends AbstractDriver {
 
     /** @inheritdoc */
     protected function delete(Delete $query): string {
-        $q = static::$fieldQuote;
-        $sql = "DELETE FROM " . implode(",", array_map(fn($t) => "$q$t$q", $query->tables));
+        $sql = "DELETE FROM " . implode(",", array_map(fn($t) => "\"$t\"", $query->tables));
 
         if (isset($query->where)) {
             $where = $this->expression($query->where);
@@ -174,17 +131,16 @@ class AnsiSqlDriver extends AbstractDriver {
     }
 
     protected function expression(Ex $ex): string {
-        $q = static::$fieldQuote;
-
         switch ($ex->type) {
             case "and":
                 $inner = array_map(fn($ex) => $this->expression($ex), $ex->props['ex']);
-                return "(" . implode(") " . static::$and . " (", $inner) . ")";
+                return implode(" AND ", array_map(fn($ex) => "($ex)", $inner));
             case "or":
                 $inner = array_map(fn($ex) => $this->expression($ex), $ex->props['ex']);
-                return "(" . implode(") " . static::$or . " (", $inner) . ")";
+                return implode(" OR ", array_map(fn($ex) => "($ex)", $inner));
             case "not":
-                return static::$not . " (" . $this->expression($ex->props['ex']) . ")";
+                $expression = $this->expression($ex->props['ex']);
+                return "NOT ($expression)";
             case "lt":
             case "le":
             case "eq":
@@ -192,21 +148,32 @@ class AnsiSqlDriver extends AbstractDriver {
             case "gt":
             case "ne":
             case "like":
-                $type = $ex->type;
-                return $q . $ex->props['field'] . $q . static::$$type . $ex->props['value'];
+                $field = $ex->props['field'];
+                $value = $ex->props['value'];
+                $operator = match ($ex->type) {
+                    "lt" => ">",
+                    "le" => ">=",
+                    "eq" => "=",
+                    "ge" => "<=",
+                    "gt" => "<",
+                    "ne" => "!=",
+                    "like" => "LIKE"
+                };
+
+                return "\"$field\"$operator$value";
             case "in":
                 $values = implode(",", $ex->props['value']);
-                return $q . $ex->props['field'] . $q . " " . static::$in . " ($values)";
+                return "\"" . $ex->props['field'] . "\" IN ($values)";
             case "exists":
-                return static::$exists . " (" . $this->generate($ex->props["query"]) . ")";
+                $query = $this->generate($ex->props["query"]);
+                return "EXISTS ($query)";
             default:
                 throw new InvalidArgumentException("Unknown expression type");
         }
     }
 
     protected function operation(Op $op): string {
-        $q = static::$fieldQuote;
-
+        $field = $op->field;
         $operation = match ($op->type) {
             "min" => "MIN",
             "max" => "MAX",
@@ -215,7 +182,9 @@ class AnsiSqlDriver extends AbstractDriver {
             default => throw new InvalidArgumentException("Unknown operation type")
         };
 
-        $field = $op->field === "*" ? $op->field : $q . $op->field . $q;
+        if ($field !== "*") {
+            $field = "\"$field\"";
+        }
 
         return "$operation($field)";
     }

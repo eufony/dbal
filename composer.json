@@ -13,6 +13,7 @@
   "minimum-stability": "stable",
   "require": {
     "php": "^8.0",
+    "ext-pdo": "*",
     "doctrine/inflector": "^2.0",
     "psr/cache": "^1.0 || ^2.0 || ^3.0",
     "psr/log": "^1.0 || ^2.0 || ^3.0",
@@ -25,7 +26,6 @@
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
-    "ext-pdo": "Required by all current officially supported database drivers.",
     "monolog/monolog": "Well-maintained and popular logging library.",
     "psr/cache-implementation": "Virtual package for PSR-6 caching implementations.",
     "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
