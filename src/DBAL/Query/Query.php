@@ -39,10 +39,10 @@ abstract class Query {
     /**
      * Executes this query in the database connection.
      *
-     * @param int|\DateInterval $ttl
+     * @param int|\DateInterval|null $ttl
      * @return mixed[][]
      */
-    public function execute(int|DateInterval $ttl = 1): array {
+    public function execute(int|DateInterval|null $ttl = 1): array {
         $connection = ORM::connection();
         $query_string = $connection->driver()->generate($this);
         return $connection->query($query_string, $this->context, $ttl);

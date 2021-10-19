@@ -129,20 +129,21 @@ class Connection {
      * The cached result's expiration can be set using the `$ttl` parameter;
      * either as a `DateInterval` object or an integer number of minutes.
      * Defaults to 1 minute.
+     * If `$ttl` is set to null, the query result will not be cached.
      *
      * Throws a `\Eufony\ORM\QueryException` on failure.
      *
      * @param string $query
      * @param mixed[] $context
-     * @param int|\DateInterval $ttl
+     * @param int|\DateInterval|null $ttl
      * @return mixed[][]
      */
-    public function query(string $query, array $context = [], int|DateInterval $ttl = 1): array {
-        // Determine if query mutates data in the database depending first keyword
+    public function query(string $query, array $context = [], int|DateInterval|null $ttl = 1): array {
+        // Determine if query mutates data in the database depending on the first keyword
         $is_mutation = preg_match("/^SELECT/", $query) !== 1;
 
         // For read-only queries, check if the result is cached first
-        if ($is_mutation === false) {
+        if ($is_mutation === false && $ttl !== null) {
             // Hashing the query along with the context array ensures the cache
             // key matches PSR-16 standards on the valid character set and
             // maximum supported length
@@ -169,7 +170,7 @@ class Connection {
             throw $e;
         }
 
-        if ($is_mutation === false) {
+        if ($is_mutation === false && $ttl !== null) {
             // Log info for read operations
             $this->logger->info("Query read op: $query");
 
