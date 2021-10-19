@@ -17,24 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\ORM\Schema;
 
-class Create extends Query {
+class Schema {
 
-    public string $table;
-    public array $fields;
-
-    public static function table(string $table): static {
-        return new static($table);
-    }
-
-    private function __construct(string $table) {
-        $this->table = $table;
-    }
-
-    public function fields(array $fields): static {
-        $this->fields = $fields;
-        return $this;
+    public static function tableExists(string $table): bool {
+        return true;
     }
 
 }

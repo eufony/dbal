@@ -37,16 +37,15 @@ abstract class Query {
     }
 
     /**
-     * Executes this query in the given database connection.
+     * Executes this query in the database connection.
      *
-     * @param string $key
      * @param int|\DateInterval $ttl
      * @return mixed[][]
      */
-    public function execute(string $key = "default", int|DateInterval $ttl = 1): array {
-        $connection = ORM::connection($key);
+    public function execute(int|DateInterval $ttl = 1): array {
+        $connection = ORM::connection();
         $query_string = $connection->driver()->generate($this);
-        return ORM::connection($key)->query($query_string, $this->context, $ttl);
+        return $connection->query($query_string, $this->context, $ttl);
     }
 
 }
