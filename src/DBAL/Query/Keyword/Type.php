@@ -19,10 +19,14 @@
 
 namespace Eufony\DBAL\Query\Keyword;
 
-class Type {
+use ArrayAccess;
+use Eufony\ORM\BadMethodCallException;
+use Eufony\ORM\OutOfBoundsException;
 
-    public string $type;
-    public array $props;
+class Type implements ArrayAccess {
+
+    protected string $type;
+    protected array $props;
 
     public static function varchar(int $length): static {
         return new static(__FUNCTION__, ["length" => $length]);
@@ -67,6 +71,31 @@ class Type {
     private function __construct(string $type, array $props = []) {
         $this->type = $type;
         $this->props = $props;
+    }
+
+    /** @inheritdoc */
+    public function offsetExists($offset): bool {
+        return property_exists($this, $offset) && isset($this->$offset);
+    }
+
+    /** @inheritdoc */
+    public function offsetGet($offset) {
+        // Ensure property exists
+        if (!$this->offsetExists($offset)) {
+            throw new OutOfBoundsException("Unknown query builder property");
+        }
+
+        return $this->$offset;
+    }
+
+    /** @inheritdoc */
+    public function offsetSet($offset, $value) {
+        throw new BadMethodCallException("Properties is read-only");
+    }
+
+    /** @inheritdoc */
+    public function offsetUnset($offset) {
+        throw new BadMethodCallException("Properties is read-only");
     }
 
 }

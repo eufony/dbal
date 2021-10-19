@@ -25,7 +25,7 @@ class Insert extends Query {
 
     use ValuesClauseTrait;
 
-    public string $table;
+    protected string $table;
 
     public static function into(string $table): static {
         return new static($table);

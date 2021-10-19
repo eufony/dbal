@@ -19,8 +19,11 @@
 
 namespace Eufony\DBAL\Query;
 
+use ArrayAccess;
 use DateInterval;
+use Eufony\ORM\BadMethodCallException;
 use Eufony\ORM\ORM;
+use Eufony\ORM\OutOfBoundsException;
 
 /**
  * Provides abstraction away from vendor-specific query language syntax using
@@ -28,9 +31,9 @@ use Eufony\ORM\ORM;
  * The query builder representation can than be translated by the database
  * driver in use.
  */
-abstract class Query {
+abstract class Query implements ArrayAccess {
 
-    public array $context = [];
+    protected array $context = [];
 
     public function __clone(): void {
         unserialize(serialize($this));
@@ -45,7 +48,32 @@ abstract class Query {
     public function execute(int|DateInterval|null $ttl = 1): array {
         $connection = ORM::connection();
         $query_string = $connection->driver()->generate($this);
-        return $connection->query($query_string, $this->context, $ttl);
+        return $connection->query($query_string, $this['context'], $ttl);
+    }
+
+    /** @inheritdoc */
+    public function offsetExists($offset): bool {
+        return property_exists($this, $offset) && isset($this->$offset);
+    }
+
+    /** @inheritdoc */
+    public function offsetGet($offset) {
+        // Ensure property exists
+        if (!$this->offsetExists($offset)) {
+            throw new OutOfBoundsException("Unknown query builder property");
+        }
+
+        return $this->$offset;
+    }
+
+    /** @inheritdoc */
+    public function offsetSet($offset, $value) {
+        throw new BadMethodCallException("Query builder properties are read-only");
+    }
+
+    /** @inheritdoc */
+    public function offsetUnset($offset) {
+        throw new BadMethodCallException("Query builder properties are read-only");
     }
 
 }

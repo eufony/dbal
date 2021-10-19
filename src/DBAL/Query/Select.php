@@ -29,9 +29,9 @@ class Select extends Query {
     use OrderByClauseTrait;
     use WhereClauseTrait;
 
-    public array $tables;
-    public array $fields;
-    public string $function;
+    protected array $tables;
+    protected array $fields;
+    protected string $function;
 
     public static function from(string ...$tables): static {
         return new static($tables);
