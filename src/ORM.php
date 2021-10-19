@@ -31,11 +31,11 @@ use Eufony\ORM\Inflection\InflectorInterface;
 class ORM {
 
     /**
-     * Stores active instances of database connections.
+     * Stores the active instance of the database connection.
      *
-     * @var \Eufony\DBAL\Connection[] $connections
+     * @var \Eufony\DBAL\Connection $connection
      */
-    private static array $connections = [];
+    private static Connection $connection;
 
     /**
      * An implementation of `InflectionInterface`.
@@ -46,28 +46,17 @@ class ORM {
     private static InflectorInterface $inflector;
 
     /**
-     * Returns an active instance of a database connection.
-     * If no key is specified, the `default` connection is returned.
+     * Returns the active instance of the database connection.
      *
-     * @param string $key
      * @return \Eufony\DBAL\Connection
      */
-    public static function connection(string $key = "default"): Connection {
+    public static function connection(): Connection {
         // Ensure connection exists
-        if (!array_key_exists($key, static::$connections)) {
-            throw new InvalidArgumentException("Unknown database connection '$key'");
+        if (!isset(static::$connection)) {
+            throw new BadMethodCallException("No active database connection");
         }
 
-        return static::$connections[$key];
-    }
-
-    /**
-     * Returns all active instances of database connections.
-     *
-     * @return \Eufony\DBAL\Connection[]
-     */
-    public static function connections(): array {
-        return static::$connections;
+        return static::$connection;
     }
 
     /**
@@ -85,13 +74,7 @@ class ORM {
     }
 
     /**
-     * Initializes database connections from the given drivers.
-     * If only a single driver is supplied, it will be treated as the `default`
-     * connection.
-     * If an array of drivers is supplied, each key-value pair will be treated
-     * as a separate connection.
-     * The keys can later be used as a reference to the active connections
-     * using the `ORM::connection()` method.
+     * Initializes the database connection from the given driver.
      *
      * By default, sets up a `\Eufony\ORM\Inflection\DoctrineInflector` for
      * inflection.
@@ -99,26 +82,19 @@ class ORM {
      * Throws a `\Eufony\ORM\InvalidArgumentException` if an attempt to
      * establish a duplicate connection occurs.
      *
-     * @param \Eufony\DBAL\Driver\DriverInterface|array $drivers
+     * @param \Eufony\DBAL\Driver\DriverInterface $driver
      */
-    public static function init(DriverInterface|array $drivers): void {
-        // If a single driver is passed, it will be treated as the default driver
-        if (!is_array($drivers)) {
-            $drivers = ["default" => $drivers];
+    public static function init(DriverInterface $driver): void {
+        // Ensure connection doesn't exist
+        if (isset(static::$connection)) {
+            throw new BadMethodCallException("Database connection is already active");
         }
 
-        // Initialize database connections with given drivers
-        foreach ($drivers as $key => $driver) {
-            // Ensure connection doesn't exist
-            if (isset(static::$connections[$key])) {
-                throw new InvalidArgumentException("Database connection '$key' is already initialized");
-            }
-
-            static::$connections[$key] = new Connection($driver);
-        }
+        // Initialize database connection
+        static::$connection = new Connection($driver);
 
         // Initialize inflector
-        static::$inflector ??= new DoctrineInflector();
+        static::$inflector = new DoctrineInflector();
     }
 
     /**

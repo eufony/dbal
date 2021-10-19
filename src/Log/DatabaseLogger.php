@@ -20,18 +20,18 @@
 namespace Eufony\ORM\Log;
 
 use Eufony\DBAL\Connection;
+use Eufony\DBAL\Query\Create;
 use Eufony\DBAL\Query\Insert;
-use Eufony\DBAL\Query\Keyword\Op;
-use Eufony\DBAL\Query\Select;
-use Eufony\ORM\QueryException;
+use Eufony\DBAL\Query\Keyword\Type;
+use Eufony\ORM\Schema\Schema;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
 /**
  * Provides a logging implementation for logging into a database directly.
- * The messages are logged into the `__log` table in a given database
- * connection; along with the log level, current timestamp, and, if one
- * occurred, the exception.
+ * The messages are logged into the `__log` table in the database connection;
+ * along with the log level, current timestamp, and, if one occurred, the
+ * exception.
  */
 class DatabaseLogger extends AbstractLogger {
 
@@ -78,41 +78,42 @@ class DatabaseLogger extends AbstractLogger {
         $logger = $this->database->logger(new NullLogger());
 
         // Ensure log table exists
-        // TODO: Use query builder for this.
-        try {
-            $sql = <<< SQL
-            CREATE TABLE __log
-            (
-                id INTEGER NOT NULL
-                    CONSTRAINT __log_pk PRIMARY KEY,
-                time TIMESTAMP NOT NULL,
-                level VARCHAR(9) NOT NULL,
-                message TEXT NOT NULL,
-                exception TEXT DEFAULT NULL
-            );
-            SQL;
+        if (!Schema::tableExists("__log")) {
+            $fields = [
+                "id" => [
+                    "type" => Type::int(),
+                    "nullable" => "false",
+                    "primary_key" => "true",
+                    "auto_increment" => true
+                ],
+                "time" => [
+                    "type" => Type::datetime(),
+                    "nullable" => false
+                ],
+                "level" => [
+                    "type" => Type::varchar(9),
+                    "nullable" => false
+                ],
+                "message" => [
+                    "type" => Type::text(),
+                ],
+                "exception" => [
+                    "type" => Type::text(),
+                    "default" => null
+                ]
+            ];
 
-            $this->database->directQuery($sql);
-        } catch (QueryException) {
-            // table already exists, silently ignore
+            Create::table("__log")->fields($fields)->execute();
         }
 
-        // Fetch ID from table
-        // TODO: Deal with array keys when using aggregate functions.
-        $result = $this->database->query(Select::from("__log")->fields(Op::max("id"))->limit(1));
-        $id = !empty($result) ? $result[0]['MAX("id")'] + 1 : 1;
-
         $values = [
-            "id" => $id,
             "time" => date("Y-m-d H:i:s"),
             "level" => $level,
-            "message" => $message
+            "message" => $message,
+            "exception" => $context['exception'] ?? null
         ];
 
-        // If an exception was passed, add it to the values array
-        if (array_key_exists("exception", $context)) $values['exception'] = $context['exception'];
-
-        $this->database->query(Insert::into("__log")->values($values));
+        Insert::into("__log")->values($values)->execute();
 
         // Restore previous logger
         $this->database->logger($logger);
