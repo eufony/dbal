@@ -24,7 +24,6 @@ use Eufony\DBAL\Query\Delete;
 use Eufony\DBAL\Query\Drop;
 use Eufony\DBAL\Query\Insert;
 use Eufony\DBAL\Query\Keyword\Ex;
-use Eufony\DBAL\Query\Keyword\Op;
 use Eufony\DBAL\Query\Select;
 use Eufony\DBAL\Query\Update;
 use Eufony\ORM\InvalidArgumentException;
@@ -45,12 +44,18 @@ class AnsiSQLDriver extends AbstractPDODriver {
     protected function select(Select $query): string {
         $sql = "SELECT ";
 
-        if (!isset($query->fields) || $query->fields === ["*"]) {
-            $sql .= "*";
-        } else {
-            $fields = array_map(fn($f) => $f instanceof Op ? $this->operation($f) : "\"$f\"", $query->fields);
-            $sql .= implode(",", $fields);
-        }
+        $function = !isset($query->function)
+            ? null
+            : match ($query->function) {
+                "count" => "COUNT",
+                "max" => "MAX",
+                "min" => "MIN",
+                default => throw new InvalidArgumentException("Unknown function type")
+            };
+
+        $fields = isset($query->fields) ? array_map(fn($f) => "\"$f\"", $query->fields) : ["*"];
+        if (isset($function)) $fields = array_map(fn($f) => "$function($f)", $fields);
+        $sql .= implode(",", $fields);
 
         $sql .= " FROM " . implode(",", array_map(fn($table) => "\"$table\"", $query->tables));
 
@@ -124,10 +129,14 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function create(Create $query): string {
+        $sql = "CREATE TABLE ";
+        return $sql;
     }
 
     /** @inheritdoc */
     protected function drop(Drop $query): string {
+        $sql = "DROP TABLE " . implode(",", array_map(fn($t) => "\"$t\"", $query->tables));
+        return $sql;
     }
 
     protected function expression(Ex $ex): string {
@@ -170,23 +179,6 @@ class AnsiSQLDriver extends AbstractPDODriver {
             default:
                 throw new InvalidArgumentException("Unknown expression type");
         }
-    }
-
-    protected function operation(Op $op): string {
-        $field = $op->field;
-        $operation = match ($op->type) {
-            "min" => "MIN",
-            "max" => "MAX",
-            "avg" => "AVG",
-            "count" => "COUNT",
-            default => throw new InvalidArgumentException("Unknown operation type")
-        };
-
-        if ($field !== "*") {
-            $field = "\"$field\"";
-        }
-
-        return "$operation($field)";
     }
 
 }
