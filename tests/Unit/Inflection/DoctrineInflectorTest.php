@@ -13,19 +13,7 @@ class DoctrineInflectorTest extends AbstractInflectorTest {
 
     /** @inheritdoc */
     public function getInflector(): InflectorInterface {
-        // Wrap inflector in anonymous wrapper class to test hard-coded exceptions
-        return new class() extends DoctrineInflector {
-
-            public function wordExceptions(): array {
-                return array_merge(parent::wordExceptions(), ["foo" => "bar"]);
-            }
-
-        };
-    }
-
-    /** @inheritdoc */
-    public function words(): array {
-        return array_merge(parent::words(), [["foo", "bar"]]);
+        return new DoctrineInflector();
     }
 
     public function testInflector() {
