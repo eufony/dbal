@@ -23,7 +23,7 @@ use Eufony\DBAL\Query\Keyword\Ex;
 
 trait WhereClauseTrait {
 
-    public Ex $where;
+    protected Ex $where;
 
     public function where(Ex $expression): static {
         $this->where = $this->extractContext($expression);
@@ -31,13 +31,13 @@ trait WhereClauseTrait {
     }
 
     private function extractContext(Ex $ex): Ex {
-        switch ($ex->type) {
+        switch ($ex['type']) {
             case "and":
             case "or":
-                $ex->props['ex'] = array_map(fn($ex) => $this->extractContext($ex), $ex->props['ex']);
+                $ex['props']['ex'] = array_map(fn($ex) => $this->extractContext($ex), $ex['props']['ex']);
                 return $ex;
             case "not":
-                $ex->props['ex'] = $this->extractContext($ex->props['ex']);
+                $ex['props']['ex'] = $this->extractContext($ex['props']['ex']);
                 return $ex;
             case "lt":
             case "le":
@@ -48,8 +48,8 @@ trait WhereClauseTrait {
             case "like":
             case "in":
                 $placeholder = hash("md5", uniqid(more_entropy: true));
-                $this->context[$placeholder] = $ex->props['value'];
-                $ex->props['value'] = ":" . $placeholder;
+                $this->context[$placeholder] = $ex['props']['value'];
+                $ex['props']['value'] = ":" . $placeholder;
                 return $ex;
             default:
                 return $ex;

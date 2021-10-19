@@ -25,7 +25,7 @@ class Delete extends Query {
 
     use WhereClauseTrait;
 
-    public array $tables;
+    protected array $tables;
 
     public static function from(string ...$tables): static {
         return new static($tables);

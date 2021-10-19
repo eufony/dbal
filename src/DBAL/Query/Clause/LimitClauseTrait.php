@@ -21,8 +21,8 @@ namespace Eufony\DBAL\Query\Clause;
 
 trait LimitClauseTrait {
 
-    public int $limit;
-    public int $offset;
+    protected int $limit;
+    protected int $offset;
 
     public function limit(int $count): static {
         $this->limit = $count;

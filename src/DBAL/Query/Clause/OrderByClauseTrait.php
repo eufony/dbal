@@ -21,7 +21,7 @@ namespace Eufony\DBAL\Query\Clause;
 
 trait OrderByClauseTrait {
 
-    public array $order;
+    protected array $order;
 
     public function orderBy(string|array $fields): static {
         $this->order = [];

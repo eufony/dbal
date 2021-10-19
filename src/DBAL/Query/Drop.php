@@ -21,7 +21,7 @@ namespace Eufony\DBAL\Query;
 
 class Drop extends Query {
 
-    public array $tables;
+    protected array $tables;
 
     public static function tables(string ...$tables): static {
         return new static($tables);

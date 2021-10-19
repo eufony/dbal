@@ -30,7 +30,7 @@ class Update extends Query {
     use ValuesClauseTrait;
     use WhereClauseTrait;
 
-    public array $tables;
+    protected array $tables;
 
     /**
      * @param string ...$tables

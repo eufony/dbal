@@ -21,7 +21,7 @@ namespace Eufony\DBAL\Query\Clause;
 
 trait ValuesClauseTrait {
 
-    public array $values;
+    protected array $values;
 
     public function values(array $values): static {
         foreach ($values as $key => $value) {

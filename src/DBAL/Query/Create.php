@@ -21,8 +21,8 @@ namespace Eufony\DBAL\Query;
 
 class Create extends Query {
 
-    public string $table;
-    public array $fields;
+    protected string $table;
+    protected array $fields;
 
     public static function table(string $table): static {
         return new static($table);
