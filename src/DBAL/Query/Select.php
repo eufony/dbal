@@ -22,7 +22,6 @@ namespace Eufony\DBAL\Query;
 use Eufony\DBAL\Query\Clause\LimitClauseTrait;
 use Eufony\DBAL\Query\Clause\OrderByClauseTrait;
 use Eufony\DBAL\Query\Clause\WhereClauseTrait;
-use Eufony\DBAL\Query\Keyword\Op;
 
 class Select extends Query {
 
@@ -32,6 +31,7 @@ class Select extends Query {
 
     public array $tables;
     public array $fields;
+    public string $function;
 
     public static function from(string ...$tables): static {
         return new static($tables);
@@ -41,9 +41,26 @@ class Select extends Query {
         $this->tables = $tables;
     }
 
-    public function fields(string|Op ...$fields): static {
+    public function fields(string ...$fields): static {
         $this->fields = $fields;
         return $this;
+    }
+
+    public function count(): int {
+        $this->function = "count";
+        return array_values($this->execute()[0])[0];
+    }
+
+    public function max(string $field): mixed {
+        $this->fields($field);
+        $this->function = "max";
+        return array_values($this->execute()[0])[0];
+    }
+
+    public function min(string $field): mixed {
+        $this->fields($field);
+        $this->function = "min";
+        return array_values($this->execute()[0])[0];
     }
 
 }

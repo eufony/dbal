@@ -44,7 +44,9 @@ abstract class Query {
      * @return mixed[][]
      */
     public function execute(string $key = "default", int|DateInterval $ttl = 1): array {
-        return ORM::connection($key)->query($this, $ttl);
+        $connection = ORM::connection($key);
+        $query_string = $connection->driver()->generate($this);
+        return ORM::connection($key)->query($query_string, $this->context, $ttl);
     }
 
 }

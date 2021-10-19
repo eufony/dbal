@@ -21,7 +21,6 @@ namespace Eufony\DBAL;
 
 use DateInterval;
 use Eufony\DBAL\Driver\DriverInterface;
-use Eufony\DBAL\Query\Query;
 use Eufony\ORM\Cache\ArrayCache;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\Log\DatabaseLogger;
@@ -118,31 +117,6 @@ class Connection {
     }
 
     /**
-     * Builds and executes a query from the given query builder.
-     *
-     * The query string is passed to the `Database:directQuery()` method along
-     * with the internal context array of the query builder, providing easy
-     * protection against SQL injection attacks.
-     *
-     * The cached result's expiration can be set using the `$ttl` parameter;
-     * either as a `DateInterval` object or an integer number of minutes.
-     * Defaults to 1 minute.
-     *
-     * Throws a `\Eufony\ORM\QueryException` on failure.
-     *
-     * @param \Eufony\DBAL\Query\Query $query
-     * @param int|\DateInterval $ttl
-     * @return mixed[][]
-     */
-    public function query(Query $query, int|DateInterval $ttl = 1): array {
-        // Generate the query string
-        $query_string = $this->driver->generate($query);
-
-        // Execute query string and return result
-        return $this->directQuery($query_string, $query->context, $ttl);
-    }
-
-    /**
      * Executes the given query string.
      *
      * Additionally handles caching (for read-only queries), logging, and
@@ -163,9 +137,8 @@ class Connection {
      * @param int|\DateInterval $ttl
      * @return mixed[][]
      */
-    public function directQuery(string $query, array $context = [], int|DateInterval $ttl = 1): array {
+    public function query(string $query, array $context = [], int|DateInterval $ttl = 1): array {
         // Determine if query mutates data in the database depending first keyword
-        // TODO: This assumes query is written in SQL
         $is_mutation = preg_match("/^SELECT/", $query) !== 1;
 
         // For read-only queries, check if the result is cached first

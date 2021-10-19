@@ -38,35 +38,35 @@ class Ex {
         return new static(__FUNCTION__, ["ex" => $expression]);
     }
 
-    public static function lt(string|Op $field, int|float $value): static {
+    public static function lt(string $field, int|float $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function le(string|Op $field, int|float $value): static {
+    public static function le(string $field, int|float $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function eq(string|Op $field, int|float|string|bool|null $value): static {
+    public static function eq(string $field, int|float|string|bool|null $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function ge(string|Op $field, int|float $value): static {
+    public static function ge(string $field, int|float $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function gt(string|Op $field, int|float $value): static {
+    public static function gt(string $field, int|float $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function ne(string|Op $field, int|float|string|bool|null $value): static {
+    public static function ne(string $field, int|float|string|bool|null $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function like(string|Op $field, string $value): static {
+    public static function like(string $field, string $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function in(string|Op $field, array $value): static {
+    public static function in(string $field, array $value): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
