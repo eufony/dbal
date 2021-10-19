@@ -329,8 +329,7 @@ abstract class AbstractInflectorTest extends TestCase {
             ["wood", "wood"],
             ["wool", "wool"],
             ["work", "works"],
-            ["zombie", "zombies"],
-            ["foo", "bar"]
+            ["zombie", "zombies"]
         ];
     }
 
