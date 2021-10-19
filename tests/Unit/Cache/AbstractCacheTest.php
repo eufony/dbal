@@ -85,8 +85,7 @@ abstract class AbstractCacheTest extends TestCase {
 
     /** @inheritdoc */
     protected function setUp(): void {
-        $this->cache ??= $this->getCache();
-        $this->cache->clear();
+        $this->cache = $this->getCache();
     }
 
     /**
