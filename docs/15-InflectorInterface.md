@@ -1,1 +1,1 @@
-## Inflector Interface: Generating Class, Table, and Methods Names On-the-Fly
+## Inflector Interface: Generating Class, Table, and Method Names On-the-Fly

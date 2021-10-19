@@ -20,7 +20,7 @@
 require __DIR__ . "/../vendor/autoload.php";
 
 echo "\n";
-echo "Testsuite for the Eufony ORM Package by Alpin Gencer.\n";
+echo "Testsuite for the Eufony ORM Package by Alpin Gencer and contributors.\n";
 echo "Using php.ini file: '" . php_ini_loaded_file() . "'\n";
 echo "\n";
 
