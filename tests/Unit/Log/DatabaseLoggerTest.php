@@ -36,7 +36,7 @@ class DatabaseLoggerTest extends AbstractLogTest {
      *
      * @var \Eufony\DBAL\Connection $internalDatabase
      */
-    private Connection $internalDatabase;
+    protected Connection $internalDatabase;
 
     /** @inheritdoc */
     public function getLogger(): LoggerInterface {
