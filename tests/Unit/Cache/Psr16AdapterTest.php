@@ -34,7 +34,7 @@ class Psr16AdapterTest extends AbstractCacheTest {
      *
      * @var \Psr\Cache\CacheItemPoolInterface $internalCache
      */
-    private CacheItemPoolInterface $internalCache;
+    protected CacheItemPoolInterface $internalCache;
 
     /** @inheritdoc */
     public function getCache(): CacheInterface {

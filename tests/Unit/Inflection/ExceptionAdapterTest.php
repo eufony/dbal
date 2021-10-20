@@ -34,7 +34,7 @@ class ExceptionAdapterTest extends AbstractInflectorTest {
      *
      * @var \Eufony\ORM\Inflection\InflectorInterface $internalInflector
      */
-    private InflectorInterface $internalInflector;
+    protected InflectorInterface $internalInflector;
 
     /**
      * Test cases for exceptions to changing between `PascalCase`,
@@ -42,14 +42,14 @@ class ExceptionAdapterTest extends AbstractInflectorTest {
      *
      * @var string[][] $cases
      */
-    private array $cases;
+    protected array $cases;
 
     /**
      * Test cases for exception to pluralization and singularization.
      *
      * @var string[] $words
      */
-    private array $words;
+    protected array $words;
 
     /** @inheritdoc */
     public function getInflector(): InflectorInterface {
