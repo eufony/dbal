@@ -47,6 +47,37 @@ trait LoggerTraitTestTrait {
         return $result;
     }
 
+    /**
+     * Data provider for PSR-3 messages and contexts.
+     * Returns the log message, context, and expected fully interpolated message
+     * string for each data set.
+     *
+     * @return mixed[][]
+     */
+    public function interpolatedMessages(): array {
+        $logged_events = $this->loggedEvents();
+        $interpolated_strings = [
+            "Hello, world!",
+            "Hello, bar",
+            "bar bar",
+            "{bar}",
+            "value1 value2",
+            "value2 value1",
+            (string)$logged_events[6][2]["foo"],
+            "",
+        ];
+
+        $data = [];
+
+        // Push arguments to data set
+        foreach ($logged_events as $index => $event) {
+            $data[] = [$event[1], $event[2], $interpolated_strings[$index]];
+        }
+
+        // Return result
+        return $data;
+    }
+
     public function testLoggerHasLoggerTrait() {
         $this->assertTrue(in_array(LoggerTrait::class, class_uses(get_class($this->logger))));
     }
@@ -98,24 +129,10 @@ trait LoggerTraitTestTrait {
     }
 
     /**
-     * @depends testLoggerHasLoggerTrait
+     * @depends      testLoggerHasLoggerTrait
+     * @dataProvider interpolatedMessages
      */
-    public function testInterpolate() {
-        $message = "{key1} {key2} {key3} {key4} {key5}";
-        $context = ["key1" => "value1", "key2" => 2, "key3" => null, "key4" => true];
-        $expected = "value1 2  1 {key5}";
-
-        $this->assertEquals($expected, $this->invokeTraitMethod("interpolate", $message, $context));
-    }
-
-    /**
-     * @depends testLoggerHasLoggerTrait
-     */
-    public function testInterpolateNested() {
-        $message = "{key1} {key2}";
-        $context = ["key1" => "{value1}", "key2" => "{{value2}}"];
-        $expected = "{value1} {{value2}}";
-
+    public function testInterpolate(string $message, array $context, string $expected) {
         $this->assertEquals($expected, $this->invokeTraitMethod("interpolate", $message, $context));
     }
 

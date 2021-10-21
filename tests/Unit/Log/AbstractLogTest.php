@@ -19,6 +19,7 @@
 
 namespace Tests\Unit\Log;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -73,12 +74,14 @@ abstract class AbstractLogTest extends TestCase {
 
         $data = [];
 
+        // Push arguments to data set
         foreach ($methods as $method) {
             foreach ($invalid_messages as $message) {
                 $data[] = [$method, $message];
             }
         }
 
+        // Return result
         return $data;
     }
 
@@ -90,28 +93,39 @@ abstract class AbstractLogTest extends TestCase {
      */
     public function invalidContexts(): array {
         $methods = $this->logLevels();
-        $invalid_contexts = [["exception" => "foo"]];
+        $invalid_contexts = [
+            ["exception" => "foo"],
+            ["foo" => $this->getLogger()],
+        ];
 
         $data = [];
 
+        // Push arguments to data set
         foreach ($methods as $method) {
-            foreach ($invalid_contexts as $message) {
-                $data[] = [$method, $message];
+            foreach ($invalid_contexts as $context) {
+                $data[] = [$method, $context];
             }
         }
 
+        // Return result
         return $data;
     }
 
+    /**
+     * Data provider for valid PSR-3 method calls.
+     * Returns the log level, message and context for each data set.
+     *
+     * @return mixed[][]
+     */
     public function loggedEvents(): array {
         return [
-            ["debug", "", []],
-            ["info", "", []],
-            ["notice", "", []],
-            ["warning", "", []],
-            ["error", "", []],
-            ["critical", "", []],
-            ["alert", "", []],
+            ["debug", "Hello, world!", []],
+            ["info", "Hello, {foo}", ["foo" => "bar"]],
+            ["notice", "{foo} {foo}", ["foo" => "bar"]],
+            ["warning", "{foo}", ["foo" => "{bar}", "bar" => "should not be interpolated"]],
+            ["error", "{key1} {key2}", ["key1" => "value1", "key2" => "value2"]],
+            ["critical", "{key2} {key1}", ["key1" => "value1", "key2" => "value2", "key3" => "value3"]],
+            ["alert", "{foo}", ["foo" => new Exception("bar")]],
             ["emergency", "", []],
         ];
     }
@@ -140,7 +154,7 @@ abstract class AbstractLogTest extends TestCase {
     /**
      * @dataProvider invalidContexts
      */
-    public function testInvalidContext(string $method, array $context) {
+    public function testInvalidContext(string $method, mixed $context) {
         $this->expectException(InvalidArgumentException::class);
         $this->logger->$method("foo", $context);
     }
