@@ -33,7 +33,7 @@ class DoctrineInflectorTest extends AbstractInflectorTest {
         return new DoctrineInflector();
     }
 
-    public function testInflector() {
+    public function testGetInternalInflector() {
         $this->assertEquals(Inflector::class, get_class($this->inflector->inflector()));
     }
 

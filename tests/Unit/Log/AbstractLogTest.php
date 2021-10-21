@@ -52,7 +52,8 @@ abstract class AbstractLogTest extends TestCase {
     }
 
     /**
-     * Data provider for invalid log levels.
+     * Data provider for invalid PSR-3 log levels.
+     * Returns an invalid log level for each data set.
      *
      * @return mixed[][]
      */
@@ -61,7 +62,8 @@ abstract class AbstractLogTest extends TestCase {
     }
 
     /**
-     * Data provider for invalid log messages.
+     * Data provider for PSR-3 methods that require a log message.
+     * Returns the methods name and an invalid log message for ech data set.
      *
      * @return mixed[][]
      */
@@ -81,23 +83,37 @@ abstract class AbstractLogTest extends TestCase {
     }
 
     /**
-     * Data provider for invalid log contexts.
+     * Data provider for PSR-3 methods that accept a log context.
+     * Returns the method name and an invalid context for each data set.
      *
      * @return mixed[][]
      */
     public function invalidContexts(): array {
         $methods = $this->logLevels();
-        $invalid_messages = [["exception" => "foo"]];
+        $invalid_contexts = [["exception" => "foo"]];
 
         $data = [];
 
         foreach ($methods as $method) {
-            foreach ($invalid_messages as $message) {
+            foreach ($invalid_contexts as $message) {
                 $data[] = [$method, $message];
             }
         }
 
         return $data;
+    }
+
+    public function loggedEvents(): array {
+        return [
+            ["debug", "", []],
+            ["info", "", []],
+            ["notice", "", []],
+            ["warning", "", []],
+            ["error", "", []],
+            ["critical", "", []],
+            ["alert", "", []],
+            ["emergency", "", []],
+        ];
     }
 
     /** @inheritdoc */

@@ -25,7 +25,8 @@ use Psr\Log\LogLevel;
 use ReflectionClass;
 
 /**
- * Unit tests for `\Eufony\ORM\Log\LoggerTrait`.
+ * Unit tests for PSR-3 loggers that inherit from
+ * `\Eufony\ORM\Log\LoggerTrait`.
  */
 trait LoggerTraitTestTrait {
 

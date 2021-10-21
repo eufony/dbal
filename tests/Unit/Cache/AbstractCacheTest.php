@@ -45,18 +45,20 @@ abstract class AbstractCacheTest extends TestCase {
 
     /**
      * Data provider for PSR-16 methods that require a cache key parameter.
+     * Returns the method name, an invalid cache key argument, and an array of
+     * additional method arguments for each data set.
      *
      * @return mixed[][]
      */
-    public function invalidKeyMethods(): array {
+    public function invalidKeys(): array {
         $methods = ["get", "set", "delete", "getMultiple", "setMultiple", "deleteMultiple", "has"];
-        $invalid_keys = [null, 0, '', '{}()/\@:'];
+        $invalid_keys = [null, 0, "", "{}()/\@:"];
 
         $data = [];
 
         foreach ($methods as $method) {
             // If dealing with a "multiple" method, the parameter should be an array of keys
-            if (in_array([$method], $this->multipleMethods())) {
+            if (in_array($method, ["getMultiple", "setMultiple", "deleteMultiple"])) {
                 $invalid_keys = array_map(fn($key) => [$key], $invalid_keys);
             }
 
@@ -67,36 +69,59 @@ abstract class AbstractCacheTest extends TestCase {
                 default => []
             };
 
+            // Push arguments to data set
             foreach ($invalid_keys as $key) {
                 $data[] = [$method, $key, $args];
             }
         }
 
+        // Return result
         return $data;
     }
 
     /**
      * Data provider for PSR-16 methods that require a TTL parameter.
+     * Returns the method name and an array of method arguments for each data
+     * set.
      *
      * @return mixed[][]
      */
-    public function invalidTtlMethods(): array {
+    public function ttlMethods(): array {
         return [
-            ["set", ["foo", "bar", "baz"]],
-            ["setMultiple", [["foo"], ["bar"], "baz"]]
+            ["set", ["foo", "bar"]],
+            ["setMultiple", [["foo"], ["bar"]]],
+        ];
+    }
+
+    /**
+     * Data provider for PSR-16 methods that change their behaviour when cache
+     * items expire.
+     * Returns a valid TTL parameter and whether the TTL expires after 2
+     * seconds.
+     *
+     * @return mixed[][]
+     */
+    public function ttls(): array {
+        return [
+            [1, true],
+            [5, false],
+            [new DateInterval("PT1S"), true],
+            [new DateInterval("PT5S"), false],
         ];
     }
 
     /**
      * Data provider for PSR-16 methods that operate on multiple cache items.
+     * Returns the method name and an array of method arguments for each data
+     * set.
      *
      * @return string[][]
      */
     public function multipleMethods(): array {
         return [
-            ["getMultiple"],
-            ["setMultiple"],
-            ["deleteMultiple"]
+            ["getMultiple", [["foo"]]],
+            ["setMultiple", [["foo"], ["bar"]]],
+            ["deleteMultiple", [["foo"]]],
         ];
     }
 
@@ -106,7 +131,7 @@ abstract class AbstractCacheTest extends TestCase {
     }
 
     /**
-     * @dataProvider invalidKeyMethods
+     * @dataProvider invalidKeys
      */
     public function testInvalidKeys(string $method, mixed $key, array $args) {
         $this->expectException(InvalidArgumentException::class);
@@ -114,9 +139,10 @@ abstract class AbstractCacheTest extends TestCase {
     }
 
     /**
-     * @dataProvider invalidTtlMethods
+     * @dataProvider ttlMethods
      */
     public function testInvalidTtl(string $method, array $args) {
+        $args[] = "ttl";
         $this->expectException(InvalidArgumentException::class);
         $this->cache->$method(...$args);
     }
@@ -124,77 +150,50 @@ abstract class AbstractCacheTest extends TestCase {
     /**
      * @dataProvider multipleMethods
      */
-    public function testInvalidIterable(string $method) {
+    public function testInvalidIterable(string $method, array $args) {
+        $args[0] = "foo";
         $this->expectException(InvalidArgumentException::class);
-
-        // Some PSR-16 methods require additional parameters
-        $args = match ($method) {
-            "setMultiple" => [["bar"]],
-            default => []
-        };
-
-        $this->cache->$method("foo", ...$args);
+        $this->cache->$method(...$args);
     }
 
     public function testSetGet() {
-        $this->cache->set('foo', 'bar');
-        $this->assertEquals('bar', $this->cache->get('foo'));
-    }
-
-    public function testGetNotFound() {
-        $this->assertNull($this->cache->get('not-found'));
-    }
-
-    /**
-     * @depends testGetNotFound
-     */
-    public function testGetNotFoundDefault() {
-        $default = 'chickpeas';
-        $this->assertEquals($default, $this->cache->get('not-found', $default));
+        $this->cache->set("foo", "bar");
+        $this->assertEquals("bar", $this->cache->get("foo"));
+        $this->assertNull($this->cache->get("not-found"));
+        $this->assertEquals("chickpeas", $this->cache->get("not-found", "chickpeas"));
     }
 
     /**
-     * @depends testSetGet
+     * @depends      testSetGet
+     * @dataProvider ttls
      * @group slow
      */
-    public function testSetExpireInt() {
-        $this->cache->set('foo', 'bar', 1);
+    public function testSetExpire(int|DateInterval $ttl, bool $expired) {
+        $this->cache->set("foo", "bar", $ttl);
+        $expected = $expired ? null : "bar";
 
         // Wait 2 seconds so the cache expires
         sleep(2);
 
-        $this->assertNull($this->cache->get('foo'));
-    }
-
-    /**
-     * @depends testSetGet
-     * @group slow
-     */
-    public function testSetExpireDateInterval() {
-        $this->cache->set('foo', 'bar', new DateInterval('PT1S'));
-
-        // Wait 2 seconds so the cache expires
-        sleep(2);
-
-        $this->assertNull($this->cache->get('foo'));
+        $this->assertEquals($expected, $this->cache->get("foo"));
     }
 
     /**
      * @depends testSetGet
      */
     public function testDelete() {
-        $this->cache->set('foo', 'bar');
-        $this->cache->delete('foo');
-        $this->assertNull($this->cache->get('foo'));
+        $this->cache->set("foo", "bar");
+        $this->cache->delete("foo");
+        $this->assertNull($this->cache->get("foo"));
     }
 
     /**
      * @depends testSetGet
      */
     public function testClearCache() {
-        $this->cache->set('foo', 'bar');
+        $this->cache->set("foo", "bar");
         $this->cache->clear();
-        $this->assertNull($this->cache->get('foo'));
+        $this->assertNull($this->cache->get("foo"));
     }
 
     public function testSetGetMultiple() {
@@ -202,17 +201,13 @@ abstract class AbstractCacheTest extends TestCase {
         $values = array_combine($keys, ["value1", "value2", "value3"]);
 
         $this->cache->setMultiple($values);
+        $result = (array)$this->cache->getMultiple($keys);
 
-        $result = $this->cache->getMultiple($keys);
+        $this->assertEquals($keys, array_keys($result));
 
         foreach ($result as $key => $value) {
-            $this->assertTrue(isset($values[$key]));
             $this->assertEquals($values[$key], $value);
-            unset($values[$key]);
         }
-
-        // The list of values should now be empty
-        $this->assertEquals([], $values);
     }
 
     public function testSetGetMultipleGenerator() {
@@ -226,226 +221,108 @@ abstract class AbstractCacheTest extends TestCase {
         };
 
         $this->cache->setMultiple($generator($values));
+        $result = (array)$this->cache->getMultiple($generator($keys));
 
-        $result = $this->cache->getMultiple($generator($keys));
+        $this->assertEquals($keys, array_keys($result));
 
         foreach ($result as $key => $value) {
-            $this->assertTrue(isset($values[$key]));
             $this->assertEquals($values[$key], $value);
-            unset($values[$key]);
         }
-
-        // The list of values should now be empty
-        $this->assertEquals([], $values);
     }
 
     /**
-     * @depends testSetGetMultiple
+     * @depends      testSetGetMultiple
+     * @dataProvider ttls
      * @group slow
      */
-    public function testSetMultipleExpireInt() {
-        $values = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-        ];
+    public function testSetMultipleExpire(int|DateInterval $ttl, bool $expired) {
+        $keys = ["key1", "key2", "key3"];
+        $values = array_combine($keys, ["value1", "value2", "value3"]);
 
-        $this->cache->setMultiple($values, 1);
+        $this->cache->setMultiple($values, $ttl);
 
         // Wait 2 seconds so the cache expires
         sleep(2);
 
-        $result = $this->cache->getMultiple(array_keys($values), 'not-found');
-
-        $count = 0;
-        $expected = [
-            'key1' => 'not-found',
-            'key2' => 'not-found',
-            'key3' => 'not-found',
-        ];
+        $result = $this->cache->getMultiple($keys);
+        $expected = $expired ? array_fill_keys($keys, null) : $values;
 
         foreach ($result as $key => $value) {
-            $count++;
-            $this->assertTrue(isset($expected[$key]));
             $this->assertEquals($expected[$key], $value);
-            unset($expected[$key]);
         }
-        $this->assertEquals(3, $count);
-
-        // The list of values should now be empty
-        $this->assertEquals([], $expected);
-    }
-
-    /**
-     * @depends testSetGetMultiple
-     */
-    public function testSetMultipleExpireDateIntervalNotExpired() {
-        $values = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-        ];
-
-        $this->cache->setMultiple($values, new DateInterval('PT5S'));
-
-        $result = $this->cache->getMultiple(array_keys($values));
-
-        $count = 0;
-        foreach ($result as $key => $value) {
-            $count++;
-            $this->assertTrue(isset($values[$key]));
-            $this->assertEquals($values[$key], $value);
-            unset($values[$key]);
-        }
-        $this->assertEquals(3, $count);
-
-        // The list of values should now be empty
-        $this->assertEquals([], $values);
-    }
-
-    /**
-     * @depends testSetGetMultiple
-     * @group slow
-     */
-    public function testSetMultipleExpireDateIntervalExpired() {
-        $values = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-        ];
-
-        $this->cache->setMultiple($values, new DateInterval('PT1S'));
-
-        // Wait 2 seconds so the cache expires
-        sleep(2);
-
-        $result = $this->cache->getMultiple(array_keys($values), 'not-found');
-
-        $count = 0;
-        $expected = [
-            'key1' => 'not-found',
-            'key2' => 'not-found',
-            'key3' => 'not-found',
-        ];
-
-        foreach ($result as $key => $value) {
-            $count++;
-            $this->assertTrue(isset($expected[$key]));
-            $this->assertEquals($expected[$key], $value);
-            unset($expected[$key]);
-        }
-        $this->assertEquals(3, $count);
-
-        // The list of values should now be empty
-        $this->assertEquals([], $expected);
     }
 
     /**
      * @depends testSetGetMultiple
      */
     public function testDeleteMultiple() {
-        $values = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-        ];
+        $keys = ["key1", "key2", "key3"];
+        $values = array_combine($keys, ["value1", "value2", "value3"]);
 
         $this->cache->setMultiple($values);
-        $this->cache->deleteMultiple(['key1', 'key3']);
-
-        $result = $this->cache->getMultiple(array_keys($values), 'tea');
+        $this->cache->deleteMultiple(["key1", "key3"]);
+        $result = $this->cache->getMultiple($keys, "tea");
 
         $expected = [
-            'key1' => 'tea',
-            'key2' => 'value2',
-            'key3' => 'tea',
+            "key1" => "tea",
+            "key2" => "value2",
+            "key3" => "tea",
         ];
 
         foreach ($result as $key => $value) {
-            $this->assertTrue(isset($expected[$key]));
             $this->assertEquals($expected[$key], $value);
-            unset($expected[$key]);
         }
-
-        // The list of values should now be empty
-        $this->assertEquals([], $expected);
     }
 
     /**
      * @depends testSetGetMultiple
      */
     public function testDeleteMultipleGenerator() {
-        $values = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-        ];
+        $keys = ["key1", "key2", "key3"];
+        $values = array_combine($keys, ["value1", "value2", "value3"]);
 
         $generator = function () {
-            yield 'key1';
-            yield 'key3';
+            yield "key1";
+            yield "key3";
         };
 
         $this->cache->setMultiple($values);
         $this->cache->deleteMultiple($generator());
-
-        $result = $this->cache->getMultiple(array_keys($values), 'tea');
+        $result = $this->cache->getMultiple(array_keys($values), "tea");
 
         $expected = [
-            'key1' => 'tea',
-            'key2' => 'value2',
-            'key3' => 'tea',
+            "key1" => "tea",
+            "key2" => "value2",
+            "key3" => "tea",
         ];
 
         foreach ($result as $key => $value) {
-            $this->assertTrue(isset($expected[$key]));
             $this->assertEquals($expected[$key], $value);
-            unset($expected[$key]);
         }
-
-        // The list of values should now be empty
-        $this->assertEquals([], $expected);
     }
 
     /**
      * @depends testSetGet
      */
     public function testHas() {
-        $this->cache->set('foo', 'bar');
-        $this->assertTrue($this->cache->has('foo'));
+        $this->cache->set("foo", "bar");
+        $this->assertTrue($this->cache->has("foo"));
+        $this->assertFalse($this->cache->has("not-found"));
     }
 
     /**
-     * @depends testSetGet
-     */
-    public function testHasNot() {
-        $this->assertFalse($this->cache->has('not-found'));
-    }
-
-    /**
-     * @depends testSetGet
+     * @depends      testSetGet
+     * @dataProvider ttls
      * @group slow
      */
-    public function testHasExpire() {
-        $this->cache->set('foo', 'bar', 1);
+    public function testHasExpire(int|DateInterval $ttl, bool $expired) {
+        $this->cache->set("foo", "bar", $ttl);
+        $expected = !$expired;
 
         // Wait 2 seconds so the cache expires
         sleep(2);
 
-        $this->assertFalse($this->cache->has('foo'));
-    }
-
-    /**
-     * @depends testSetGet
-     * @group slow
-     */
-    public function testHasExpireDateInterval() {
-        $this->cache->set('foo', 'bar', new DateInterval('PT1S'));
-
-        // Wait 2 seconds so the cache expires
-        sleep(2);
-
-        $this->assertFalse($this->cache->has('foo'));
+        $this->assertEquals($expected, $this->cache->has("foo"));
     }
 
 }

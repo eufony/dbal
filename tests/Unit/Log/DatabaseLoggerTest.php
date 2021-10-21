@@ -45,7 +45,7 @@ class DatabaseLoggerTest extends AbstractLogTest {
         return new DatabaseLogger($database);
     }
 
-    public function testDatabase() {
+    public function testGetInternalDatabase() {
         $this->assertSame($this->internalDatabase, $this->logger->database());
     }
 
