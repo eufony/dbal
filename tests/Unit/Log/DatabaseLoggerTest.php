@@ -40,9 +40,8 @@ class DatabaseLoggerTest extends AbstractLogTest {
 
     /** @inheritdoc */
     public function getLogger(): LoggerInterface {
-        $database = Mockery::mock(Connection::class);
-        $this->internalDatabase = $database;
-        return new DatabaseLogger($database);
+        $this->internalDatabase = Mockery::mock(Connection::class);
+        return new DatabaseLogger($this->internalDatabase);
     }
 
     public function testGetInternalDatabase() {
