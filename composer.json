@@ -20,6 +20,7 @@
     "psr/simple-cache": "^1.0"
   },
   "require-dev": {
+    "brianium/paratest": "^6.3",
     "cache/array-adapter": "^1.1",
     "fakerphp/faker": "^1.16",
     "mockery/mockery": "^1.4",
@@ -46,6 +47,12 @@
       "App\\": "tests/App/",
       "Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "test": [
+      "paratest -c tests/Unit/phpunit.xml.dist",
+      "paratest -c tests/Integration/phpunit.xml.dist"
+    ]
   },
   "config": {
     "optimize-autoloader": true,

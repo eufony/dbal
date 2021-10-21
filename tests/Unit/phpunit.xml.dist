@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
-         bootstrap="./bootstrap.php"
-         cacheResultFile="./.phpunit/results"
+         bootstrap="../bootstrap.php"
+         cacheResultFile="../.phpunit/Unit/results"
          executionOrder="depends,defects"
          beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
@@ -11,21 +11,18 @@
          failOnWarning="true"
          verbose="true">
     <testsuites>
-        <testsuite name="unit">
-            <directory>./Unit/</directory>
-        </testsuite>
-        <testsuite name="integration">
-            <directory>./Integration/</directory>
+        <testsuite name="default">
+            <directory>./</directory>
         </testsuite>
     </testsuites>
 
-    <coverage cacheDirectory="./.phpunit/coverage/"
+    <coverage cacheDirectory="../.phpunit/Unit/coverage/"
               processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">../src</directory>
+            <directory suffix=".php">../../src</directory>
         </include>
         <report>
-            <html outputDirectory="./.phpunit/coverage-html/"/>
+            <html outputDirectory="../.phpunit/Unit/coverage-html/"/>
         </report>
     </coverage>
 </phpunit>

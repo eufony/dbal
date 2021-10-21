@@ -11,3 +11,4 @@ composer.lock
 
 # Project
 /tests/.phpunit/
+/tests/**/phpunit.xml
