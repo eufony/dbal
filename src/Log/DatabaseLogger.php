@@ -84,23 +84,23 @@ class DatabaseLogger extends AbstractLogger {
                     "type" => Type::int(),
                     "nullable" => "false",
                     "primary_key" => "true",
-                    "auto_increment" => true
+                    "auto_increment" => true,
                 ],
                 "time" => [
                     "type" => Type::datetime(),
-                    "nullable" => false
+                    "nullable" => false,
                 ],
                 "level" => [
                     "type" => Type::varchar(9),
-                    "nullable" => false
+                    "nullable" => false,
                 ],
                 "message" => [
                     "type" => Type::text(),
                 ],
                 "exception" => [
                     "type" => Type::text(),
-                    "default" => null
-                ]
+                    "default" => null,
+                ],
             ];
 
             Create::table("__log")->fields($fields)->execute();
@@ -110,7 +110,7 @@ class DatabaseLogger extends AbstractLogger {
             "time" => date("Y-m-d H:i:s"),
             "level" => $level,
             "message" => $message,
-            "exception" => $context['exception'] ?? null
+            "exception" => $context['exception'] ?? null,
         ];
 
         Insert::into("__log")->values($values)->execute();
