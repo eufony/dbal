@@ -69,15 +69,15 @@ class ExceptionAdapterTest extends AbstractInflectorTest {
         return array_merge(parent::words(), [["foo", "bar"]]);
     }
 
-    public function testInflector() {
+    public function testGetInternalInflector() {
         $this->assertSame($this->internalInflector, $this->inflector->inflector());
     }
 
-    public function testCases() {
+    public function testGetInternalCases() {
         $this->assertEquals($this->cases, $this->inflector->cases());
     }
 
-    public function testWords() {
+    public function testGetInternalWords() {
         $this->assertEquals($this->words, $this->inflector->words());
     }
 

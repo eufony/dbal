@@ -43,19 +43,22 @@ abstract class AbstractInflectorTest extends TestCase {
     abstract public function getInflector(): InflectorInterface;
 
     /**
-     * Data provider for pascal, snake, and camel-cased strings.
+     * Data provider for inflection methods that change string cases.
+     * Returns the same string in `PascalCase`, `snake_case`, and `camelCase`
+     * for each data set.
      *
      * @return string[][]
      */
     public function cases(): array {
         return [
             ["FooBar", "foo_bar", "fooBar"],
-            ["", "", ""]
+            ["", "", ""],
         ];
     }
 
     /**
      * Data provider for words with and their plural forms.
+     * Returns the same word in singular and plural form for each data set.
      *
      * @return string[][]
      */
@@ -346,7 +349,7 @@ abstract class AbstractInflectorTest extends TestCase {
             ["wood", "wood"],
             ["wool", "wool"],
             ["work", "works"],
-            ["zombie", "zombies"]
+            ["zombie", "zombies"],
         ];
     }
 
