@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Driver;
+namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\DBAL\Query\Query;
+use Eufony\ORM\DBAL\Query\Query;
 
 /**
  * Provides a common interface for connecting to and querying different
@@ -35,7 +35,7 @@ interface DriverInterface {
     /**
      * Generates the query string to be executed from the given query builder.
      *
-     * @param \Eufony\DBAL\Query\Query $query
+     * @param \Eufony\ORM\DBAL\Query\Query $query
      * @return string
      */
     public function generate(Query $query): string;

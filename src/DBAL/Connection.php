@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL;
+namespace Eufony\ORM\DBAL;
 
 use DateInterval;
-use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\ORM\DBAL\Driver\DriverInterface;
 use Eufony\ORM\Cache\ArrayCache;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\Log\DatabaseLogger;
@@ -39,7 +39,7 @@ class Connection {
     /**
      * A backend driver for building and executing queries.
      *
-     * @var \Eufony\DBAL\Driver\DriverInterface $driver
+     * @var \Eufony\ORM\DBAL\Driver\DriverInterface $driver
      */
     private DriverInterface $driver;
 
@@ -67,7 +67,7 @@ class Connection {
      * By default, sets up a `\Eufony\ORM\Log\DatabaseLogger` for logging,
      * and a `\Eufony\ORM\Cache\ArrayCache` for caching.
      *
-     * @param \Eufony\DBAL\Driver\DriverInterface $driver
+     * @param \Eufony\ORM\DBAL\Driver\DriverInterface $driver
      */
     public function __construct(DriverInterface $driver) {
         $this->driver = $driver;
@@ -78,7 +78,7 @@ class Connection {
     /**
      * Returns the current database driver.
      *
-     * @return \Eufony\DBAL\Driver\DriverInterface
+     * @return \Eufony\ORM\DBAL\Driver\DriverInterface
      */
     public function driver(): DriverInterface {
         return $this->driver;
@@ -170,13 +170,15 @@ class Connection {
             throw $e;
         }
 
-        if ($is_mutation === false && $ttl !== null) {
-            // Log info for read operations
-            $this->logger->info("Query read op: $query");
+        if ($is_mutation === false) {
+            if ($ttl !== null) {
+                // Log info for read operations
+                $this->logger->info("Query read op: $query");
 
-            // Cache result
-            $this->cache->set($cache_key, $query_result, ttl: $ttl);
-            $this->logger->debug("Query cached result: $query");
+                // Cache result
+                $this->cache->set($cache_key, $query_result, ttl: $ttl);
+                $this->logger->debug("Query cached result: $query");
+            }
         } else {
             // Log notice for write operations
             $this->logger->notice("Query write op: $query");

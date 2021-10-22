@@ -51,8 +51,8 @@ abstract class AbstractInflectorTest extends TestCase {
      */
     public function cases(): array {
         return [
-            ["FooBar", "foo_bar", "fooBar"],
             ["", "", ""],
+            ["FooBar", "foo_bar", "fooBar"],
         ];
     }
 

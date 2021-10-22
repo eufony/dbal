@@ -19,8 +19,8 @@
 
 namespace Eufony\ORM;
 
-use Eufony\DBAL\Connection;
-use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\ORM\DBAL\Connection;
+use Eufony\ORM\DBAL\Driver\DriverInterface;
 use Eufony\ORM\Inflection\DoctrineInflector;
 use Eufony\ORM\Inflection\InflectorInterface;
 
@@ -33,7 +33,7 @@ class ORM {
     /**
      * Stores the active instance of the database connection.
      *
-     * @var \Eufony\DBAL\Connection $connection
+     * @var \Eufony\ORM\DBAL\Connection $connection
      */
     private static Connection $connection;
 
@@ -48,7 +48,7 @@ class ORM {
     /**
      * Returns the active instance of the database connection.
      *
-     * @return \Eufony\DBAL\Connection
+     * @return \Eufony\ORM\DBAL\Connection
      */
     public static function connection(): Connection {
         // Ensure connection exists
@@ -75,26 +75,20 @@ class ORM {
 
     /**
      * Initializes the database connection from the given driver.
+     * If a connection is already active, it will be broken and a new
+     * connection will be established.
      *
      * By default, sets up a `\Eufony\ORM\Inflection\DoctrineInflector` for
      * inflection.
      *
-     * Throws a `\Eufony\ORM\InvalidArgumentException` if an attempt to
-     * establish a duplicate connection occurs.
-     *
-     * @param \Eufony\DBAL\Driver\DriverInterface $driver
+     * @param \Eufony\ORM\DBAL\Driver\DriverInterface $driver
      */
     public static function init(DriverInterface $driver): void {
-        // Ensure connection doesn't exist
-        if (isset(static::$connection)) {
-            throw new BadMethodCallException("Database connection is already active");
-        }
-
         // Initialize database connection
         static::$connection = new Connection($driver);
 
         // Initialize inflector
-        static::$inflector = new DoctrineInflector();
+        static::$inflector ??= new DoctrineInflector();
     }
 
     /**

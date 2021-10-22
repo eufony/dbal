@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query;
 
 class Create extends Query {
 

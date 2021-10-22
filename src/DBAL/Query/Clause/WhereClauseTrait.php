@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query\Clause;
+namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\DBAL\Query\Keyword\Ex;
+use Eufony\ORM\DBAL\Query\Keyword\Ex;
 
 trait WhereClauseTrait {
 

@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Driver;
+namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\DBAL\Query\Query;
+use Eufony\ORM\DBAL\Query\Query;
 
 /**
  * Provides a database driver implementation for MySQL using the PDO extension.

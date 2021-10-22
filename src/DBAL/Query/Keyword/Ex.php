@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query\Keyword;
+namespace Eufony\ORM\DBAL\Query\Keyword;
 
 use ArrayAccess;
-use Eufony\DBAL\Query\Select;
+use Eufony\ORM\DBAL\Query\Select;
 use Eufony\ORM\BadMethodCallException;
 use Eufony\ORM\OutOfBoundsException;
 

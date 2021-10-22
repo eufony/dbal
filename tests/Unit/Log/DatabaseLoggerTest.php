@@ -19,7 +19,7 @@
 
 namespace Tests\Unit\Log;
 
-use Eufony\DBAL\Connection;
+use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\Log\DatabaseLogger;
 use Mockery;
 use Psr\Log\LoggerInterface;
@@ -34,7 +34,7 @@ class DatabaseLoggerTest extends AbstractLogTest {
     /**
      * The internal mock Connection object used to test the DatabaseLogger.
      *
-     * @var \Eufony\DBAL\Connection $internalDatabase
+     * @var \Eufony\ORM\DBAL\Connection $internalDatabase
      */
     protected Connection $internalDatabase;
 
