@@ -83,12 +83,7 @@ class Connection {
      * @return \Eufony\ORM\DBAL\Connection
      */
     public static function get(): Connection {
-        // Ensure connection exists
-        if (!isset(static::$connection)) {
-            throw new BadMethodCallException("No active database connection");
-        }
-
-        return static::$connection;
+        return static::$connection ?? throw new BadMethodCallException("No active database connection");
     }
 
     /**
