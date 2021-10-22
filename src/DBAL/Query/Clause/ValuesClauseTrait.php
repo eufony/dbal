@@ -24,10 +24,10 @@ trait ValuesClauseTrait {
     protected array $values;
 
     public function values(array $values): static {
-        foreach ($values as $key => $value) {
+        foreach ($values as &$value) {
             $placeholder = hash("md5", uniqid(more_entropy: true));
             $this->context[$placeholder] = $value;
-            $values[$key] = ":" . $placeholder;
+            $value = ":" . $placeholder;
         }
 
         $this->values = $values;

@@ -19,15 +19,13 @@
 
 namespace Eufony\ORM\DBAL\Query\Keyword;
 
-use ArrayAccess;
 use Eufony\ORM\DBAL\Query\Select;
-use Eufony\ORM\BadMethodCallException;
-use Eufony\ORM\OutOfBoundsException;
 
-class Ex implements ArrayAccess {
+class Ex {
 
     protected string $type;
     protected array $props;
+    protected array $context;
 
     public static function and(Ex ...$expressions): static {
         return new static(__FUNCTION__, ["ex" => $expressions]);
@@ -80,31 +78,53 @@ class Ex implements ArrayAccess {
     private function __construct(string $type, array $props = []) {
         $this->type = $type;
         $this->props = $props;
-    }
+        $this->context = [];
 
-    /** @inheritdoc */
-    public function offsetExists($offset): bool {
-        return property_exists($this, $offset) && isset($this->$offset);
-    }
-
-    /** @inheritdoc */
-    public function &offsetGet($offset) {
-        // Ensure property exists
-        if (!$this->offsetExists($offset)) {
-            throw new OutOfBoundsException("Unknown query builder property");
+        switch ($type) {
+            case "and":
+            case "or":
+                foreach ($this->props['ex'] as $ex) {
+                    $this->context = array_merge($this->context, $ex->context);
+                    $ex->context = [];
+                }
+                break;
+            case "not":
+                $ex = $this->props['ex'];
+                $this->context = $ex->context;
+                $ex->context = [];
+                break;
+            case "lt":
+            case "le":
+            case "eq":
+            case "ge":
+            case "gt":
+            case "ne":
+            case "like":
+                $value = &$this->props['value'];
+                $placeholder = hash("md5", uniqid(more_entropy: true));
+                $this->context[$placeholder] = $value;
+                $value = ":" . $placeholder;
+                break;
+            case "in":
+                foreach ($this->props['value'] as &$value) {
+                    $placeholder = hash("md5", uniqid(more_entropy: true));
+                    $this->context[$placeholder] = $value;
+                    $value = ":" . $placeholder;
+                }
+                break;
         }
-
-        return $this->$offset;
     }
 
-    /** @inheritdoc */
-    public function offsetSet($offset, $value) {
-        throw new BadMethodCallException("Properties is read-only");
+    public function type(): string {
+        return $this->type;
     }
 
-    /** @inheritdoc */
-    public function offsetUnset($offset) {
-        throw new BadMethodCallException("Properties is read-only");
+    public function props(): array {
+        return $this->props;
+    }
+
+    public function context(): array {
+        return $this->context;
     }
 
 }

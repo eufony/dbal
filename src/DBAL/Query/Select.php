@@ -19,26 +19,28 @@
 
 namespace Eufony\ORM\DBAL\Query;
 
+use Eufony\ORM\DBAL\Query\Clause\JoinClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\LimitClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\OrderByClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
 
 class Select extends Query {
 
+    use JoinClauseTrait;
     use LimitClauseTrait;
     use OrderByClauseTrait;
     use WhereClauseTrait;
 
-    protected array $tables;
+    protected string $table;
     protected array $fields;
     protected string $function;
 
-    public static function from(string ...$tables): static {
-        return new static($tables);
+    public static function from(string $table): static {
+        return new static($table);
     }
 
-    private function __construct(array $tables) {
-        $this->tables = $tables;
+    private function __construct(string $table) {
+        $this->table = $table;
     }
 
     public function fields(string ...$fields): static {

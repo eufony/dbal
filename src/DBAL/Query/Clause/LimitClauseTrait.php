@@ -24,13 +24,14 @@ trait LimitClauseTrait {
     protected int $limit;
     protected int $offset;
 
-    public function limit(int $count): static {
-        $this->limit = $count;
-        return $this;
-    }
+    public function limit(int $x, ?int $y = null): static {
+        if ($y === null) {
+            $this->limit = $x;
+        } else {
+            $this->limit = $y;
+            $this->offset = $x;
+        }
 
-    public function offset(int $offset): static {
-        $this->offset = $offset;
         return $this;
     }
 
