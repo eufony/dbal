@@ -90,14 +90,14 @@ class DatabaseLogger extends AbstractLogger {
                     "nullable" => false,
                 ],
                 "level" => [
-                    "type" => "string(9)",
+                    "type" => "varchar(9)",
                     "nullable" => false,
                 ],
                 "message" => [
-                    "type" => "string",
+                    "type" => "text",
                 ],
                 "exception" => [
-                    "type" => "string",
+                    "type" => "text",
                     "default" => null,
                 ],
             ];
