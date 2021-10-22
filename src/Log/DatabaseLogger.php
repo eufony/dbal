@@ -19,10 +19,10 @@
 
 namespace Eufony\ORM\Log;
 
-use Eufony\DBAL\Connection;
-use Eufony\DBAL\Query\Create;
-use Eufony\DBAL\Query\Insert;
-use Eufony\DBAL\Query\Keyword\Type;
+use Eufony\ORM\DBAL\Connection;
+use Eufony\ORM\DBAL\Query\Create;
+use Eufony\ORM\DBAL\Query\Insert;
+use Eufony\ORM\DBAL\Query\Keyword\Type;
 use Eufony\ORM\Schema\Schema;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
@@ -40,7 +40,7 @@ class DatabaseLogger extends AbstractLogger {
     /**
      * The database connection to log into.
      *
-     * @var \Eufony\DBAL\Connection $database
+     * @var \Eufony\ORM\DBAL\Connection $database
      */
     public Connection $database;
 
@@ -48,7 +48,7 @@ class DatabaseLogger extends AbstractLogger {
      * Class constructor.
      * Creates a new logger that logs into the given database.
      *
-     * @param \Eufony\DBAL\Connection $database
+     * @param \Eufony\ORM\DBAL\Connection $database
      */
     public function __construct(Connection $database) {
         $this->database = $database;
@@ -59,8 +59,8 @@ class DatabaseLogger extends AbstractLogger {
      * If `$database` is set, sets the new connection and returns the previous
      * instance.
      *
-     * @param \Eufony\DBAL\Connection|null $database
-     * @return \Eufony\DBAL\Connection
+     * @param \Eufony\ORM\DBAL\Connection|null $database
+     * @return \Eufony\ORM\DBAL\Connection
      */
     public function database(?Connection $database = null): Connection {
         $prev = $this->database;

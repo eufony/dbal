@@ -17,15 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Driver;
+namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\DBAL\Query\Create;
-use Eufony\DBAL\Query\Delete;
-use Eufony\DBAL\Query\Drop;
-use Eufony\DBAL\Query\Insert;
-use Eufony\DBAL\Query\Keyword\Ex;
-use Eufony\DBAL\Query\Select;
-use Eufony\DBAL\Query\Update;
+use Eufony\ORM\DBAL\Query\Create;
+use Eufony\ORM\DBAL\Query\Delete;
+use Eufony\ORM\DBAL\Query\Drop;
+use Eufony\ORM\DBAL\Query\Insert;
+use Eufony\ORM\DBAL\Query\Keyword\Ex;
+use Eufony\ORM\DBAL\Query\Select;
+use Eufony\ORM\DBAL\Query\Update;
 use Eufony\ORM\InvalidArgumentException;
 
 /**
@@ -68,7 +68,7 @@ class AnsiSQLDriver extends AbstractPDODriver {
             $keys = array_keys($query['order']);
             $values = array_values($query['order']);
             $order = array_map(fn($f, $t) => "\"$f\" " . ($t === "asc" ? "ASC" : "DESC"), $keys, $values);
-            $sql .= " ORDER BY " . implode(",", $order);
+            $sql .= " ORDER BY " . implode(", ", $order);
         }
 
         // TODO: No LIMIT or OFFSET support in ANSI SQL.
@@ -166,13 +166,13 @@ class AnsiSQLDriver extends AbstractPDODriver {
                     "ge" => "<=",
                     "gt" => "<",
                     "ne" => "!=",
-                    "like" => "LIKE"
+                    "like" => " LIKE "
                 };
 
                 return "\"$field\"$operator$value";
             case "in":
-                $values = implode(",", $ex['props']['value']);
-                return "\"" . $ex['props']['field'] . "\" IN ($values)";
+                $values = $ex['props']['value'];
+                return "\"" . $ex['props']['field'] . "\" IN $values";
             case "exists":
                 $query = $this->generate($ex['props']["query"]);
                 return "EXISTS ($query)";

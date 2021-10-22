@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Driver;
+namespace Eufony\ORM\DBAL\Driver;
 
 /**
  * Provides a database driver implementation for SQLite using the PDO

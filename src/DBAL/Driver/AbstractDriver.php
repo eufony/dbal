@@ -17,16 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Driver;
+namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\DBAL\Query\Create;
-use Eufony\DBAL\Query\Delete;
-use Eufony\DBAL\Query\Drop;
-use Eufony\DBAL\Query\Insert;
-use Eufony\DBAL\Query\Query;
-use Eufony\DBAL\Query\Select;
-use Eufony\DBAL\Query\Update;
-use Eufony\ORM\InvalidArgumentException;
+use Eufony\ORM\DBAL\Query\Create;
+use Eufony\ORM\DBAL\Query\Delete;
+use Eufony\ORM\DBAL\Query\Drop;
+use Eufony\ORM\DBAL\Query\Insert;
+use Eufony\ORM\DBAL\Query\Query;
+use Eufony\ORM\DBAL\Query\Select;
+use Eufony\ORM\DBAL\Query\Update;
 use ReflectionClass;
 
 
@@ -58,19 +57,13 @@ abstract class AbstractDriver implements DriverInterface {
     /** @inheritdoc */
     public function generate(Query $query): string {
         $short_name = (new ReflectionClass(get_class($query)))->getShortName();
-
-        // Ensure a known query type is passed
-        if (!method_exists($this, strtolower($short_name))) {
-            throw new InvalidArgumentException("Unknown query type: " . get_class($query));
-        }
-
         return $this->$short_name($query);
     }
 
     /**
      * Generates the SQL query to be executed from a `Select` query builder.
      *
-     * @param \Eufony\DBAL\Query\Select $query
+     * @param \Eufony\ORM\DBAL\Query\Select $query
      * @return string
      */
     abstract protected function select(Select $query): string;
@@ -78,7 +71,7 @@ abstract class AbstractDriver implements DriverInterface {
     /**
      * Generates the SQL query to be executed from an `Insert` query builder.
      *
-     * @param \Eufony\DBAL\Query\Insert $query
+     * @param \Eufony\ORM\DBAL\Query\Insert $query
      * @return string
      */
     abstract protected function insert(Insert $query): string;
@@ -86,7 +79,7 @@ abstract class AbstractDriver implements DriverInterface {
     /**
      * Generates the SQL query to be executed from an `Update` query builder.
      *
-     * @param \Eufony\DBAL\Query\Update $query
+     * @param \Eufony\ORM\DBAL\Query\Update $query
      * @return string
      */
     abstract protected function update(Update $query): string;
@@ -94,7 +87,7 @@ abstract class AbstractDriver implements DriverInterface {
     /**
      * Generates the SQL query to be executed from a `Delete` query builder.
      *
-     * @param \Eufony\DBAL\Query\Delete $query
+     * @param \Eufony\ORM\DBAL\Query\Delete $query
      * @return string
      */
     abstract protected function delete(Delete $query): string;
@@ -102,7 +95,7 @@ abstract class AbstractDriver implements DriverInterface {
     /**
      * Generates the SQL query to be executed from a `Create` query builder.
      *
-     * @param \Eufony\DBAL\Query\Create $query
+     * @param \Eufony\ORM\DBAL\Query\Create $query
      * @return string
      */
     abstract protected function create(Create $query): string;
@@ -110,7 +103,7 @@ abstract class AbstractDriver implements DriverInterface {
     /**
      * Generates the SQL query to be executed from a `Drop` query builder.
      *
-     * @param \Eufony\DBAL\Query\Drop $query
+     * @param \Eufony\ORM\DBAL\Query\Drop $query
      * @return string
      */
     abstract protected function drop(Drop $query): string;

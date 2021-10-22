@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query;
 
-use Eufony\DBAL\Query\Clause\ValuesClauseTrait;
-use Eufony\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\ORM\DBAL\Query\Clause\ValuesClauseTrait;
+use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
 
 /**
  * Represents an `UPDATE` SQL query.
