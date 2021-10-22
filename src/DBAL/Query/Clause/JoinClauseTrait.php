@@ -17,22 +17,32 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\ORM\InvalidArgumentException;
 
-class Delete extends Query {
+trait JoinClauseTrait {
 
-    use WhereClauseTrait;
+    protected array $joins;
 
-    protected string $table;
+    public function innerJoin(string $primary, string $foreign): static {
+        $primary = explode(".", $primary);
+        $foreign = explode(".", $foreign);
 
-    public static function from(string $table): static {
-        return new static($table);
-    }
+        if (count($primary) !== 2 || count($foreign) !== 2) {
+            throw new InvalidArgumentException("Invalid primary or foreign field");
+        }
 
-    private function __construct(string $table) {
-        $this->table = $table;
+        $joins ??= [];
+        $this->joins[] = [
+            "type" => "inner",
+            "primary_table" => $primary[0],
+            "primary_field" => $primary[1],
+            "foreign_table" => $foreign[0],
+            "foreign_field" => $foreign[1],
+        ];
+
+        return $this;
     }
 
 }

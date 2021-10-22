@@ -30,24 +30,24 @@ class Update extends Query {
     use ValuesClauseTrait;
     use WhereClauseTrait;
 
-    protected array $tables;
+    protected string $table;
 
     /**
-     * @param string ...$tables
+     * @param string $table
      * @return static
      */
-    public static function table(string ...$tables): static {
-        return new static($tables);
+    public static function table(string $table): static {
+        return new static($table);
     }
 
     /**
      * Private class constructor.
      * Use `Update::table()` to initialize this class.
      *
-     * @param string[] $tables
+     * @param string $table
      */
-    private function __construct(array $tables) {
-        $this->tables = $tables;
+    private function __construct(string $table) {
+        $this->table = $table;
     }
 
 }

@@ -42,41 +42,90 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function select(Select $query): string {
+        $table = $query['table'];
+        $fields = $query['fields'] ?? null;
+        $function = $query['function'] ?? null;
+        $joins = $query['joins'] ?? null;
+        $limit = $query['limit'] ?? null;
+        $offset = $query['offset'] ?? null;
+        $order = $query['order'] ?? null;
+        $where = $query['where'] ?? null;
+
         $sql = "SELECT ";
 
-        $function = !isset($query['function'])
-            ? null
-            : match ($query['function']) {
+        if (isset($function)) {
+            $function = match ($function) {
                 "count" => "COUNT",
                 "max" => "MAX",
                 "min" => "MIN",
                 default => throw new InvalidArgumentException("Unknown function type")
             };
+        }
 
-        $fields = isset($query['fields']) ? array_map(fn($f) => "\"$f\"", $query['fields']) : ["*"];
-        if (isset($function)) $fields = array_map(fn($f) => "$function($f)", $fields);
+        $fields = isset($fields) ? array_map(fn($field) => "\"$field\"", $fields) : ["*"];
+        if (isset($function)) $fields = array_map(fn($field) => "$function($field)", $fields);
         $sql .= implode(",", $fields);
 
-        $sql .= " FROM " . implode(",", array_map(fn($table) => "\"$table\"", $query['tables']));
+        if (isset($joins)) {
+            $tables = [$table];
+            $aliases = [null];
+            $join_string = "";
 
-        if (isset($query['where'])) {
-            $where = $this->expression($query['where']);
+            foreach ($joins as $join) {
+                $type = $join['type'];
+                $primary_table = $join['primary_table'];
+                $primary_field = $join['primary_field'];
+                $foreign_table = $join['foreign_table'];
+                $foreign_field = $join['foreign_field'];
+
+                if (in_array($foreign_table, $tables)) {
+                    $count = array_count_values($tables)[$foreign_table] + 1;
+                    $alias = $foreign_table . $count;
+                } else {
+                    $alias = null;
+                }
+
+                $tables[] = $foreign_table;
+                $aliases[] = $alias;
+
+                $type = match ($type) {
+                    "inner" => "INNER"
+                };
+                $join_table = $alias === null ? $foreign_table : $alias;
+
+                $join_string .= " $type JOIN $join_table";
+                $join_string .= " ON $primary_table.$primary_field = $join_table.$foreign_field";
+            }
+
+            $from = array_map(fn($table, $alias) => $alias === null ? "$table" : "$table AS $alias", $tables, $aliases);
+            $from = implode(", ", $from);
+            $sql .= " FROM $from";
+
+            $sql .= $join_string;
+        } else {
+            $sql .= " FROM \"$table\"";
+        }
+
+        if (isset($where)) {
+            $where = $this->expression($where);
             $sql .= " WHERE $where";
         }
 
-        if (isset($query['order'])) {
-            $keys = array_keys($query['order']);
-            $values = array_values($query['order']);
-            $order = array_map(fn($f, $t) => "\"$f\" " . ($t === "asc" ? "ASC" : "DESC"), $keys, $values);
+        if (isset($order)) {
+            $order = array_map(
+                fn($field, $type) => "\"$field\" " . ($type === "asc" ? "ASC" : "DESC"),
+                array_keys($order),
+                array_values($order)
+            );
             $sql .= " ORDER BY " . implode(", ", $order);
         }
 
         // TODO: No LIMIT or OFFSET support in ANSI SQL.
-        if (isset($query['limit'])) {
-            $sql .= " LIMIT " . $query['limit'];
+        if (isset($limit)) {
+            $sql .= " LIMIT " . $limit;
 
-            if (isset($query['offset'])) {
-                $sql .= " OFFSET " . $query['limit'];
+            if (isset($offset)) {
+                $sql .= " OFFSET " . $offset;
             }
         }
 
@@ -85,30 +134,40 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function insert(Insert $query): string {
-        $sql = "INSERT INTO \"" . $query['table'] . "\"";
+        $table = $query['table'];
+        $values = $query['values'] ?? null;
 
-        if (isset($query['values'])) {
-            $fields = implode(",", array_map(fn($key) => "\"$key\"", array_keys($query['values'])));
-            $values = implode(",", array_values($query['values']));
-            $sql .= " ($fields) VALUES ($values)";
+        if (!isset($values)) {
+            throw new InvalidArgumentException("Insert values not set");
         }
+
+        $sql = "INSERT INTO \"$table\"";
+
+        $fields = implode(", ", array_map(fn($key) => "\"$key\"", array_keys($values)));
+        $values = implode(", ", array_values($query['values']));
+        $sql .= " ($fields) VALUES ($values)";
 
         return $sql;
     }
 
     /** @inheritdoc */
     protected function update(Update $query): string {
-        $sql = "UPDATE " . implode(",", array_map(fn($t) => "\"$t\"", $query['tables']));
+        $table = $query['table'];
+        $values = $query['values'] ?? null;
+        $where = $query['where'] ?? null;
 
-        if (isset($query['values'])) {
-            $keys = array_keys($query['values']);
-            $values = array_values($query['values']);
-            $values = implode(", ", array_map(fn($key, $value) => "\"$key\"=$value", $keys, $values));
-            $sql .= " SET $values";
+        if (!isset($values)) {
+            throw new InvalidArgumentException("Update values not set");
         }
 
-        if (isset($query['where'])) {
-            $where = $this->expression($query['where']);
+        $sql = "UPDATE \"$table\"";
+
+        $values = array_map(fn($key, $value) => "\"$key\" = $value", array_keys($values), array_values($values));
+        $values = implode(", ", $values);
+        $sql .= " SET $values";
+
+        if (isset($where)) {
+            $where = $this->expression($where);
             $sql .= " WHERE $where";
         }
 
@@ -117,9 +176,12 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function delete(Delete $query): string {
-        $sql = "DELETE FROM " . implode(",", array_map(fn($t) => "\"$t\"", $query['tables']));
+        $table = $query['table'];
+        $where = $query['where'] ?? null;
 
-        if (isset($query['where'])) {
+        $sql = "DELETE FROM \"$table\"";
+
+        if (isset($where)) {
             $where = $this->expression($query['where']);
             $sql .= " WHERE $where";
         }
@@ -135,21 +197,24 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
     /** @inheritdoc */
     protected function drop(Drop $query): string {
-        $sql = "DROP TABLE " . implode(",", array_map(fn($t) => "\"$t\"", $query['tables']));
+        $tables = $query['tables'];
+
+        $sql = "DROP TABLE " . implode(", ", array_map(fn($table) => "\"$table\"", $tables));
+
         return $sql;
     }
 
     protected function expression(Ex $ex): string {
-        switch ($ex['type']) {
+        switch ($ex->type()) {
             case "and":
-                $inner = array_map(fn($ex) => $this->expression($ex), $ex['props']['ex']);
+                $inner = array_map(fn($ex) => $this->expression($ex), $ex->props()['ex']);
                 return implode(" AND ", array_map(fn($ex) => "($ex)", $inner));
             case "or":
-                $inner = array_map(fn($ex) => $this->expression($ex), $ex['props']['ex']);
+                $inner = array_map(fn($ex) => $this->expression($ex), $ex->props()['ex']);
                 return implode(" OR ", array_map(fn($ex) => "($ex)", $inner));
             case "not":
-                $expression = $this->expression($ex['props']['ex']);
-                return "NOT ($expression)";
+                $inner = $this->expression($ex->props()['ex']);
+                return "NOT ($inner)";
             case "lt":
             case "le":
             case "eq":
@@ -157,25 +222,27 @@ class AnsiSQLDriver extends AbstractPDODriver {
             case "gt":
             case "ne":
             case "like":
-                $field = $ex['props']['field'];
-                $value = $ex['props']['value'];
-                $operator = match ($ex['type']) {
+                $field = $ex->props()['field'];
+                $value = $ex->props()['value'];
+                $operator = match ($ex->type()) {
                     "lt" => ">",
                     "le" => ">=",
                     "eq" => "=",
                     "ge" => "<=",
                     "gt" => "<",
                     "ne" => "!=",
-                    "like" => " LIKE "
+                    "like" => "LIKE"
                 };
 
-                return "\"$field\"$operator$value";
+                return "\"$field\" $operator $value";
             case "in":
-                $values = $ex['props']['value'];
-                return "\"" . $ex['props']['field'] . "\" IN $values";
+                $field = $ex->props()['field'];
+                $values = $ex->props()['value'];
+                $values = implode(", ", $values);
+                return "\"$field\" IN ($values)";
             case "exists":
-                $query = $this->generate($ex['props']["query"]);
-                return "EXISTS ($query)";
+                $inner = $this->generate($ex->props()["query"]);
+                return "EXISTS ($inner)";
             default:
                 throw new InvalidArgumentException("Unknown expression type");
         }

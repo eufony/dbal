@@ -19,19 +19,30 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
+use Eufony\ORM\InvalidArgumentException;
+
 trait OrderByClauseTrait {
 
     protected array $order;
 
     public function orderBy(string|array $fields): static {
-        $this->order = [];
-
         if (is_string($fields)) {
             $fields = [$fields];
         }
 
+        $this->order = [];
+
         foreach ($fields as $key => $value) {
-            $this->order = array_merge($this->order, is_int($key) ? [$value => "asc"] : [$key => $value]);
+            if (is_int($key)) {
+                $key = $value;
+                $value = "asc";
+            }
+
+            if (!in_array($value, ["asc", "desc"])) {
+                throw new InvalidArgumentException("Unknown order modifier");
+            }
+
+            $this->order[$key] = $value;
         }
 
         return $this;
