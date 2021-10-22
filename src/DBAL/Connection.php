@@ -20,8 +20,11 @@
 namespace Eufony\ORM\DBAL;
 
 use DateInterval;
-use Eufony\ORM\DBAL\Driver\DriverInterface;
+use Eufony\ORM\BadMethodCallException;
 use Eufony\ORM\Cache\ArrayCache;
+use Eufony\ORM\DBAL\Driver\DriverInterface;
+use Eufony\ORM\Inflection\DoctrineInflector;
+use Eufony\ORM\Inflection\InflectorInterface;
 use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\Log\DatabaseLogger;
 use Eufony\ORM\QueryException;
@@ -35,6 +38,13 @@ use Throwable;
  * Provides methods to send queries to the database engine.
  */
 class Connection {
+
+    /**
+     * Stores the active instance of the database connection.
+     *
+     * @var \Eufony\ORM\DBAL\Connection $connection
+     */
+    private static Connection $connection;
 
     /**
      * A backend driver for building and executing queries.
@@ -60,6 +70,28 @@ class Connection {
     private CacheInterface $cache;
 
     /**
+     * An implementation of `InflectionInterface`.
+     * Defaults to an instance of `\Eufony\ORM\Inflection\DoctrineInflector`.
+     *
+     * @var \Eufony\ORM\Inflection\InflectorInterface $inflector
+     */
+    private InflectorInterface $inflector;
+
+    /**
+     * Returns the active instance of the database connection.
+     *
+     * @return \Eufony\ORM\DBAL\Connection
+     */
+    public static function get(): Connection {
+        // Ensure connection exists
+        if (!isset(static::$connection)) {
+            throw new BadMethodCallException("No active database connection");
+        }
+
+        return static::$connection;
+    }
+
+    /**
      * Class constructor.
      * Creates a new connection to a database engine using the given driver
      * backend.
@@ -70,9 +102,11 @@ class Connection {
      * @param \Eufony\ORM\DBAL\Driver\DriverInterface $driver
      */
     public function __construct(DriverInterface $driver) {
+        static::$connection = $this;
         $this->driver = $driver;
         $this->logger = new DatabaseLogger($this);
         $this->cache = new ArrayCache();
+        $this->inflector = new DoctrineInflector();
     }
 
     /**
@@ -117,6 +151,20 @@ class Connection {
     }
 
     /**
+     * Returns the current inflector.
+     * If `$inflector` is set, sets the new inflector and returns the previous
+     * instance.
+     *
+     * @param \Eufony\ORM\Inflection\InflectorInterface|null $inflector
+     * @return \Eufony\ORM\Inflection\InflectorInterface
+     */
+    public function inflector(?InflectorInterface $inflector = null): InflectorInterface {
+        $prev = $this->inflector;
+        $this->inflector = $inflector ?? $this->inflector;
+        return $prev;
+    }
+
+    /**
      * Executes the given query string.
      *
      * Additionally handles caching (for read-only queries), logging, and
@@ -153,7 +201,7 @@ class Connection {
             $cache_result = $this->cache->get($cache_key);
 
             if ($cache_result !== null) {
-                $this->logger->debug("Query cache hit: $query");
+                $this->logger->debug("Cache hit for query: $query");
                 return $cache_result;
             }
         }
@@ -173,20 +221,20 @@ class Connection {
         if ($is_mutation === false) {
             if ($ttl !== null) {
                 // Log info for read operations
-                $this->logger->info("Query read op: $query");
+                $this->logger->info("Query read: $query");
 
                 // Cache result
                 $this->cache->set($cache_key, $query_result, ttl: $ttl);
-                $this->logger->debug("Query cached result: $query");
+                $this->logger->debug("Cache set for query: $query");
             }
         } else {
             // Log notice for write operations
-            $this->logger->notice("Query write op: $query");
+            $this->logger->notice("Query mutation: $query");
 
             // Invalidate cache
             // TODO: Don't need to invalidate the entire cache, only the tables that were altered
             $this->cache->clear();
-            $this->logger->debug("Clear cache");
+            $this->logger->debug("Cache clear");
         }
 
         // Return result
@@ -214,7 +262,7 @@ class Connection {
 
         if ($is_root_transaction) {
             // Start transaction
-            $this->logger->debug("Start transaction");
+            $this->logger->debug("Transaction start");
             $this->driver->beginTransaction();
         }
 
@@ -225,17 +273,17 @@ class Connection {
             if ($is_root_transaction) {
                 // Transaction failed, roll back
                 $this->driver->rollback();
-                $this->logger->error("Transaction failed, roll back", context: ["exception" => $e]);
+                $this->logger->error("Transaction failed, rolled back", context: ["exception" => $e]);
             }
 
             // Propagate error
-            throw new TransactionException("Transaction failed", previous: $e);
+            throw new TransactionException("Transaction failed, rolled back", previous: $e);
         }
 
         if ($is_root_transaction) {
             // Transaction didn't throw errors, commit to database
             $this->driver->commit();
-            $this->logger->debug("Commit transaction");
+            $this->logger->debug("Transaction commit");
         }
     }
 

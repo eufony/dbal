@@ -22,7 +22,7 @@ namespace Eufony\ORM\DBAL\Query;
 use ArrayAccess;
 use DateInterval;
 use Eufony\ORM\BadMethodCallException;
-use Eufony\ORM\ORM;
+use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\OutOfBoundsException;
 
 /**
@@ -46,7 +46,7 @@ abstract class Query implements ArrayAccess {
      * @return mixed[][]
      */
     public function execute(int|DateInterval|null $ttl = 1): array {
-        $connection = ORM::connection();
+        $connection = Connection::get();
         $query_string = $connection->driver()->generate($this);
         return $connection->query($query_string, $this['context'], $ttl);
     }
