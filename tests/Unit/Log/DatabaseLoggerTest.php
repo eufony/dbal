@@ -32,7 +32,7 @@ class DatabaseLoggerTest extends AbstractLogTest {
     use LoggerTraitTestTrait;
 
     /**
-     * The internal mock Connection object used to test the DatabaseLogger.
+     * The internal mock `Connection` object used to test the `DatabaseLogger`.
      *
      * @var \Eufony\ORM\DBAL\Connection $internalDatabase
      */
