@@ -22,7 +22,6 @@ namespace Eufony\ORM\Log;
 use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\DBAL\Query\Create;
 use Eufony\ORM\DBAL\Query\Insert;
-use Eufony\ORM\DBAL\Query\Keyword\Type;
 use Eufony\ORM\Schema\Schema;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
@@ -81,24 +80,24 @@ class DatabaseLogger extends AbstractLogger {
         if (!Schema::tableExists("__log")) {
             $fields = [
                 "id" => [
-                    "type" => Type::int(),
+                    "type" => "int",
                     "nullable" => "false",
                     "primary_key" => "true",
                     "auto_increment" => true,
                 ],
                 "time" => [
-                    "type" => Type::datetime(),
+                    "type" => "datetime",
                     "nullable" => false,
                 ],
                 "level" => [
-                    "type" => Type::varchar(9),
+                    "type" => "string(9)",
                     "nullable" => false,
                 ],
                 "message" => [
-                    "type" => Type::text(),
+                    "type" => "string",
                 ],
                 "exception" => [
-                    "type" => Type::text(),
+                    "type" => "string",
                     "default" => null,
                 ],
             ];
