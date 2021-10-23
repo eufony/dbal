@@ -39,32 +39,32 @@ class Ex {
         return new static(__FUNCTION__, ["ex" => $expression]);
     }
 
-    public static function lt(string $field, int|float $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function lt(string $field, int|float $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function le(string $field, int|float $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function le(string $field, int|float $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function eq(string $field, int|float|string|bool|null $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function eq(string $field, int|float|string|bool|null $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function ge(string $field, int|float $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function ge(string $field, int|float $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function gt(string $field, int|float $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function gt(string $field, int|float $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function ne(string $field, int|float|string|bool|null $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function ne(string $field, int|float|string|bool|null $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
-    public static function like(string $field, string $value): static {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    public static function like(string $field, string $value, bool $literal = true): static {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
     public static function in(string $field, array $value): static {
@@ -100,6 +100,10 @@ class Ex {
             case "gt":
             case "ne":
             case "like":
+                if ($this->props['literal']) {
+                    break;
+                }
+
                 $value = &$this->props['value'];
                 $placeholder = hash("md5", uniqid(more_entropy: true));
                 $this->context[$placeholder] = $value;
