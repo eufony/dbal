@@ -19,28 +19,42 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\ORM\InvalidArgumentException;
+use Eufony\ORM\BadMethodCallException;
+use Eufony\ORM\DBAL\Query\Keyword\Ex;
 
 trait JoinClauseTrait {
 
     protected array $joins;
 
-    public function innerJoin(string $primary, string $foreign): static {
-        $primary = explode(".", $primary);
-        $foreign = explode(".", $foreign);
-
-        if (count($primary) !== 2 || count($foreign) !== 2) {
-            throw new InvalidArgumentException("Invalid primary or foreign field");
-        }
-
-        $joins ??= [];
+    public function innerJoin(string $table, ?string $alias = null): static {
+        $this->joins ??= [];
         $this->joins[] = [
             "type" => "inner",
-            "primary_table" => $primary[0],
-            "primary_field" => $primary[1],
-            "foreign_table" => $foreign[0],
-            "foreign_field" => $foreign[1],
+            "table" => $table,
+            "alias" => $alias,
         ];
+
+        return $this;
+    }
+
+
+    public function leftJoin(string $table, ?string $alias = null): static {
+        $this->joins ??= [];
+        $this->joins[] = [
+            "type" => "left",
+            "table" => $table,
+            "alias" => $alias,
+        ];
+
+        return $this;
+    }
+
+    public function on(Ex $expression): static {
+        if (!isset($this->joins)) {
+            throw new BadMethodCallException("Cannot set ON predicate before a join");
+        }
+
+        $this->joins[array_key_last($this->joins)]['on'] = $expression;
 
         return $this;
     }

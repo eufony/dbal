@@ -19,8 +19,6 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Query;
-
 /**
  * Provides a database driver implementation for MySQL using the PDO extension.
  */
@@ -44,9 +42,8 @@ class MySQLDriver extends AnsiSQLDriver {
     }
 
     /** @inheritdoc */
-    public function generate(Query $query): string {
-        // MySQL uses backticks instead of double quotes for identifiers
-        return preg_replace("/\"/m", "`", parent::generate($query));
+    protected function fieldQuote(string $field): string {
+        return implode(".", array_map(fn($part) => "`$part`", explode(".", $field)));
     }
 
 }

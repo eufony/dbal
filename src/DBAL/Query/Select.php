@@ -32,15 +32,17 @@ class Select extends Query {
     use WhereClauseTrait;
 
     protected string $table;
+    protected string $alias;
     protected array $fields;
     protected string $function;
 
-    public static function from(string $table): static {
-        return new static($table);
+    public static function from(string $table, ?string $alias = null): static {
+        return new static($table, $alias);
     }
 
-    private function __construct(string $table) {
+    private function __construct(string $table, string|null $alias) {
         $this->table = $table;
+        if (isset($alias)) $this->alias = $alias;
     }
 
     public function fields(string ...$fields): static {
