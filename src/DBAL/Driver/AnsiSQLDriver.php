@@ -48,19 +48,31 @@ class AnsiSQLDriver extends AbstractPDODriver {
         $table = $query['table'];
         $alias = $query['alias'] ?? null;
         $fields = $query['fields'] ?? null;
-        $function = $query['function'] ?? null;
 
         $sql = "SELECT ";
 
         // Build fields
-        $fields = isset($fields) ? array_map(fn($field) => $this->fieldQuote($field), $fields) : ["*"];
+        if (isset($fields)) {
+            $select_fields = [];
 
-        if (isset($function)) {
-            $function = strtoupper($function);
-            $fields = array_map(fn($field) => "$function($field)", $fields);
+            foreach ($fields as $field) {
+                if (preg_match_all("/^([a-zA-Z]+)\((\w+|\*)\)$/", $field, $matches) === 1) {
+                    $function = $matches[1][0];
+                    $field = $matches[2][0];
+
+                    $function = strtoupper($function);
+                    if ($field !== "*") $field = $this->fieldQuote($field);
+
+                    $select_fields[] = "$function($field)";
+                } else {
+                    $select_fields[] = $this->fieldQuote($field);
+                }
+            }
+
+            $sql .= implode(", ", $select_fields);
+        } else {
+            $sql .= "*";
         }
-
-        $sql .= implode(",", $fields);
 
         // Build FROM
         $table = $this->fieldQuote($table);

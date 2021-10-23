@@ -34,7 +34,6 @@ class Select extends Query {
     protected string $table;
     protected string $alias;
     protected array $fields;
-    protected string $function;
 
     public static function from(string $table, ?string $alias = null): static {
         return new static($table, $alias);
@@ -48,23 +47,6 @@ class Select extends Query {
     public function fields(string ...$fields): static {
         $this->fields = $fields;
         return $this;
-    }
-
-    public function count(): int {
-        $this->function = "count";
-        return array_values($this->execute()[0])[0];
-    }
-
-    public function max(string $field): mixed {
-        $this->fields($field);
-        $this->function = "max";
-        return array_values($this->execute()[0])[0];
-    }
-
-    public function min(string $field): mixed {
-        $this->fields($field);
-        $this->function = "min";
-        return array_values($this->execute()[0])[0];
     }
 
 }
