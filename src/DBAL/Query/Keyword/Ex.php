@@ -63,6 +63,10 @@ class Ex {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
 
+    public static function same(string $primary, string $foreign): static {
+        return static::eq($primary, $foreign, literal: false);
+    }
+
     public static function like(string $field, string $value, bool $literal = true): static {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value, "literal" => $literal]);
     }
@@ -100,7 +104,7 @@ class Ex {
             case "gt":
             case "ne":
             case "like":
-                if ($this->props['literal']) {
+                if (!$this->props['literal']) {
                     break;
                 }
 
