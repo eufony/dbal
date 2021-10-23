@@ -170,13 +170,10 @@ class AnsiSQLDriver extends AbstractPDODriver {
     /** @inheritdoc */
     protected function drop(Drop $query): string {
         // Get query props
-        $tables = $query['tables'];
+        $table = $query['table'];
 
-        $sql = "DROP TABLE ";
-
-        // Build tables
-        $tables = implode(", ", array_map(fn($table) => $this->fieldQuote($table), $tables));
-        $sql .= $tables;
+        $table = $this->fieldQuote($table);
+        $sql = "DROP TABLE $table";
 
         // Return result
         return $sql;
