@@ -21,14 +21,14 @@ namespace Eufony\ORM\DBAL\Query;
 
 class Drop extends Query {
 
-    protected array $tables;
+    protected string $table;
 
-    public static function tables(string ...$tables): static {
-        return new static($tables);
+    public static function tables(string $table): static {
+        return new static($table);
     }
 
-    private function __construct(array $tables) {
-        $this->tables = $tables;
+    private function __construct(string $table) {
+        $this->table = $table;
     }
 
 }
