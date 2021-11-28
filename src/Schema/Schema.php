@@ -25,4 +25,10 @@ class Schema {
         return true;
     }
 
+    public static function createTable(string $table, array $fields): Table {
+    }
+
+    public static function dropTables(string ...$tables): void {
+    }
+
 }
