@@ -28,7 +28,6 @@ use Eufony\ORM\DBAL\Query\Select;
 use Eufony\ORM\DBAL\Query\Update;
 use ReflectionClass;
 
-
 /**
  * Provides an abstract database driver implementation that other drivers can
  * inherit from.
