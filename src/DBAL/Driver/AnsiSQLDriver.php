@@ -61,7 +61,7 @@ class AnsiSQLDriver extends AbstractPDODriver {
                     $field = $matches[2][0];
 
                     $function = strtoupper($function);
-                    if ($field !== "*") $field = $this->fieldQuote($field);
+                    $field = $this->fieldQuote($field);
 
                     $select_fields[] = "$function($field)";
                 } else {
@@ -323,7 +323,7 @@ class AnsiSQLDriver extends AbstractPDODriver {
      * @return string
      */
     protected function fieldQuote(string $field): string {
-        return implode(".", array_map(fn($part) => "\"$part\"", explode(".", $field)));
+        return implode(".", array_map(fn($part) => $part === "*" ? $part : "\"$part\"", explode(".", $field)));
     }
 
     /**
