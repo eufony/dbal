@@ -78,6 +78,7 @@ class AnsiSQLDriver extends AbstractPDODriver
         // Build clauses
         $sql .= $this->generateJoinClause($query);
         $sql .= $this->generateWhereClause($query);
+        $sql .= $this->generateGroupByClause($query);
         $sql .= $this->generateOrderByClause($query);
         $sql .= $this->generateLimitClause($query);
 
@@ -173,10 +174,10 @@ class AnsiSQLDriver extends AbstractPDODriver
     protected function generateDrop(Drop $query): string
     {
         // Get query props
-        $tables = $query['tables'];
+        $table = $query['table'];
 
-        $tables = implode(", ", array_map(fn($table) => $this->quoteField($table), $tables));
-        $sql = "DROP TABLE $tables";
+        $table = $this->quoteField($table);
+        $sql = "DROP TABLE $table";
 
         // Return result
         return $sql;
@@ -358,6 +359,7 @@ class AnsiSQLDriver extends AbstractPDODriver
             case "like":
                 $field = $expr->props()['field'];
                 $value = $expr->props()['value'];
+                $real_value = $expr->context()[trim($value, ":")];
 
                 $operator = match ($expr->type()) {
                     "lt" => "<",
@@ -371,9 +373,9 @@ class AnsiSQLDriver extends AbstractPDODriver
 
                 $field = $this->quoteField($field);
 
-                if ($expr->type() === "eq" && $value === null) {
+                if ($expr->type() === "eq" && $real_value === null) {
                     return "$field IS NULL";
-                } elseif ($expr->type() === "ne" && $value === null) {
+                } elseif ($expr->type() === "ne" && $real_value === null) {
                     return "$field IS NOT NULL";
                 }
 

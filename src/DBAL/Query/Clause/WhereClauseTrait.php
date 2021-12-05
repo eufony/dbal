@@ -28,7 +28,7 @@ trait WhereClauseTrait
     public function where(Expr $expr): static
     {
         $this->where = $expr;
-        $this->context = array_merge($this->context, $expr->context());
+        $this->context = array_merge($this->context, $expr->context(recursive: true));
         return $this;
     }
 }
