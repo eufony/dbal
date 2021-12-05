@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\Log;
+namespace Eufony\ORM\Tests\Unit\Log;
 
 use Eufony\ORM\Log\LoggerTrait;
 use Psr\Log\InvalidArgumentException;
@@ -28,8 +28,8 @@ use ReflectionClass;
  * Unit tests for PSR-3 loggers that inherit from
  * `\Eufony\ORM\Log\LoggerTrait`.
  */
-trait LoggerTraitTestTrait {
-
+trait LoggerTraitTestTrait
+{
     /**
      * Forcibly invokes a private method in LoggerTrait and returns the result.
      *
@@ -37,7 +37,8 @@ trait LoggerTraitTestTrait {
      * @param mixed ...$args
      * @return mixed
      */
-    protected function invokeTraitMethod(string $method, mixed ...$args): mixed {
+    protected function invokeTraitMethod(string $method, mixed ...$args): mixed
+    {
         $method = (new ReflectionClass($this->logger))->getMethod($method);
         $method->setAccessible(true);
 
@@ -54,7 +55,8 @@ trait LoggerTraitTestTrait {
      *
      * @return mixed[][]
      */
-    public function interpolatedMessages(): array {
+    public function interpolatedMessages(): array
+    {
         $logged_events = $this->loggedEvents();
         $interpolated_strings = [
             "Hello, world!",
@@ -78,7 +80,8 @@ trait LoggerTraitTestTrait {
         return $data;
     }
 
-    public function testLoggerHasLoggerTrait() {
+    public function testLoggerHasLoggerTrait()
+    {
         $this->assertTrue(in_array(LoggerTrait::class, class_uses(get_class($this->logger))));
     }
 
@@ -86,7 +89,8 @@ trait LoggerTraitTestTrait {
      * @depends      testLoggerHasLoggerTrait
      * @dataProvider invalidLevels
      */
-    public function testMinLevelInvalidLevel(mixed $level) {
+    public function testMinLevelInvalidLevel(mixed $level)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->logger->minLevel($level ?? 0);
     }
@@ -95,7 +99,8 @@ trait LoggerTraitTestTrait {
      * @depends      testLoggerHasLoggerTrait
      * @dataProvider invalidLevels
      */
-    public function testMaxLevelInvalidLevel(mixed $level) {
+    public function testMaxLevelInvalidLevel(mixed $level)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->logger->maxLevel($level ?? 0);
     }
@@ -103,7 +108,8 @@ trait LoggerTraitTestTrait {
     /**
      * @depends testLoggerHasLoggerTrait
      */
-    public function testMinLevel() {
+    public function testMinLevel()
+    {
         $this->assertEquals(LogLevel::DEBUG, $this->logger->minLevel());
         $this->logger->minLevel(LogLevel::INFO);
         $this->assertEquals(LogLevel::INFO, $this->logger->minLevel());
@@ -112,7 +118,8 @@ trait LoggerTraitTestTrait {
     /**
      * @depends testLoggerHasLoggerTrait
      */
-    public function testMaxLevel() {
+    public function testMaxLevel()
+    {
         $this->assertEquals(LogLevel::EMERGENCY, $this->logger->maxLevel());
         $this->logger->maxLevel(LogLevel::ALERT);
         $this->assertEquals(LogLevel::ALERT, $this->logger->maxLevel());
@@ -121,30 +128,32 @@ trait LoggerTraitTestTrait {
     /**
      * @depends testLoggerHasLoggerTrait
      */
-    public function testCompareLevels() {
-        $this->assertTrue($this->invokeTraitMethod("compareLevels", "debug", "debug", "emergency"));
-        $this->assertTrue($this->invokeTraitMethod("compareLevels", "debug", "debug", "info"));
-        $this->assertFalse($this->invokeTraitMethod("compareLevels", "debug", "info", "emergency"));
-        $this->assertTrue($this->invokeTraitMethod("compareLevels", "emergency", "emergency", "emergency"));
+    public function testCompareLevels()
+    {
+        $this->assertTrue($this->invokeTraitMethod("psr3_compareLevels", "debug", "debug", "emergency"));
+        $this->assertTrue($this->invokeTraitMethod("psr3_compareLevels", "debug", "debug", "info"));
+        $this->assertFalse($this->invokeTraitMethod("psr3_compareLevels", "debug", "info", "emergency"));
+        $this->assertTrue($this->invokeTraitMethod("psr3_compareLevels", "emergency", "emergency", "emergency"));
     }
 
     /**
      * @depends      testLoggerHasLoggerTrait
      * @dataProvider interpolatedMessages
      */
-    public function testInterpolate(string $message, array $context, string $expected) {
-        $this->assertEquals($expected, $this->invokeTraitMethod("interpolate", $message, $context));
+    public function testInterpolate(string $message, array $context, string $expected)
+    {
+        $this->assertEquals($expected, $this->invokeTraitMethod("psr3_interpolateMessage", $message, $context));
     }
 
     /**
      * @depends testLoggerHasLoggerTrait
      */
-    public function testInterpolateInvalid() {
+    public function testInterpolateInvalid()
+    {
         $message = "{key1}";
         $context = ["key1" => $this->logger];
 
         $this->expectException(InvalidArgumentException::class);
-        $this->invokeTraitMethod("interpolate", $message, $context);
+        $this->invokeTraitMethod("psr3_interpolateMessage", $message, $context);
     }
-
 }

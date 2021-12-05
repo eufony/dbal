@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\Log;
+namespace Eufony\ORM\Tests\Unit\Log;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use TypeError;
 
 /**
  * Provides an abstract PSR-3 implementation tester.
  */
-abstract class AbstractLogTest extends TestCase {
-
+abstract class AbstractLogTest extends TestCase
+{
     /**
      * The PSR-3 logging implementation to test.
      *
@@ -48,7 +49,8 @@ abstract class AbstractLogTest extends TestCase {
      *
      * @return string[]
      */
-    public function logLevels(): array {
+    public function logLevels(): array
+    {
         return ["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"];
     }
 
@@ -58,7 +60,8 @@ abstract class AbstractLogTest extends TestCase {
      *
      * @return mixed[][]
      */
-    public function invalidLevels(): array {
+    public function invalidLevels(): array
+    {
         return [[null], [0], ["foo"]];
     }
 
@@ -68,7 +71,8 @@ abstract class AbstractLogTest extends TestCase {
      *
      * @return mixed[][]
      */
-    public function invalidMessages(): array {
+    public function invalidMessages(): array
+    {
         $methods = $this->logLevels();
         $invalid_messages = [$this->getLogger()];
 
@@ -91,7 +95,8 @@ abstract class AbstractLogTest extends TestCase {
      *
      * @return mixed[][]
      */
-    public function invalidContexts(): array {
+    public function invalidContexts(): array
+    {
         $methods = $this->logLevels();
         $invalid_contexts = [
             ["exception" => "foo"],
@@ -117,7 +122,8 @@ abstract class AbstractLogTest extends TestCase {
      *
      * @return mixed[][]
      */
-    public function loggedEvents(): array {
+    public function loggedEvents(): array
+    {
         return [
             ["debug", "Hello, world!", []],
             ["info", "Hello, {foo}", ["foo" => "bar"]],
@@ -130,15 +136,19 @@ abstract class AbstractLogTest extends TestCase {
         ];
     }
 
-    /** @inheritdoc */
-    protected function setUp(): void {
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
+    {
         $this->logger = $this->getLogger();
     }
 
     /**
      * @dataProvider invalidLevels
      */
-    public function testInvalidLevel(mixed $level) {
+    public function testInvalidLevel(mixed $level)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->logger->log($level, "foo");
     }
@@ -146,17 +156,22 @@ abstract class AbstractLogTest extends TestCase {
     /**
      * @dataProvider invalidMessages
      */
-    public function testInvalidMessage(string $method, mixed $message) {
-        $this->expectException(InvalidArgumentException::class);
-        $this->logger->$method($message);
+    public function testInvalidMessage(string $method, mixed $message)
+    {
+        try {
+            $this->logger->$method($message);
+            $this->fail();
+        } catch (TypeError|\InvalidArgumentException) {
+            $this->expectNotToPerformAssertions();
+        }
     }
 
     /**
      * @dataProvider invalidContexts
      */
-    public function testInvalidContext(string $method, mixed $context) {
+    public function testInvalidContext(string $method, mixed $context)
+    {
         $this->expectException(InvalidArgumentException::class);
         $this->logger->$method("foo", $context);
     }
-
 }

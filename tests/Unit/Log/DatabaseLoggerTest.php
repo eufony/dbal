@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\Log;
+namespace Eufony\ORM\Tests\Unit\Log;
 
 use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\Log\DatabaseLogger;
@@ -27,8 +27,8 @@ use Psr\Log\LoggerInterface;
 /**
  * Unit tests for `\Eufony\ORM\Log\DatabaseLogger`.
  */
-class DatabaseLoggerTest extends AbstractLogTest {
-
+class DatabaseLoggerTest extends AbstractLogTest
+{
     use LoggerTraitTestTrait;
 
     /**
@@ -38,14 +38,17 @@ class DatabaseLoggerTest extends AbstractLogTest {
      */
     protected Connection $internalDatabase;
 
-    /** @inheritdoc */
-    public function getLogger(): LoggerInterface {
+    /**
+     * @inheritDoc
+     */
+    public function getLogger(): LoggerInterface
+    {
         $this->internalDatabase = Mockery::mock(Connection::class);
         return new DatabaseLogger($this->internalDatabase);
     }
 
-    public function testGetInternalDatabase() {
+    public function testGetInternalDatabase()
+    {
         $this->assertSame($this->internalDatabase, $this->logger->database());
     }
-
 }
