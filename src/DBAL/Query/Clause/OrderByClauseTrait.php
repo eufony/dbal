@@ -19,7 +19,7 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\ORM\InvalidArgumentException;
+use InvalidArgumentException;
 
 trait OrderByClauseTrait
 {

@@ -20,8 +20,9 @@
 namespace Eufony\ORM;
 
 /**
- * @inheritDoc
+ * Exception thrown if an implementation of an interface does not support a
+ * requested feature.
  */
-class InvalidArgumentException extends \InvalidArgumentException
+class UnsupportedException extends \RuntimeException
 {
 }

@@ -19,16 +19,16 @@
 
 namespace Eufony\ORM\DBAL;
 
+use BadMethodCallException;
 use DateInterval;
 use Eufony\Cache\ArrayCache;
 use Eufony\Inflector\DoctrineInflector;
 use Eufony\Inflector\InflectorInterface;
-use Eufony\ORM\BadMethodCallException;
 use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\Log\DatabaseLogger;
 use Eufony\ORM\QueryException;
 use Eufony\ORM\TransactionException;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Throwable;

@@ -19,7 +19,7 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\ORM\BadMethodCallException;
+use BadMethodCallException;
 use Eufony\ORM\QueryException;
 use PDO;
 use PDOException;
