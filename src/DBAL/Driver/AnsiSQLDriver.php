@@ -27,8 +27,8 @@ use Eufony\ORM\DBAL\Query\Builder\Query;
 use Eufony\ORM\DBAL\Query\Builder\Select;
 use Eufony\ORM\DBAL\Query\Builder\Update;
 use Eufony\ORM\DBAL\Query\Expr;
-use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\QueryException;
+use InvalidArgumentException;
 
 /**
  * Provides a database driver implementation that strictly complies with the
@@ -43,7 +43,7 @@ use Eufony\ORM\QueryException;
  * **Note**: The ANSI SQL standard does not have full support of all features
  * that are provided by the Eufony DBAL, which makes it impossible to implement
  * support for some queries.
- * In such cases, a `\Eufony\ORM\UnsupportedQueryException` will be thrown.
+ * In such cases, a `\Eufony\ORM\UnsupportedException` will be thrown.
  */
 class AnsiSQLDriver extends AbstractPDODriver
 {

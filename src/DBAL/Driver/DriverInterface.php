@@ -55,8 +55,8 @@ interface DriverInterface
      * advantage of it is highly RECOMMENDED.
      *
      * If the query mixes both positional and named parameters, or if the keys in
-     * the context array don't match the parameters in the query, a
-     * `\Eufony\ORM\InvalidArgumentException` MUST be thrown.
+     * the context array don't match the parameters in the query, an
+     * `\InvalidArgumentException` MUST be thrown.
      *
      * If the query fails, a `\Eufony\ORM\QueryException` MUST be thrown.
      * If another exception is re-thrown as a `QueryException`, the original
@@ -86,7 +86,7 @@ interface DriverInterface
      *
      * Transactions cannot be nested.
      * If this method is called when a transaction is already active, a
-     * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
+     * `\BadMethodCallException` MUST be thrown.
      */
     public function beginTransaction(): void;
 
@@ -97,7 +97,7 @@ interface DriverInterface
      * immediately.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
+     * `\BadMethodCallException` MUST be thrown.
      */
     public function commit(): void;
 
@@ -107,7 +107,7 @@ interface DriverInterface
      * Previously buffered modifications to the database MUST be discarded.
      *
      * If this method is called when a transaction is not active a
-     * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
+     * `\BadMethodCallException` MUST be thrown.
      */
     public function rollback(): void;
 }

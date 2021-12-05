@@ -20,10 +20,10 @@
 namespace Eufony\ORM\DBAL\Query\Builder;
 
 use ArrayAccess;
+use BadMethodCallException;
 use DateInterval;
-use Eufony\ORM\BadMethodCallException;
 use Eufony\ORM\DBAL\Connection;
-use Eufony\ORM\OutOfBoundsException;
+use OutOfBoundsException;
 
 /**
  * Provides an abstract base class for all query builders.
@@ -75,13 +75,13 @@ abstract class Query implements ArrayAccess
      * If no database key is given, defaults to the default connection.
      * Optionally allows setting the expiration time of the query's cached result.
      *
-     * @param string|null $key
+     * @param string|null $database
      * @param int|\DateInterval|null $ttl
      * @return mixed[][]
      */
-    public function execute(?string $key = null, int|DateInterval|null $ttl = 1): array
+    public function execute(?string $database = null, int|DateInterval|null $ttl = 1): array
     {
-        $connection = Connection::get($key);
+        $connection = Connection::get($database);
         $query_string = $connection->driver()->generate($this);
         return $connection->query($query_string, $this['context'], $ttl);
     }

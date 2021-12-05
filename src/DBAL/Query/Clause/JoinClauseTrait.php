@@ -20,7 +20,7 @@
 namespace Eufony\ORM\DBAL\Query\Clause;
 
 use Eufony\ORM\DBAL\Query\Expr;
-use Eufony\ORM\InvalidArgumentException;
+use InvalidArgumentException;
 
 trait JoinClauseTrait
 {
