@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,13 +19,14 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Create;
-use Eufony\ORM\DBAL\Query\Delete;
-use Eufony\ORM\DBAL\Query\Drop;
-use Eufony\ORM\DBAL\Query\Insert;
-use Eufony\ORM\DBAL\Query\Query;
-use Eufony\ORM\DBAL\Query\Select;
-use Eufony\ORM\DBAL\Query\Update;
+use Eufony\ORM\DBAL\Query\Builder\Create;
+use Eufony\ORM\DBAL\Query\Builder\Delete;
+use Eufony\ORM\DBAL\Query\Builder\Drop;
+use Eufony\ORM\DBAL\Query\Builder\Insert;
+use Eufony\ORM\DBAL\Query\Builder\Query;
+use Eufony\ORM\DBAL\Query\Builder\Select;
+use Eufony\ORM\DBAL\Query\Builder\Update;
+use Eufony\ORM\DBAL\Query\Expr;
 use ReflectionClass;
 
 /**
@@ -36,75 +37,139 @@ use ReflectionClass;
  * of the query builders.
  * This reduces the boilerplate code that a driver has to implement to check
  * for the types of the queries.
+ *
+ * Additionally defines abstract methods to generate the query strings of an
+ * expression and each of the query clauses.
  */
-abstract class AbstractDriver implements DriverInterface {
-
+abstract class AbstractDriver implements DriverInterface
+{
     /**
      * Class constructor.
      * Creates a new connection to the database.
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
 
     /**
      * Class destructor.
      * Breaks the connection to the database.
      */
-    public function __destruct() {
+    public function __destruct()
+    {
     }
 
-    /** @inheritdoc */
-    public function generate(Query $query): string {
+    /**
+     * @inheritDoc
+     */
+    public function generate(Query $query): string
+    {
         $short_name = (new ReflectionClass(get_class($query)))->getShortName();
-        return $this->$short_name($query);
+        $method_name = "generate" . ucfirst($short_name);
+        return $this->$method_name($query);
     }
 
     /**
-     * Generates the SQL query to be executed from a `Select` query builder.
+     * Generates the query string to be executed from a `Select` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Select $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Select $query
      * @return string
      */
-    abstract protected function select(Select $query): string;
+    abstract protected function generateSelect(Select $query): string;
 
     /**
-     * Generates the SQL query to be executed from an `Insert` query builder.
+     * Generates the query string to be executed from an `Insert` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Insert $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Insert $query
      * @return string
      */
-    abstract protected function insert(Insert $query): string;
+    abstract protected function generateInsert(Insert $query): string;
 
     /**
-     * Generates the SQL query to be executed from an `Update` query builder.
+     * Generates the query string to be executed from an `Update` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Update $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Update $query
      * @return string
      */
-    abstract protected function update(Update $query): string;
+    abstract protected function generateUpdate(Update $query): string;
 
     /**
-     * Generates the SQL query to be executed from a `Delete` query builder.
+     * Generates the query string to be executed from a `Delete` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Delete $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Delete $query
      * @return string
      */
-    abstract protected function delete(Delete $query): string;
+    abstract protected function generateDelete(Delete $query): string;
 
     /**
-     * Generates the SQL query to be executed from a `Create` query builder.
+     * Generates the query string to be executed from a `Create` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Create $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Create $query
      * @return string
      */
-    abstract protected function create(Create $query): string;
+    abstract protected function generateCreate(Create $query): string;
 
     /**
-     * Generates the SQL query to be executed from a `Drop` query builder.
+     * Generates the query string to be executed from a `Drop` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Drop $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Drop $query
      * @return string
      */
-    abstract protected function drop(Drop $query): string;
+    abstract protected function generateDrop(Drop $query): string;
 
+    /**
+     * Generates the `GROUP BY` clause of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateGroupByClause(Query $query): string;
+
+    /**
+     * Generates the `JOIN` clauses of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateJoinClause(Query $query): string;
+
+    /**
+     * Generates the `LIMIT` and `OFFSET` clause of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateLimitClause(Query $query): string;
+
+    /**
+     * Generates the `ORDER BY` clause of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateOrderByClause(Query $query): string;
+
+    /**
+     * Generates the `VALUES` clause of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateValuesClause(Query $query): string;
+
+    /**
+     * Generates the `WHERE` clause of a query string.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @return string
+     */
+    abstract protected function generateWhereClause(Query $query): string;
+
+    /**
+     * Recursively generates the query string of an expression.
+     *
+     * @param \Eufony\ORM\DBAL\Query\Expr $expr
+     * @return string
+     */
+    abstract protected function generateExpression(Expr $expr): string;
 }

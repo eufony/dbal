@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,31 +19,39 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\ORM\BadMethodCallException;
-use Eufony\ORM\DBAL\Query\Create;
-use Eufony\ORM\DBAL\Query\Delete;
-use Eufony\ORM\DBAL\Query\Drop;
-use Eufony\ORM\DBAL\Query\Insert;
-use Eufony\ORM\DBAL\Query\Keyword\Ex;
-use Eufony\ORM\DBAL\Query\Query;
-use Eufony\ORM\DBAL\Query\Select;
-use Eufony\ORM\DBAL\Query\Update;
+use Eufony\ORM\DBAL\Query\Builder\Create;
+use Eufony\ORM\DBAL\Query\Builder\Delete;
+use Eufony\ORM\DBAL\Query\Builder\Drop;
+use Eufony\ORM\DBAL\Query\Builder\Insert;
+use Eufony\ORM\DBAL\Query\Builder\Query;
+use Eufony\ORM\DBAL\Query\Builder\Select;
+use Eufony\ORM\DBAL\Query\Builder\Update;
+use Eufony\ORM\DBAL\Query\Expr;
 use Eufony\ORM\InvalidArgumentException;
+use Eufony\ORM\QueryException;
 
 /**
- * Provides a database driver implementation for database engines that more or
- * less comply with the ANSI SQL standards.
- * However, database engines usually never comply with the complete standards,
- * which might lead to some unpredictability and instability in obscure ways.
- * Refer to the "SQL compliance" Wikipedia page for a comparison between
- * different SQL engines.
+ * Provides a database driver implementation that strictly complies with the
+ * ANSI SQL standards.
  *
- * @see https://en.wikipedia.org/wiki/SQL_compliance
+ * This is meant to be used for SQL engines that don't have an officially
+ * supported driver yet.
+ * However, SQL vendors usually never completely comply with the ANSI SQL
+ * standards, which might lead to some unpredictability and instability in
+ * obscure ways.
+ *
+ * **Note**: The ANSI SQL standard does not have full support of all features
+ * that are provided by the Eufony DBAL, which makes it impossible to implement
+ * support for some queries.
+ * In such cases, a `\Eufony\ORM\UnsupportedQueryException` will be thrown.
  */
-class AnsiSQLDriver extends AbstractPDODriver {
-
-    /** @inheritdoc */
-    protected function select(Select $query): string {
+class AnsiSQLDriver extends AbstractPDODriver
+{
+    /**
+     * @inheritDoc
+     */
+    protected function generateSelect(Select $query): string
+    {
         // Get query props
         $table = $query['table'];
         $alias = $query['alias'] ?? null;
@@ -53,29 +61,14 @@ class AnsiSQLDriver extends AbstractPDODriver {
 
         // Build fields
         if (isset($fields)) {
-            $select_fields = [];
-
-            foreach ($fields as $field) {
-                if (preg_match_all("/^([a-zA-Z]+)\((\w+|\*)\)$/", $field, $matches) === 1) {
-                    $function = $matches[1][0];
-                    $field = $matches[2][0];
-
-                    $function = strtoupper($function);
-                    $field = $this->fieldQuote($field);
-
-                    $select_fields[] = "$function($field)";
-                } else {
-                    $select_fields[] = $this->fieldQuote($field);
-                }
-            }
-
-            $sql .= implode(", ", $select_fields);
+            $fields = array_map(fn($field) => $this->quoteField($field), $fields);
+            $sql .= implode(", ", $fields);
         } else {
             $sql .= "*";
         }
 
         // Build FROM
-        $table = $this->fieldQuote($table);
+        $table = $this->quoteField($table);
         $sql .= " FROM $table";
 
         if (isset($alias)) {
@@ -83,17 +76,20 @@ class AnsiSQLDriver extends AbstractPDODriver {
         }
 
         // Build clauses
-        $sql .= $this->join($query) ?? "";
-        $sql .= $this->where($query) ?? "";
-        $sql .= $this->order($query) ?? "";
-        $sql .= $this->limit($query) ?? "";
+        $sql .= $this->generateJoinClause($query);
+        $sql .= $this->generateWhereClause($query);
+        $sql .= $this->generateOrderByClause($query);
+        $sql .= $this->generateLimitClause($query);
 
         // Return result
         return $sql;
     }
 
-    /** @inheritdoc */
-    protected function insert(Insert $query): string {
+    /**
+     * @inheritDoc
+     */
+    protected function generateInsert(Insert $query): string
+    {
         // Get query props
         $table = $query['table'];
         $values = $query['values'] ?? null;
@@ -103,11 +99,11 @@ class AnsiSQLDriver extends AbstractPDODriver {
             throw new InvalidArgumentException("Insert values not set");
         }
 
-        $table = $this->fieldQuote($table);
+        $table = $this->quoteField($table);
         $sql = "INSERT INTO $table";
 
         // Build values
-        $fields = implode(", ", array_map(fn($key) => $this->fieldQuote($key), array_keys($values)));
+        $fields = implode(", ", array_map(fn($key) => $this->quoteField($key), array_keys($values)));
         $values = implode(", ", array_values($values));
         $sql .= " ($fields) VALUES ($values)";
 
@@ -115,8 +111,11 @@ class AnsiSQLDriver extends AbstractPDODriver {
         return $sql;
     }
 
-    /** @inheritdoc */
-    protected function update(Update $query): string {
+    /**
+     * @inheritDoc
+     */
+    protected function generateUpdate(Update $query): string
+    {
         // Get query props
         $table = $query['table'];
         $values = $query['values'] ?? null;
@@ -126,74 +125,99 @@ class AnsiSQLDriver extends AbstractPDODriver {
             throw new InvalidArgumentException("Update values not set");
         }
 
-        $table = $this->fieldQuote($table);
+        $table = $this->quoteField($table);
         $sql = "UPDATE $table";
 
         // Build values
-        $fields = array_map(fn($field) => $this->fieldQuote($field), array_keys($values));
+        $fields = array_map(fn($field) => $this->quoteField($field), array_keys($values));
         $values = array_values($values);
         $values = implode(", ", array_map(fn($field, $value) => "$field = $value", $fields, $values));
         $sql .= " SET $values";
 
         // Build clauses
-        $sql .= $this->where($query) ?? "";
-
-        // Return result
-        return $sql;
-    }
-
-    /** @inheritdoc */
-    protected function delete(Delete $query): string {
-        // Get query props
-        $table = $query['table'];
-
-        $table = $this->fieldQuote($table);
-        $sql = "DELETE FROM $table";
-
-        // Build clauses
-        $sql .= $this->where($query) ?? "";
-
-        // Return result
-        return $sql;
-    }
-
-    /** @inheritdoc */
-    protected function create(Create $query): string {
-        // Get query props
-
-        $sql = "CREATE TABLE ";
-
-        // Return result
-        return $sql;
-    }
-
-    /** @inheritdoc */
-    protected function drop(Drop $query): string {
-        // Get query props
-        $table = $query['table'];
-
-        $table = $this->fieldQuote($table);
-        $sql = "DROP TABLE $table";
+        $sql .= $this->generateWhereClause($query);
 
         // Return result
         return $sql;
     }
 
     /**
-     * Builds the and `JOIN` clause of a query.
-     * Returns the fully generated string if the query has set joins, null
-     * otherwise.
-     *
-     * @param \Eufony\ORM\DBAL\Query\Query $query
-     * @return string|null
+     * @inheritDoc
      */
-    protected function join(Query $query): string|null {
+    protected function generateDelete(Delete $query): string
+    {
+        // Get query props
+        $table = $query['table'];
+
+        $table = $this->quoteField($table);
+        $sql = "DELETE FROM $table";
+
+        // Build clauses
+        $sql .= $this->generateWhereClause($query);
+
+        // Return result
+        return $sql;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateCreate(Create $query): string
+    {
+        // TODO: Implement Create query builder.
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateDrop(Drop $query): string
+    {
+        // Get query props
+        $tables = $query['tables'];
+
+        $tables = implode(", ", array_map(fn($table) => $this->quoteField($table), $tables));
+        $sql = "DROP TABLE $tables";
+
+        // Return result
+        return $sql;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateGroupByClause(Query $query): string
+    {
+        // Get query props
+        $groupBy = $query['groupBy'] ?? null;
+        $having = $query['having'] ?? null;
+
+        // Return empty string if no group by fields set
+        if (!isset($groupBy)) {
+            return "";
+        }
+
+        $groupBy = implode(", ", array_map(fn($part) => $this->quoteField($part), $groupBy));
+        $clause = " GROUP BY $groupBy";
+
+        if (isset($having)) {
+            $having = $this->generateExpression($having);
+            $clause .= " HAVING $having";
+        }
+
+        return $clause;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateJoinClause(Query $query): string
+    {
         // Get query props
         $joins = $query['joins'] ?? null;
 
-        // Return null if joins not set
+        // Return empty string if no joins set
         if (!isset($joins)) {
-            return null;
+            return "";
         }
 
         $clause = "";
@@ -203,16 +227,11 @@ class AnsiSQLDriver extends AbstractPDODriver {
             $type = $join['type'];
             $join_table = $join['table'];
             $alias = $join['alias'] ?? null;
-            $on = $join['on'] ?? null;
-
-            // Ensure ON predicate is set
-            if (!isset($on)) {
-                throw new BadMethodCallException("No ON predicate on join");
-            }
+            $on = $join['on'];
 
             // Build JOIN
             $type = strtoupper($type);
-            $join_table = $this->fieldQuote($join_table);
+            $join_table = $this->quoteField($join_table);
             $clause .= " $type JOIN $join_table";
 
             if ($alias !== null) {
@@ -220,7 +239,7 @@ class AnsiSQLDriver extends AbstractPDODriver {
             }
 
             // Build ON
-            $on = $this->expression($on);
+            $on = $this->generateExpression($on);
             $clause .= " ON $on";
         }
 
@@ -229,60 +248,46 @@ class AnsiSQLDriver extends AbstractPDODriver {
     }
 
     /**
-     * Builds the `LIMIT` clause of a query.
-     * Returns the fully generated string if the query has a set limit, null
-     * otherwise.
-     *
-     *
-     * @param \Eufony\ORM\DBAL\Query\Query $query
-     * @return string|null
+     * @inheritDoc
      */
-    protected function limit(Query $query): string|null {
+    protected function generateLimitClause(Query $query): string
+    {
         // Get query props
         $limit = $query['limit'] ?? null;
         $offset = $query['offset'] ?? null;
 
-        // TODO: No LIMIT or OFFSET support in ANSI SQL.
-
-        // Return null if limit not set
+        // Return empty string if no limit set
         if (!isset($limit)) {
-            return null;
+            return "";
         }
 
         // Build limit
-        $clause = " LIMIT $limit";
+        $clause = " FETCH FIRST $limit ROWS ONLY";
 
-        // Return limit if offset not set
-        if (!isset($offset)) {
-            return $clause;
+        // Cannot build offset: No support in ANSI SQL
+        if (isset($offset)) {
+            throw new QueryException("No OFFSET clause support in ANSI SQL");
         }
-
-        // Build offset
-        $clause .= " OFFSET $offset";
 
         // Return result
         return $clause;
     }
 
     /**
-     * Builds the `ORDER BY` clause of a query.
-     * Returns the fully generated string if the query has a set order, null
-     * otherwise.
-     *
-     * @param \Eufony\ORM\DBAL\Query\Query $query
-     * @return string|null
+     * @inheritDoc
      */
-    protected function order(Query $query): string|null {
+    protected function generateOrderByClause(Query $query): string
+    {
         // Get query props
         $order = $query['order'] ?? null;
 
-        // Return null if order not set
+        // Return empty string if no order set
         if (!isset($order)) {
-            return null;
+            return "";
         }
 
         // Build order
-        $fields = array_map(fn($field) => $this->fieldQuote($field), array_keys($order));
+        $fields = array_map(fn($field) => $this->quoteField($field), array_keys($order));
         $types = array_map(fn($type) => strtoupper($type), array_values($order));
         $order = implode(", ", array_map(fn($field, $type) => "$field $type", $fields, $types));
 
@@ -291,58 +296,59 @@ class AnsiSQLDriver extends AbstractPDODriver {
     }
 
     /**
-     * Builds the `WHERE` clause of a query.
-     * Returns the fully generated string if the query has a set where
-     * condition, null otherwise.
+     * {@inheritDoc}
      *
-     * @param \Eufony\ORM\DBAL\Query\Query $query
-     * @return string|null
+     * **Note**: This method is unused by SQL drivers.
      */
-    protected function where(Query $query): string|null {
+    protected function generateValuesClause(Query $query): string
+    {
+        return "";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateWhereClause(Query $query): string
+    {
         // Get query props
         $where = $query['where'] ?? null;
 
-        // Return null if where condition not set
+        // Return empty string if no where condition set
         if (!isset($where)) {
-            return null;
+            return "";
         }
 
         // Build where condition
-        $where = $this->expression($where);
+        $where = $this->generateExpression($where);
 
         // Return result
         return " WHERE $where";
     }
 
     /**
-     * Wraps identifiers in a field string with quotes.
-     * Also works with table-field pairs separated with a period (ex.
-     * `"foo"."bar"`).
-     *
-     * @param string $field
-     * @return string
+     * @inheritDoc
      */
-    protected function fieldQuote(string $field): string {
-        return implode(".", array_map(fn($part) => $part === "*" ? $part : "\"$part\"", explode(".", $field)));
-    }
-
-    /**
-     * Recursively builds an expression.
-     * Returns the fully generated string.
-     *
-     * @param \Eufony\ORM\DBAL\Query\Keyword\Ex $ex
-     * @return string
-     */
-    protected function expression(Ex $ex): string {
-        switch ($ex->type()) {
+    protected function generateExpression(Expr $expr): string
+    {
+        switch ($expr->type()) {
+            case "true":
+                return "1 = 1";
+            case "not":
+                $inner = $this->generateExpression($expr->props()['expr']);
+                return "NOT ($inner)";
             case "and":
             case "or":
-                $inner = array_map(fn($ex) => $this->expression($ex), $ex->props()['ex']);
-                $function = strtoupper($ex->type());
+                $inner = array_map(fn($expr) => $this->generateExpression($expr), $expr->props()['expr']);
+                $function = strtoupper($expr->type());
                 return implode(" $function ", array_map(fn($ex) => "($ex)", $inner));
-            case "not":
-                $inner = $this->expression($ex->props()['ex']);
-                return "NOT ($inner)";
+            case "same":
+                $primary = $expr->props()['primary'];
+                $foreign = $expr->props()['foreign'];
+
+                $primary = $this->quoteField($primary);
+                $foreign = $this->quoteField($foreign);
+
+                return "$primary = $foreign";
             case "lt":
             case "le":
             case "eq":
@@ -350,40 +356,61 @@ class AnsiSQLDriver extends AbstractPDODriver {
             case "gt":
             case "ne":
             case "like":
-                $field = $ex->props()['field'];
-                $value = $ex->props()['value'];
-                $literal = $ex->props()['literal'];
-                $operator = match ($ex->type()) {
+                $field = $expr->props()['field'];
+                $value = $expr->props()['value'];
+
+                $operator = match ($expr->type()) {
                     "lt" => "<",
                     "le" => "<=",
                     "eq" => "=",
                     "ge" => ">=",
                     "gt" => ">",
-                    "ne" => "!=",
+                    "ne" => "<>",
                     "like" => "LIKE"
                 };
 
-                $field = $this->fieldQuote($field);
+                $field = $this->quoteField($field);
 
-                if (!$literal) {
-                    $value = $this->fieldQuote($value);
+                if ($expr->type() === "eq" && $value === null) {
+                    return "$field IS NULL";
+                } elseif ($expr->type() === "ne" && $value === null) {
+                    return "$field IS NOT NULL";
+                }
+
+                if (in_array($expr, ["lt", "le", "ge", "gt"]) && is_string($value)) {
+                    $value = $this->quoteField($value);
                 }
 
                 return "$field $operator $value";
             case "in":
-                $field = $ex->props()['field'];
-                $values = $ex->props()['value'];
-                $values = implode(", ", $values);
+                $field = $expr->props()['field'];
+                $values = $expr->props()['values'];
 
-                $field = $this->fieldQuote($field);
+                $field = $this->quoteField($field);
+                $values = implode(", ", $values);
 
                 return "$field IN ($values)";
             case "exists":
-                $inner = $this->generate($ex->props()["query"]);
-                return "EXISTS ($inner)";
+                $query = $expr->props()['query'];
+                $query = $this->generate($query);
+                return "EXISTS ($query)";
             default:
                 throw new InvalidArgumentException("Unknown expression type");
         }
     }
 
+    /**
+     * Wraps identifiers in a field string with quotes.
+     *
+     * Also works with table-field pairs separated by a period (`"table"."field"`).
+     *
+     * @param string $field
+     * @return string
+     */
+    protected function quoteField(string $field): string
+    {
+        $parts = explode(".", $field);
+        $parts = array_map(fn($part) => $part === "*" ? $part : "\"$part\"", $parts);
+        return implode(".", $parts);
+    }
 }

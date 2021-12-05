@@ -14,26 +14,24 @@
   "require": {
     "php": "^8.0",
     "ext-pdo": "*",
-    "doctrine/inflector": "^2.0",
-    "psr/cache": "^1.0 || ^2.0 || ^3.0",
+    "eufony/cache": "^1.0@dev",
+    "eufony/inflector-doctrine-wrapper": "^1.0",
     "psr/log": "^1.0 || ^2.0 || ^3.0",
     "psr/simple-cache": "^1.0"
   },
   "require-dev": {
-    "brianium/paratest": "^6.3",
-    "cache/array-adapter": "^1.1",
     "fakerphp/faker": "^1.16",
     "mockery/mockery": "^1.4",
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
+    "eufony/inflector-implementation": "Virtual package for inflection implementations.",
     "monolog/monolog": "Well-maintained and popular logging library.",
     "psr/cache-implementation": "Virtual package for PSR-6 caching implementations.",
     "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
     "psr/simple-cache-implementation": "Virutal package for PSR-16 caching implementations."
   },
   "provide": {
-    "psr/simple-cache-implementation": "^1.0",
     "psr/log-implementation": "^1.0 || ^2.0 || ^3.0"
   },
   "autoload": {
@@ -43,14 +41,14 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "App\\": "tests/App/",
-      "Tests\\": "tests/"
+      "App\\": [ "tests/App/" ],
+      "Eufony\\ORM\\Tests\\": [ "tests/" ]
     }
   },
   "scripts": {
     "test": [
-      "paratest -c tests/Unit/phpunit.xml.dist",
-      "paratest -c tests/Integration/phpunit.xml.dist"
+      "phpunit -c tests/Unit/phpunit.xml.dist",
+      "phpunit -c tests/Integration/phpunit.xml.dist"
     ]
   },
   "config": {

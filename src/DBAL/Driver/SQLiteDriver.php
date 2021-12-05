@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,25 +19,53 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
+use Eufony\ORM\DBAL\Query\Builder\Query;
+
 /**
  * Provides a database driver implementation for SQLite using the PDO
  * extension.
  */
-class SQLiteDriver extends AnsiSQLDriver {
-
+class SQLiteDriver extends AnsiSQLDriver
+{
     /**
      * Class constructor.
-     * Creates a new connection to the database using the PHP PDO_SQLite
+     * Creates a new connection to the database using the PHP `pdo_sqlite`
      * extension.
      *
      * Requires the file path of the database file to establish the connection.
-     * If the path is `:memory:`, an in-memory database that will be destroyed
-     * at the end of the process will be created.
+     * If the path is `:memory:`, an in-memory database will be created.
+     * It will be destroyed at the end of the PHP process.
      *
      * @param string $path
      */
-    public function __construct(string $path) {
+    public function __construct(string $path)
+    {
         parent::__construct("sqlite:" . $path);
     }
 
+    /**
+     * @inheritDoc
+     */
+    protected function generateLimitClause(Query $query): string
+    {
+        // Get query props
+        $limit = $query['limit'] ?? null;
+        $offset = $query['offset'] ?? null;
+
+        // Return empty string if no limit set
+        if (!isset($limit)) {
+            return "";
+        }
+
+        // Build limit
+        $clause = " LIMIT $limit";
+
+        // Build offset
+        if (isset($offset)) {
+            $clause .= " OFFSET $offset";
+        }
+
+        // Return result
+        return $clause;
+    }
 }

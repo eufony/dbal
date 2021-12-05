@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Builder;
 
-class Drop extends Query {
+class Drop extends Query
+{
+    protected array $tables;
 
-    protected string $table;
-
-    public static function tables(string $table): static {
-        return new static($table);
+    public static function tables(string ...$tables): static
+    {
+        return new static($tables);
     }
 
-    private function __construct(string $table) {
-        $this->table = $table;
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Drop::tables()` to initialize and instance of this class.
+     *
+     * @param array $tables
+     */
+    protected function __construct(array $tables)
+    {
+        parent::__construct();
+        $this->tables = $tables;
     }
-
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 namespace Eufony\ORM;
 
 /**
- * Thrown whenever an executed query results in an error.
+ * Exception thrown if an executed query results in an error.
  */
-class QueryException extends \RuntimeException {
+class QueryException extends \RuntimeException
+{
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,12 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-trait ValuesClauseTrait {
-
+trait ValuesClauseTrait
+{
     protected array $values;
 
-    public function values(array $values): static {
+    public function values(array $values): static
+    {
         foreach ($values as &$value) {
             $placeholder = hash("md5", uniqid(more_entropy: true));
             $this->context[$placeholder] = $value;
@@ -33,5 +34,4 @@ trait ValuesClauseTrait {
         $this->values = $values;
         return $this;
     }
-
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Builder;
 
+use Eufony\ORM\DBAL\Query\Clause\GroupByClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\JoinClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\LimitClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\OrderByClauseTrait;
 use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
 
-class Select extends Query {
-
+class Select extends Query
+{
+    use GroupByClauseTrait;
     use JoinClauseTrait;
     use LimitClauseTrait;
     use OrderByClauseTrait;
@@ -35,18 +37,32 @@ class Select extends Query {
     protected string $alias;
     protected array $fields;
 
-    public static function from(string $table, ?string $alias = null): static {
+    public static function from(string $table, ?string $alias = null): static
+    {
         return new static($table, $alias);
     }
 
-    private function __construct(string $table, string|null $alias) {
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Select::from()` to initialize an instance of this class.
+     *
+     * @param string $table
+     * @param string|null $alias
+     */
+    protected function __construct(string $table, string|null $alias)
+    {
+        parent::__construct();
         $this->table = $table;
-        if (isset($alias)) $this->alias = $alias;
+
+        if (isset($alias)) {
+            $this->alias = $alias;
+        }
     }
 
-    public function fields(string ...$fields): static {
+    public function fields(string ...$fields): static
+    {
         $this->fields = $fields;
         return $this;
     }
-
 }

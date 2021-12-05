@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 namespace Eufony\ORM;
 
 /**
- * Thrown whenever an unknown key is supplied when accessing an array.
+ * @inheritDoc
  */
-class OutOfBoundsException extends \OutOfBoundsException {
+class OutOfBoundsException extends \OutOfBoundsException
+{
 }
