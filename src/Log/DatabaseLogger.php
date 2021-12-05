@@ -22,7 +22,6 @@ namespace Eufony\ORM\Log;
 use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\DBAL\Query\Builder\Create;
 use Eufony\ORM\DBAL\Query\Builder\Insert;
-use Eufony\ORM\Schema\Schema;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
@@ -88,33 +87,31 @@ class DatabaseLogger extends AbstractLogger
         $logger = $this->database->logger(new NullLogger());
 
         // Ensure log table exists
-        if (!Schema::tableExists("__log")) {
-            $fields = [
-                "id" => [
-                    "type" => "int",
-                    "nullable" => "false",
-                    "primary_key" => "true",
-                    "auto_increment" => true,
-                ],
-                "time" => [
-                    "type" => "datetime",
-                    "nullable" => false,
-                ],
-                "level" => [
-                    "type" => "varchar(9)",
-                    "nullable" => false,
-                ],
-                "message" => [
-                    "type" => "text",
-                ],
-                "exception" => [
-                    "type" => "text",
-                    "default" => null,
-                ],
-            ];
+        $fields = [
+            "id" => [
+                "type" => "int",
+                "nullable" => "false",
+                "primary_key" => "true",
+                "auto_increment" => true,
+            ],
+            "time" => [
+                "type" => "datetime",
+                "nullable" => false,
+            ],
+            "level" => [
+                "type" => "varchar(9)",
+                "nullable" => false,
+            ],
+            "message" => [
+                "type" => "text",
+            ],
+            "exception" => [
+                "type" => "text",
+                "default" => null,
+            ],
+        ];
 
-            Create::table("__log")->fields($fields)->execute();
-        }
+        Create::tableIfNotExists("__log")->fields($fields)->execute();
 
         // Execute log query
         $values = [
