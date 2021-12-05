@@ -77,12 +77,12 @@ class Expr
         return new static(__FUNCTION__, ["primary" => $primary, "foreign" => $foreign]);
     }
 
-    public static function lt(string $field, int|float|string $value): static
+    public static function lt(string $field, int|float $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function le(string $field, int|float|string $value): static
+    public static function le(string $field, int|float $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
@@ -92,7 +92,7 @@ class Expr
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function ge(string $field, int|float|string $value): static
+    public static function ge(string $field, int|float $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
@@ -129,18 +129,6 @@ class Expr
         $this->context = [];
 
         switch ($type) {
-            case "not":
-                $expr = $this->props['expr'];
-                $this->context = $expr->context;
-                $expr->context = [];
-                break;
-            case "and":
-            case "or":
-                foreach ($this->props['expr'] as $expr) {
-                    $this->context = array_merge($this->context, $expr->context);
-                    $expr->context = [];
-                }
-                break;
             case "lt":
             case "le":
             case "eq":
@@ -175,8 +163,20 @@ class Expr
         return $this->props;
     }
 
-    public function context(): array
+    public function context(bool $recursive = false): array
     {
+        if (!$recursive) {
+            return $this->context;
+        }
+
+        if ($this->type === "not") {
+            return array_merge($this->context, $this->props['expr']->context);
+        }
+
+        if (in_array($this->type, ["and", "or"])) {
+            return array_merge($this->context, ...array_map(fn($expr) => $expr->context, $this->props['expr']));
+        }
+
         return $this->context;
     }
 }
