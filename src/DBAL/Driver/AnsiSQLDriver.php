@@ -166,6 +166,7 @@ class AnsiSQLDriver extends AbstractPDODriver
     protected function generateCreate(Create $query): string
     {
         // TODO: Implement Create query builder.
+        return ";";
     }
 
     /**

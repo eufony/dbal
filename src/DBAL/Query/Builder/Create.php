@@ -29,6 +29,11 @@ class Create extends Query
         return new static($table);
     }
 
+    public static function tableIfNotExists(string $table): static
+    {
+        return new static($table);
+    }
+
     /**
      * {@inheritDoc}
      *
