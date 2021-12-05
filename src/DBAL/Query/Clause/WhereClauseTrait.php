@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,16 +19,16 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\ORM\DBAL\Query\Keyword\Ex;
+use Eufony\ORM\DBAL\Query\Expr;
 
-trait WhereClauseTrait {
+trait WhereClauseTrait
+{
+    protected Expr $where;
 
-    protected Ex $where;
-
-    public function where(Ex $expression): static {
-        $this->where = $expression;
-        $this->context = array_merge($this->context, $expression->context());
+    public function where(Expr $expr): static
+    {
+        $this->where = $expr;
+        $this->context = array_merge($this->context, $expr->context());
         return $this;
     }
-
 }

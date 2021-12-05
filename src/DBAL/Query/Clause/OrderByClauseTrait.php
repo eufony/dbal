@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,12 @@ namespace Eufony\ORM\DBAL\Query\Clause;
 
 use Eufony\ORM\InvalidArgumentException;
 
-trait OrderByClauseTrait {
-
+trait OrderByClauseTrait
+{
     protected array $order;
 
-    public function orderBy(string|array $fields): static {
+    public function orderBy(string|array $fields): static
+    {
         if (is_string($fields)) {
             $fields = [$fields];
         }
@@ -47,5 +48,4 @@ trait OrderByClauseTrait {
 
         return $this;
     }
-
 }

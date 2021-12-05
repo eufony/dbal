@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,22 +17,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Builder;
 
-use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\ORM\DBAL\Query\Clause\ValuesClauseTrait;
 
-class Delete extends Query {
-
-    use WhereClauseTrait;
+class Insert extends Query
+{
+    use ValuesClauseTrait;
 
     protected string $table;
 
-    public static function from(string $table): static {
+    public static function into(string $table): static
+    {
         return new static($table);
     }
 
-    private function __construct(string $table) {
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Insert::into()` to initialize an instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
         $this->table = $table;
     }
-
 }

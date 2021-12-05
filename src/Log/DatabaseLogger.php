@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,20 +20,21 @@
 namespace Eufony\ORM\Log;
 
 use Eufony\ORM\DBAL\Connection;
-use Eufony\ORM\DBAL\Query\Create;
-use Eufony\ORM\DBAL\Query\Insert;
+use Eufony\ORM\DBAL\Query\Builder\Create;
+use Eufony\ORM\DBAL\Query\Builder\Insert;
 use Eufony\ORM\Schema\Schema;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
 /**
- * Provides a logging implementation for logging into a database directly.
+ * Provides a logging implementation for logging into the database directly.
+ *
  * The messages are logged into the `__log` table in the database connection;
  * along with the log level, current timestamp, and, if one occurred, the
  * exception.
  */
-class DatabaseLogger extends AbstractLogger {
-
+class DatabaseLogger extends AbstractLogger
+{
     use LoggerTrait;
 
     /**
@@ -49,29 +50,39 @@ class DatabaseLogger extends AbstractLogger {
      *
      * @param \Eufony\ORM\DBAL\Connection $database
      */
-    public function __construct(Connection $database) {
+    public function __construct(Connection $database)
+    {
         $this->database = $database;
     }
 
     /**
-     * Returns the database connection to be logged into.
+     * Combined getter / setter for database connection to be logged into.
+     *
+     * Returns the current database connection.
      * If `$database` is set, sets the new connection and returns the previous
      * instance.
      *
      * @param \Eufony\ORM\DBAL\Connection|null $database
      * @return \Eufony\ORM\DBAL\Connection
      */
-    public function database(?Connection $database = null): Connection {
+    public function database(?Connection $database = null): Connection
+    {
         $prev = $this->database;
         $this->database = $database ?? $this->database;
         return $prev;
     }
 
-    /** @inheritdoc */
-    public function log($level, $message, array $context = []): void {
-        [$level, $message, $context] = $this->validateParams($level, $message, $context);
-        if (!$this->compareLevels($level, $this->minLevel, $this->maxLevel)) return;
-        $message = $this->interpolate($message, $context);
+    /**
+     * @inheritDoc
+     */
+    public function log($level, $message, array $context = []): void
+    {
+        [$level, $message, $context] = $this->psr3_validateParams($level, $message, $context);
+        $message = $this->psr3_interpolateMessage($message, $context);
+
+        if (!$this->psr3_compareLevels($level, $this->minLevel, $this->maxLevel)) {
+            return;
+        }
 
         // Temporarily turn off logging (creates an infinite loop otherwise)
         $logger = $this->database->logger(new NullLogger());
@@ -105,6 +116,7 @@ class DatabaseLogger extends AbstractLogger {
             Create::table("__log")->fields($fields)->execute();
         }
 
+        // Execute log query
         $values = [
             "time" => date("Y-m-d H:i:s"),
             "level" => $level,
@@ -117,5 +129,4 @@ class DatabaseLogger extends AbstractLogger {
         // Restore previous logger
         $this->database->logger($logger);
     }
-
 }

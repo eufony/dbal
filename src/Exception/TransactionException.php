@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 namespace Eufony\ORM;
 
 /**
- * Thrown whenever a transaction fails unexpectedly.
+ * Exception thrown if a transaction fails unexpectedly.
  */
-class TransactionException extends QueryException {
+class TransactionException extends QueryException
+{
 }

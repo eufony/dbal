@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,37 +17,34 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Builder;
 
-use Eufony\ORM\DBAL\Query\Clause\ValuesClauseTrait;
-use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
-
-/**
- * Represents an `UPDATE` SQL query.
- */
-class Update extends Query {
-
-    use ValuesClauseTrait;
-    use WhereClauseTrait;
-
+class Create extends Query
+{
     protected string $table;
+    protected array $fields;
 
-    /**
-     * @param string $table
-     * @return static
-     */
-    public static function table(string $table): static {
+    public static function table(string $table): static
+    {
         return new static($table);
     }
 
     /**
-     * Private class constructor.
-     * Use `Update::table()` to initialize this class.
+     * {@inheritDoc}
+     *
+     * Use `Create::table()` to initialize an instance of this class.
      *
      * @param string $table
      */
-    private function __construct(string $table) {
+    protected function __construct(string $table)
+    {
+        parent::__construct();
         $this->table = $table;
     }
 
+    public function fields(array $fields): static
+    {
+        $this->fields = $fields;
+        return $this;
+    }
 }

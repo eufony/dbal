@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,44 +19,36 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-use Eufony\ORM\BadMethodCallException;
-use Eufony\ORM\DBAL\Query\Keyword\Ex;
+use Eufony\ORM\DBAL\Query\Expr;
+use Eufony\ORM\InvalidArgumentException;
 
-trait JoinClauseTrait {
-
+trait JoinClauseTrait
+{
     protected array $joins;
 
-    public function innerJoin(string $table, ?string $alias = null): static {
+    public function innerJoin(string $table, ?string $alias = null, ?Expr $on = null): static
+    {
         $this->joins ??= [];
         $this->joins[] = [
             "type" => "inner",
             "table" => $table,
             "alias" => $alias,
+            "on" => $on ?? throw new InvalidArgumentException("No ON predicate given for inner join")
         ];
 
         return $this;
     }
 
-
-    public function leftJoin(string $table, ?string $alias = null): static {
+    public function leftJoin(string $table, ?string $alias = null, ?Expr $on = null): static
+    {
         $this->joins ??= [];
         $this->joins[] = [
             "type" => "left",
             "table" => $table,
             "alias" => $alias,
+            "on" => $on ?? throw new InvalidArgumentException("No ON predicate given for left join")
         ];
 
         return $this;
     }
-
-    public function on(Ex $expression): static {
-        if (!isset($this->joins)) {
-            throw new BadMethodCallException("Cannot set ON predicate before a join");
-        }
-
-        $this->joins[array_key_last($this->joins)]['on'] = $expression;
-
-        return $this;
-    }
-
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,24 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\ORM\DBAL\Query\Clause;
 
-class Create extends Query {
+use Eufony\ORM\DBAL\Query\Expr;
 
-    protected string $table;
-    protected array $fields;
+trait GroupByClauseTrait
+{
+    protected array $groupBy;
+    protected Expr $having;
 
-    public static function table(string $table): static {
-        return new static($table);
-    }
-
-    private function __construct(string $table) {
-        $this->table = $table;
-    }
-
-    public function fields(array $fields): static {
-        $this->fields = $fields;
+    public function groupBy(string ...$fields): static
+    {
+        $this->groupBy = $fields;
         return $this;
     }
 
+    public function having(Expr $expr): static
+    {
+        $this->having = $expr;
+        return $this;
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 namespace Eufony\ORM;
 
 /**
- * Thrown whenever a call to a method is performed in an illegal state.
+ * @inheritDoc
  */
-class BadMethodCallException extends \BadMethodCallException {
+class BadMethodCallException extends \BadMethodCallException
+{
 }

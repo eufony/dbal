@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@
 namespace Eufony\ORM;
 
 /**
- * Thrown whenever an invalid argument is supplied to a method.
+ * @inheritDoc
  */
-class InvalidArgumentException extends \InvalidArgumentException implements \Psr\SimpleCache\InvalidArgumentException {
+class InvalidArgumentException extends \InvalidArgumentException
+{
 }

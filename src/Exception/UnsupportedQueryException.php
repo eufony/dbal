@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\Inflection;
-
-use Doctrine\Inflector\Inflector;
-use Eufony\ORM\Inflection\DoctrineInflector;
-use Eufony\ORM\Inflection\InflectorInterface;
+namespace Eufony\ORM;
 
 /**
- * Unit tests for `\Eufony\ORM\Inflection\DoctrineInflector`.
+ * Exception thrown if a database driver cannot generate the query string from
+ * a query builder due to unsupported features.
  */
-class DoctrineInflectorTest extends AbstractInflectorTest {
-
-    /** @inheritdoc */
-    public function getInflector(): InflectorInterface {
-        return new DoctrineInflector();
-    }
-
-    public function testGetInternalInflector() {
-        $this->assertEquals(Inflector::class, get_class($this->inflector->inflector()));
-    }
-
+class UnsupportedQueryException extends QueryException
+{
 }

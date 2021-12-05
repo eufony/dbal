@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,35 +35,39 @@ use PDOException;
  * Inherits from the `AbstractDriver` class to delegate the `generate()` method
  * correspond methods for each of the query builders.
  */
-abstract class AbstractPDODriver extends AbstractDriver {
-
+abstract class AbstractPDODriver extends AbstractDriver
+{
     /**
      * The PDO object used internally to interface with SQL databases.
      *
      * @var \PDO $pdo
      */
-    private PDO $pdo;
+    protected PDO $pdo;
 
     /**
-     * Creates a new connection to the database.
+     * {@inheritDoc}
      *
      * The given parameters are passed directly to the underlying PDO object.
      * Refer to the official PDO documentation for more details.
      *
+     * @see https://www.php.net/manual/en/pdo.construct.php
+     *
      * @param string $dsn
      * @param string|null $user
      * @param string|null $password
-     *
-     * @see https://www.php.net/manual/en/pdo.construct.php
      */
-    public function __construct(string $dsn, ?string $user = null, ?string $password = null) {
+    public function __construct(string $dsn, ?string $user = null, ?string $password = null)
+    {
         parent::__construct();
         $this->pdo = new PDO($dsn, $user, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    /** @inheritdoc */
-    public function execute(string $query, array $context): array {
+    /**
+     * @inheritDoc
+     */
+    public function execute(string $query, array $context): array
+    {
         try {
             // Prepare statement from the given query
             $statement = $this->pdo->prepare($query);
@@ -79,13 +83,19 @@ abstract class AbstractPDODriver extends AbstractDriver {
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /** @inheritdoc */
-    public function inTransaction(): bool {
+    /**
+     * @inheritDoc
+     */
+    public function inTransaction(): bool
+    {
         return $this->pdo->inTransaction();
     }
 
-    /** @inheritdoc */
-    public function beginTransaction(): void {
+    /**
+     * @inheritDoc
+     */
+    public function beginTransaction(): void
+    {
         if ($this->inTransaction()) {
             throw new BadMethodCallException("A transaction is already active");
         }
@@ -93,8 +103,11 @@ abstract class AbstractPDODriver extends AbstractDriver {
         $this->pdo->beginTransaction();
     }
 
-    /** @inheritdoc */
-    public function commit(): void {
+    /**
+     * @inheritDoc
+     */
+    public function commit(): void
+    {
         if (!$this->inTransaction()) {
             throw new BadMethodCallException("No transaction to commit");
         }
@@ -102,13 +115,15 @@ abstract class AbstractPDODriver extends AbstractDriver {
         $this->pdo->commit();
     }
 
-    /** @inheritdoc */
-    public function rollback(): void {
+    /**
+     * @inheritDoc
+     */
+    public function rollback(): void
+    {
         if (!$this->inTransaction()) {
             throw new BadMethodCallException("No transaction to roll back to");
         }
 
         $this->pdo->rollBack();
     }
-
 }

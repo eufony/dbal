@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 
 namespace Eufony\ORM\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Query;
+use Eufony\ORM\DBAL\Query\Builder\Query;
 
 /**
  * Provides a common interface for connecting to and querying different
@@ -27,15 +27,16 @@ use Eufony\ORM\DBAL\Query\Query;
  *
  * The connection to the database MUST be kept alive for as long as the
  * lifetime of the driver instance.
+ *
  * If the database requires specific instructions to finish a session, these
  * instructions SHOULD be issued in the destructor of the object class.
  */
-interface DriverInterface {
-
+interface DriverInterface
+{
     /**
      * Generates the query string to be executed from the given query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Query $query
+     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
      * @return string
      */
     public function generate(Query $query): string;
@@ -44,28 +45,23 @@ interface DriverInterface {
      * Executes the generated query and returns the result as a PHP array.
      *
      * The array MUST return each numerically indexed row as a nested array,
-     * indexed by the column name as returned by the result set.
-     * This matches the behaviour of `\PDO::FETCH_ASSOC`.
+     * indexed by the field name as returned by the result set.
      *
      * The query MAY contain positional (`?`) or named (`:foo`) parameters
-     * (exclusively), which are passed in through `$context`.
-     * The placeholders in the query MUST be substituted for their
-     * corresponding values in the context array before execution.
-     *
-     * **Warning:** The values in the context array MUST be treated as literal
-     * data, the database MUST NOT interpret them as part of the query.
-     * The values in the array MUST be escaped properly for use in the query.
+     * (exclusively), which MUST be passed in through the context array.
+     * The values in the context array MUST be treated as literal data, the
+     * database MUST NOT interpret them as part of the query.
      * If the database provides functionality for prepared statements, taking
      * advantage of it is highly RECOMMENDED.
      *
-     * If the query mixes both positional and named parameters, or if the
-     * keys in the context array don't match the parameters in the query, a
+     * If the query mixes both positional and named parameters, or if the keys in
+     * the context array don't match the parameters in the query, a
      * `\Eufony\ORM\InvalidArgumentException` MUST be thrown.
      *
      * If the query fails, a `\Eufony\ORM\QueryException` MUST be thrown.
      * If another exception is re-thrown as a `QueryException`, the original
-     * exception SHOULD be chained onto the `QueryException` using the
-     * `previous` parameter in the exception constructor.
+     * exception SHOULD be chained onto the `QueryException` using the `previous`
+     * parameter in the exception constructor.
      *
      * @param string $query
      * @param mixed[] $context
@@ -75,6 +71,7 @@ interface DriverInterface {
 
     /**
      * Checks whether the database is currently in a transaction.
+     *
      * Returns `true` if a transaction is active, `false` otherwise.
      *
      * @return bool
@@ -84,8 +81,8 @@ interface DriverInterface {
     /**
      * Initiates a transaction.
      *
-     * While in a transaction, any modifications to the database MUST be
-     * buffered until either `commit()` or `rollback()` is called.
+     * While in a transaction, any modifications to the database MUST be buffered
+     * until either `commit()` or `rollback()` is called.
      *
      * Transactions cannot be nested.
      * If this method is called when a transaction is already active, a
@@ -96,7 +93,8 @@ interface DriverInterface {
     /**
      * Commits a transaction.
      *
-     * Buffered modifications to the database MUST be applied.
+     * Previously buffered modifications to the database MUST be applied
+     * immediately.
      *
      * If this method is called when a transaction is not active a
      * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
@@ -104,13 +102,12 @@ interface DriverInterface {
     public function commit(): void;
 
     /**
-     * Rolls back a transaction
+     * Rolls back a transaction.
      *
-     * Buffered modifications to the database MUST be discarded.
+     * Previously buffered modifications to the database MUST be discarded.
      *
      * If this method is called when a transaction is not active a
      * `\Eufony\ORM\BadMethodCallException` MUST be thrown.
      */
     public function rollback(): void;
-
 }

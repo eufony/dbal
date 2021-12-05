@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,12 +19,13 @@
 
 namespace Eufony\ORM\DBAL\Query\Clause;
 
-trait LimitClauseTrait {
-
+trait LimitClauseTrait
+{
     protected int $limit;
     protected int $offset;
 
-    public function limit(int $x, ?int $y = null): static {
+    public function limit(int $x, ?int $y = null): static
+    {
         if ($y === null) {
             $this->limit = $x;
         } else {
@@ -34,5 +35,4 @@ trait LimitClauseTrait {
 
         return $this;
     }
-
 }

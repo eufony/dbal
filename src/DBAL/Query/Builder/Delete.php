@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,19 +17,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\Cache;
+namespace Eufony\ORM\DBAL\Query\Builder;
 
-use Eufony\ORM\Cache\ArrayCache;
-use Psr\SimpleCache\CacheInterface;
+use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
 
-/**
- * Unit tests for `\Eufony\ORM\Cache\ArrayCache`.
- */
-class ArrayCacheTest extends AbstractCacheTest {
+class Delete extends Query
+{
+    use WhereClauseTrait;
 
-    /** @inheritdoc */
-    public function getCache(): CacheInterface {
-        return new ArrayCache();
+    protected string $table;
+
+    public static function from(string $table): static
+    {
+        return new static($table);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Delete::from()` to initialize an instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
+        $this->table = $table;
+    }
 }
