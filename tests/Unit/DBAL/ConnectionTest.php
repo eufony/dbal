@@ -1,6 +1,6 @@
 <?php
 /*
- * Testsuite for the Eufony ORM Package
+ * The Eufony ORM
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,14 +17,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Tests\Unit\DBAL;
+namespace Eufony\ORM\Tests\Unit\DBAL;
 
+use Eufony\Inflector\InflectorInterface;
 use Eufony\ORM\DBAL\Connection;
 use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\Inflection\InflectorInterface;
-use Eufony\ORM\InvalidArgumentException;
 use Eufony\ORM\QueryException;
 use Eufony\ORM\TransactionException;
+use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -33,8 +33,8 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * Unit tests for `Eufony\ORM\DBAL\Connection`.
  */
-class ConnectionTest extends TestCase {
-
+class ConnectionTest extends TestCase
+{
     /**
      * The `Connection` object to test.
      *
@@ -68,12 +68,15 @@ class ConnectionTest extends TestCase {
      * The internal mock `InflectorInterface` object used to test the database
      * connection.
      *
-     * @var \Eufony\ORM\Inflection\InflectorInterface $internalInflector
+     * @var \Eufony\Inflector\InflectorInterface $internalInflector
      */
     protected InflectorInterface $internalInflector;
 
-    /** @inheritdoc */
-    protected function setUp(): void {
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
+    {
         $this->internalDriver = Mockery::mock(DriverInterface::class);
         $this->internalLogger = Mockery::mock(LoggerInterface::class);
         $this->internalCache = Mockery::mock(CacheInterface::class);
@@ -97,32 +100,41 @@ class ConnectionTest extends TestCase {
         );
     }
 
-    /** @inheritdoc */
-    protected function tearDown(): void {
+    /**
+     * @inheritDoc
+     */
+    protected function tearDown(): void
+    {
         Mockery::close();
     }
 
-    public function testGetStaticInstance() {
+    public function testGetStaticInstance()
+    {
         $this->assertSame($this->connection, Connection::get());
     }
 
-    public function testGetInternalDriver() {
+    public function testGetInternalDriver()
+    {
         $this->assertSame($this->internalDriver, $this->connection->driver());
     }
 
-    public function testGetInternalLogger() {
+    public function testGetInternalLogger()
+    {
         $this->assertSame($this->internalLogger, $this->connection->logger());
     }
 
-    public function testGetInternalCache() {
+    public function testGetInternalCache()
+    {
         $this->assertSame($this->internalCache, $this->connection->cache());
     }
 
-    public function testGetInternalInflector() {
+    public function testGetInternalInflector()
+    {
         $this->assertSame($this->internalInflector, $this->connection->inflector());
     }
 
-    public function testQueryReadNoCache() {
+    public function testQueryReadNoCache()
+    {
         $query = "SELECT * FROM \"test\" WHERE \"id\"=:id AND \"foo\"=:foo";
         $context = ["id" => 0, "foo" => "bar"];
 
@@ -139,7 +151,8 @@ class ConnectionTest extends TestCase {
     /**
      * @depends testQueryReadNoCache
      */
-    public function testQueryRead() {
+    public function testQueryRead()
+    {
         $query = "SELECT * FROM \"test\" WHERE \"id\"=:id AND \"foo\"=:foo";
         $context = ["id" => 0, "foo" => "bar"];
 
@@ -170,7 +183,8 @@ class ConnectionTest extends TestCase {
         $this->assertEquals($result, $this->connection->query($query, $context));
     }
 
-    public function testQueryWrite() {
+    public function testQueryWrite()
+    {
         $query = "INSERT INTO \"test\" (\"id\",\"foo\") VALUES (:id,:foo)";
         $context = ["id" => 0, "foo" => "bar"];
 
@@ -189,7 +203,8 @@ class ConnectionTest extends TestCase {
     /**
      * @depends testQueryWrite
      */
-    public function testQueryFail() {
+    public function testQueryFail()
+    {
         $query = "INSERT INTO \"test\" (\"id\",\"foo\") VALUES (:id,:foo)";
         $context = ["id" => 0, "foo" => "bar"];
 
@@ -205,7 +220,8 @@ class ConnectionTest extends TestCase {
     /**
      * @depends testQueryWrite
      */
-    public function testQueryInvalidContext() {
+    public function testQueryInvalidContext()
+    {
         $query = "INSERT INTO \"test\" (\"id\",\"foo\") VALUES (:id,:foo)";
         $context = [0, "bar"];
 
@@ -218,7 +234,8 @@ class ConnectionTest extends TestCase {
         $this->connection->query($query, $context);
     }
 
-    public function testTransactional() {
+    public function testTransactional()
+    {
         $this->internalDriver->expects("inTransaction")->andReturns(false);
         $this->internalDriver->expects("beginTransaction");
         $this->internalDriver->expects("commit");
@@ -234,7 +251,8 @@ class ConnectionTest extends TestCase {
     /**
      * @depends testTransactional
      */
-    public function testTransactionalNested() {
+    public function testTransactionalNested()
+    {
         $this->internalDriver->expects("inTransaction")->andReturns(false);
         $this->internalDriver->expects("beginTransaction");
         $this->internalDriver->expects("commit");
@@ -251,7 +269,8 @@ class ConnectionTest extends TestCase {
     /**
      * @depends testTransactional
      */
-    public function testTransactionalWithException() {
+    public function testTransactionalWithException()
+    {
         $this->internalDriver->expects("inTransaction")->andReturns(false);
         $this->internalDriver->expects("beginTransaction");
         $this->internalDriver->expects("rollback");
@@ -261,5 +280,4 @@ class ConnectionTest extends TestCase {
             throw new QueryException();
         });
     }
-
 }
