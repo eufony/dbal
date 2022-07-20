@@ -3,5 +3,4 @@
 .gitignore  export-ignore
 
 # Project
-/docs/  export-ignore
 /tests/  export-ignore
