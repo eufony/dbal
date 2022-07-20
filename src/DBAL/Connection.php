@@ -122,8 +122,7 @@ class Connection
      */
     public function __construct(DriverInterface $driver, ?string $key = null)
     {
-        $key ??= "default";
-        $this->key = $key;
+        $this->key = $key ?? "default";
         static::$connections[$this->key] = $this;
 
         $this->driver = $driver;
@@ -241,7 +240,7 @@ class Connection
     public function query(string $query, array $context = [], int|DateInterval|null $ttl = 1): array
     {
         // Determine if query mutates data in the database depending on the first keyword
-        $is_mutation = preg_match("/^SELECT/", $query) !== 1;
+        $is_mutation = !str_starts_with($query, "SELECT");
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false && $ttl !== null) {
@@ -261,7 +260,7 @@ class Connection
         // Execute query
         try {
             $query_result = $this->driver->execute($query, $context);
-        } catch (InvalidArgumentException | QueryException $e) {
+        } catch (InvalidArgumentException|QueryException $e) {
             // Log error for query exceptions
             if ($e instanceof QueryException) {
                 $this->logger->error("Query failed: $query", context: ["exception" => $e]);
