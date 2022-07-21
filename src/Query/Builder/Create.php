@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,19 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Builder;
+namespace Eufony\DBAL\Query\Builder;
 
-use Eufony\ORM\DBAL\Query\Clause\ValuesClauseTrait;
-
-class Insert extends Query
+class Create extends Query
 {
-    use ValuesClauseTrait;
-
     protected string $table;
+    protected array $fields;
 
-    public static function into(string $table): static
+    public static function table(string $table): static
+    {
+        return new static($table);
+    }
+
+    public static function tableIfNotExists(string $table): static
     {
         return new static($table);
     }
@@ -35,7 +37,7 @@ class Insert extends Query
     /**
      * {@inheritDoc}
      *
-     * Use `Insert::into()` to initialize an instance of this class.
+     * Use `Create::table()` to initialize an instance of this class.
      *
      * @param string $table
      */
@@ -43,5 +45,11 @@ class Insert extends Query
     {
         parent::__construct();
         $this->table = $table;
+    }
+
+    public function fields(array $fields): static
+    {
+        $this->fields = $fields;
+        return $this;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Tests\Unit\DBAL\Driver;
+namespace Eufony\DBAL\Tests\Unit\Driver;
 
-use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\DBAL\Driver\SQLiteDriver;
+use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\DBAL\Driver\SQLiteDriver;
 
 class SQLiteDriverTest extends AbstractDriverTest
 {
@@ -197,6 +197,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
+                    WHERE "primary" < "foreign"
+                SQL,
+            <<< SQL
+                SELECT * FROM "test"
                     WHERE "zero" <= ?
                 SQL,
             <<< SQL
@@ -218,6 +222,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 SELECT * FROM "test"
                     WHERE "big_float" <= ?
+                SQL,
+            <<< SQL
+                SELECT * FROM "test"
+                    WHERE "primary" <= "foreign"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
@@ -245,6 +253,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
+                    WHERE "primary" >= "foreign"
+                SQL,
+            <<< SQL
+                SELECT * FROM "test"
                     WHERE "zero" > ?
                 SQL,
             <<< SQL
@@ -266,6 +278,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 SELECT * FROM "test"
                     WHERE "big_float" > ?
+                SQL,
+            <<< SQL
+                SELECT * FROM "test"
+                    WHERE "primary" > "foreign"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
@@ -523,6 +539,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
+                    WHERE "primary" < "foreign"
+                SQL,
+            <<< SQL
+                UPDATE "test" SET "empty_string" = ?
                     WHERE "zero" <= ?
                 SQL,
             <<< SQL
@@ -544,6 +564,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
                     WHERE "big_float" <= ?
+                SQL,
+            <<< SQL
+                UPDATE "test" SET "empty_string" = ?
+                    WHERE "primary" <= "foreign"
                 SQL,
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
@@ -571,6 +595,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
+                    WHERE "primary" >= "foreign"
+                SQL,
+            <<< SQL
+                UPDATE "test" SET "empty_string" = ?
                     WHERE "zero" > ?
                 SQL,
             <<< SQL
@@ -592,6 +620,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
                     WHERE "big_float" > ?
+                SQL,
+            <<< SQL
+                UPDATE "test" SET "empty_string" = ?
+                    WHERE "primary" > "foreign"
                 SQL,
             <<< SQL
                 UPDATE "test" SET "empty_string" = ?
@@ -774,6 +806,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 DELETE FROM "test"
+                    WHERE "primary" < "foreign"
+                SQL,
+            <<< SQL
+                DELETE FROM "test"
                     WHERE "zero" <= ?
                 SQL,
             <<< SQL
@@ -795,6 +831,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 DELETE FROM "test"
                     WHERE "big_float" <= ?
+                SQL,
+            <<< SQL
+                DELETE FROM "test"
+                    WHERE "primary" <= "foreign"
                 SQL,
             <<< SQL
                 DELETE FROM "test"
@@ -822,6 +862,10 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 DELETE FROM "test"
+                    WHERE "primary" >= "foreign"
+                SQL,
+            <<< SQL
+                DELETE FROM "test"
                     WHERE "zero" > ?
                 SQL,
             <<< SQL
@@ -843,6 +887,10 @@ class SQLiteDriverTest extends AbstractDriverTest
             <<< SQL
                 DELETE FROM "test"
                     WHERE "big_float" > ?
+                SQL,
+            <<< SQL
+                DELETE FROM "test"
+                    WHERE "primary" > "foreign"
                 SQL,
             <<< SQL
                 DELETE FROM "test"

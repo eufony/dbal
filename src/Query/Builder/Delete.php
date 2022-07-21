@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,31 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Clause;
+namespace Eufony\DBAL\Query\Builder;
 
-trait ValuesClauseTrait
+use Eufony\DBAL\Query\Clause\WhereClauseTrait;
+
+class Delete extends Query
 {
-    protected array $values;
+    use WhereClauseTrait;
 
-    public function values(array $values): static
+    protected string $table;
+
+    public static function from(string $table): static
     {
-        foreach ($values as &$value) {
-            $placeholder = hash("md5", uniqid(more_entropy: true));
-            $this->context[$placeholder] = $value;
-            $value = ":" . $placeholder;
-        }
+        return new static($table);
+    }
 
-        $this->values = $values;
-        return $this;
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Delete::from()` to initialize an instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
+        $this->table = $table;
     }
 }

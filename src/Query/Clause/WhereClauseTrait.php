@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,31 +17,18 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Builder;
+namespace Eufony\DBAL\Query\Clause;
 
-use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\DBAL\Query\Expr;
 
-class Delete extends Query
+trait WhereClauseTrait
 {
-    use WhereClauseTrait;
+    protected Expr $where;
 
-    protected string $table;
-
-    public static function from(string $table): static
+    public function where(Expr $expr): static
     {
-        return new static($table);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * Use `Delete::from()` to initialize an instance of this class.
-     *
-     * @param string $table
-     */
-    protected function __construct(string $table)
-    {
-        parent::__construct();
-        $this->table = $table;
+        $this->where = $expr;
+        $this->context = array_merge($this->context, $expr->context(recursive: true));
+        return $this;
     }
 }

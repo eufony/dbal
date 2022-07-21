@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Driver;
+namespace Eufony\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Builder\Create;
-use Eufony\ORM\DBAL\Query\Builder\Delete;
-use Eufony\ORM\DBAL\Query\Builder\Drop;
-use Eufony\ORM\DBAL\Query\Builder\Insert;
-use Eufony\ORM\DBAL\Query\Builder\Query;
-use Eufony\ORM\DBAL\Query\Builder\Select;
-use Eufony\ORM\DBAL\Query\Builder\Update;
-use Eufony\ORM\DBAL\Query\Expr;
-use Eufony\ORM\QueryException;
+use Eufony\DBAL\Query\Builder\Create;
+use Eufony\DBAL\Query\Builder\Delete;
+use Eufony\DBAL\Query\Builder\Drop;
+use Eufony\DBAL\Query\Builder\Insert;
+use Eufony\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Select;
+use Eufony\DBAL\Query\Builder\Update;
+use Eufony\DBAL\Query\Expr;
+use Eufony\DBAL\QueryException;
 use InvalidArgumentException;
 
 /**
@@ -43,7 +43,7 @@ use InvalidArgumentException;
  * **Note**: The ANSI SQL standard does not have full support of all features
  * that are provided by the Eufony DBAL, which makes it impossible to implement
  * support for some queries.
- * In such cases, a `\Eufony\ORM\UnsupportedException` will be thrown.
+ * In such cases, a `\Eufony\DBAL\UnsupportedException` will be thrown.
  */
 class AnsiSQLDriver extends AbstractPDODriver
 {
@@ -340,9 +340,9 @@ class AnsiSQLDriver extends AbstractPDODriver
                 return "NOT ($inner)";
             case "and":
             case "or":
-                $inner = array_map(fn($expr) => $this->generateExpression($expr), $expr->props()['expr']);
+                $inner = array_map(fn($expr) => "(" . $this->generateExpression($expr). ")", $expr->props()['expr']);
                 $function = strtoupper($expr->type());
-                return implode(" $function ", array_map(fn($ex) => "($ex)", $inner));
+                return implode(" $function ", $inner);
             case "same":
                 $primary = $expr->props()['primary'];
                 $foreign = $expr->props()['foreign'];
@@ -360,7 +360,7 @@ class AnsiSQLDriver extends AbstractPDODriver
             case "like":
                 $field = $expr->props()['field'];
                 $value = $expr->props()['value'];
-                $real_value = $expr->context()[trim($value, ":")];
+                $value_is_placeholder = str_starts_with($value, ":");
 
                 $operator = match ($expr->type()) {
                     "lt" => "<",
@@ -374,13 +374,14 @@ class AnsiSQLDriver extends AbstractPDODriver
 
                 $field = $this->quoteField($field);
 
-                if ($expr->type() === "eq" && $real_value === null) {
-                    return "$field IS NULL";
-                } elseif ($expr->type() === "ne" && $real_value === null) {
-                    return "$field IS NOT NULL";
+                if(in_array($expr->type(), ["eq", "ne"])) {
+                    $real_value = $expr->context()[trim($value, ":")];
+                    if($real_value === null) {
+                        return "$field IS " . ($expr->type() === "eq" ? "" : "NOT ") . "NULL";
+                    }
                 }
 
-                if (in_array($expr, ["lt", "le", "ge", "gt"]) && is_string($value)) {
+                if (in_array($expr->type(), ["lt", "le", "ge", "gt"]) && !$value_is_placeholder) {
                     $value = $this->quoteField($value);
                 }
 

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM;
+namespace Eufony\DBAL;
 
 /**
- * Exception thrown if an implementation of an interface does not support a
- * requested feature.
+ * Exception class thrown if an implementation of an interface does not support
+ * a requested feature.
  */
 class UnsupportedException extends \RuntimeException
 {

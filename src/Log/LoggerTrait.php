@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Log;
+namespace Eufony\DBAL\Log;
 
 use Exception;
 use Psr\Log\InvalidArgumentException;
@@ -132,7 +132,7 @@ trait LoggerTrait
     protected function psr3_validateLevel($level): string
     {
         // Ensure log level can be typecast to string
-        if (!is_scalar($level) && !($level instanceof Stringable)) {
+        if (!is_string($level) && !($level instanceof Stringable)) {
             throw new InvalidArgumentException("Log level must be able to be typecast to a string");
         }
 

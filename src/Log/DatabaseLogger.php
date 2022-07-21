@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Log;
+namespace Eufony\DBAL\Log;
 
-use Eufony\ORM\DBAL\Connection;
-use Eufony\ORM\DBAL\Query\Builder\Create;
-use Eufony\ORM\DBAL\Query\Builder\Insert;
+use Eufony\DBAL\Connection;
+use Eufony\DBAL\Query\Builder\Create;
+use Eufony\DBAL\Query\Builder\Insert;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
@@ -39,7 +39,7 @@ class DatabaseLogger extends AbstractLogger
     /**
      * The database connection to log into.
      *
-     * @var \Eufony\ORM\DBAL\Connection $database
+     * @var \Eufony\DBAL\Connection $database
      */
     public Connection $database;
 
@@ -47,7 +47,7 @@ class DatabaseLogger extends AbstractLogger
      * Class constructor.
      * Creates a new logger that logs into the given database.
      *
-     * @param \Eufony\ORM\DBAL\Connection $database
+     * @param \Eufony\DBAL\Connection $database
      */
     public function __construct(Connection $database)
     {
@@ -61,8 +61,8 @@ class DatabaseLogger extends AbstractLogger
      * If `$database` is set, sets the new connection and returns the previous
      * instance.
      *
-     * @param \Eufony\ORM\DBAL\Connection|null $database
-     * @return \Eufony\ORM\DBAL\Connection
+     * @param \Eufony\DBAL\Connection|null $database
+     * @return \Eufony\DBAL\Connection
      */
     public function database(?Connection $database = null): Connection
     {

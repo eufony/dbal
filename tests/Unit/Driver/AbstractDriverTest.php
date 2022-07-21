@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Tests\Unit\DBAL\Driver;
+namespace Eufony\DBAL\Tests\Unit\Driver;
 
 use BadMethodCallException;
-use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\DBAL\Query\Builder\Delete;
-use Eufony\ORM\DBAL\Query\Builder\Drop;
-use Eufony\ORM\DBAL\Query\Builder\Insert;
-use Eufony\ORM\DBAL\Query\Builder\Query;
-use Eufony\ORM\DBAL\Query\Builder\Select;
-use Eufony\ORM\DBAL\Query\Builder\Update;
-use Eufony\ORM\DBAL\Query\Expr;
+use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\DBAL\Query\Builder\Delete;
+use Eufony\DBAL\Query\Builder\Drop;
+use Eufony\DBAL\Query\Builder\Insert;
+use Eufony\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Select;
+use Eufony\DBAL\Query\Builder\Update;
+use Eufony\DBAL\Query\Expr;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -39,14 +39,14 @@ abstract class AbstractDriverTest extends TestCase
     /**
      * The database driver implementation to test.
      *
-     * @var \Eufony\ORM\DBAL\Driver\DriverInterface $driver
+     * @var \Eufony\DBAL\Driver\DriverInterface $driver
      */
     protected DriverInterface $driver;
 
     /**
      * Returns a new instance of a database driver implementation to test.
      *
-     * @return \Eufony\ORM\DBAL\Driver\DriverInterface
+     * @return \Eufony\DBAL\Driver\DriverInterface
      */
     abstract public function getDriver(): DriverInterface;
 
@@ -290,6 +290,8 @@ abstract class AbstractDriverTest extends TestCase
                     $data[] = [Expr::$expr($test_name, $test_value)];
                 }
             }
+
+            $data[] = [Expr::$expr("primary", "foreign")];
         }
 
         foreach (["eq", "ne"] as $expr) {
@@ -353,23 +355,14 @@ abstract class AbstractDriverTest extends TestCase
     {
         return [
             Select::from("test")->fields(),
-
             Select::from("test")->leftJoin("a")->leftJoin("b"),
-
             Select::from("test")->limit(7, 2),
-
             Select::from("test")->orderBy(["foo" => "invalid"]),
-
             Insert::into("test"),
-
             Insert::into("test")->values([]),
-
             Insert::into("test")->values(["foo"]),
-
             Update::table("test"),
-
             Update::table("test")->values([]),
-
             Update::table("test")->values(["foo"]),
         ];
     }
@@ -378,13 +371,13 @@ abstract class AbstractDriverTest extends TestCase
      * Data provider for testing the generation of query strings.
      *
      * Returns a query builder and the expected query string for each data set.
-     * The query string may contain curly braces (`{}`) as a shorthand for
+     * The query string may contain question marks (`?`) as a shorthand for
      * randomized named placeholders, as well as additional indentation to make the
      * query more human-readable.
      *
      * @return mixed[][]
      */
-    public function data_expectedQueryStrings(): array
+    public function expectedQueryStrings(): array
     {
         return array_map(fn($query, $string) => [$query, $string], $this->queryBuilders(), $this->queryStrings());
     }
@@ -398,9 +391,9 @@ abstract class AbstractDriverTest extends TestCase
     }
 
     /**
-     * @dataProvider data_expectedQueryStrings
+     * @dataProvider expectedQueryStrings
      */
-    public function test_generate(Query $query, string $expected)
+    public function testGenerate(Query $query, string $expected)
     {
         $expected = preg_replace(["/\n/", "/ +/"], ["", " "], $expected);
         $expected = preg_quote($expected);
@@ -409,13 +402,13 @@ abstract class AbstractDriverTest extends TestCase
     }
 
     /**
-     * @depends test_generate
+     * @depends testGenerate
      */
-    public function test_execute()
+    public function testExecute()
     {
     }
 
-    public function test_inTransaction()
+    public function testInTransaction()
     {
         $this->assertFalse($this->driver->inTransaction());
 
@@ -431,9 +424,9 @@ abstract class AbstractDriverTest extends TestCase
     }
 
     /**
-     * @depends test_inTransaction
+     * @depends testInTransaction
      */
-    public function test_beginTransaction_withActiveTransaction()
+    public function testBeginTransactionFail()
     {
         $this->assertFalse($this->driver->inTransaction());
         $this->driver->beginTransaction();
@@ -443,16 +436,16 @@ abstract class AbstractDriverTest extends TestCase
     }
 
     /**
-     * @depends test_inTransaction
+     * @depends testInTransaction
      */
-    public function test_commit()
+    public function testCommit()
     {
     }
 
     /**
-     * @depends test_inTransaction
+     * @depends testInTransaction
      */
-    public function test_commit_withoutActiveTransaction()
+    public function testCommitFail()
     {
         $this->assertFalse($this->driver->inTransaction());
         $this->expectException(BadMethodCallException::class);
@@ -460,16 +453,16 @@ abstract class AbstractDriverTest extends TestCase
     }
 
     /**
-     * @depends test_inTransaction
+     * @depends testInTransaction
      */
-    public function test_rollback()
+    public function testRollback()
     {
     }
 
     /**
-     * @depends test_inTransaction
+     * @depends testInTransaction
      */
-    public function test_rollback_withoutActiveTransaction()
+    public function testRollbackFail()
     {
         $this->assertFalse($this->driver->inTransaction());
         $this->expectException(BadMethodCallException::class);

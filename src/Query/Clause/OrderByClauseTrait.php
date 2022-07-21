@@ -17,8 +17,35 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-require __DIR__ . "/../vendor/autoload.php";
+namespace Eufony\DBAL\Query\Clause;
 
-echo "\n";
-echo "Testsuite for the Eufony DBAL by Alpin Gencer and contributors.\n";
-echo "\n";
+use InvalidArgumentException;
+
+trait OrderByClauseTrait
+{
+    protected array $order;
+
+    public function orderBy(string|array $fields): static
+    {
+        if (is_string($fields)) {
+            $fields = [$fields];
+        }
+
+        $this->order = [];
+
+        foreach ($fields as $key => $value) {
+            if (is_int($key)) {
+                $key = $value;
+                $value = "asc";
+            }
+
+            if (!in_array($value, ["asc", "desc"])) {
+                throw new InvalidArgumentException("Unknown order modifier");
+            }
+
+            $this->order[$key] = $value;
+        }
+
+        return $this;
+    }
+}

@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Driver;
+namespace Eufony\DBAL\Driver;
 
 use BadMethodCallException;
-use Eufony\ORM\QueryException;
+use Eufony\DBAL\QueryException;
 use PDO;
 use PDOException;
 

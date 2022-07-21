@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,16 +17,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Tests\Unit\Log;
+namespace Eufony\DBAL\Tests\Unit\Log;
 
-use Eufony\ORM\Log\LoggerTrait;
+use Eufony\DBAL\Log\LoggerTrait;
 use Psr\Log\InvalidArgumentException;
 use Psr\Log\LogLevel;
 use ReflectionClass;
 
 /**
  * Unit tests for PSR-3 loggers that inherit from
- * `\Eufony\ORM\Log\LoggerTrait`.
+ * `\Eufony\DBAL\Log\LoggerTrait`.
  */
 trait LoggerTraitTestTrait
 {

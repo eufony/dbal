@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,26 +17,17 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Builder;
+namespace Eufony\DBAL\Query\Builder;
 
-use Eufony\ORM\DBAL\Query\Clause\ValuesClauseTrait;
-use Eufony\ORM\DBAL\Query\Clause\WhereClauseTrait;
+use Eufony\DBAL\Query\Clause\ValuesClauseTrait;
 
-/**
- * Represents an `UPDATE` SQL query.
- */
-class Update extends Query
+class Insert extends Query
 {
     use ValuesClauseTrait;
-    use WhereClauseTrait;
 
     protected string $table;
 
-    /**
-     * @param string $table
-     * @return static
-     */
-    public static function table(string $table): static
+    public static function into(string $table): static
     {
         return new static($table);
     }
@@ -44,7 +35,7 @@ class Update extends Query
     /**
      * {@inheritDoc}
      *
-     * Use `Update::table()` to initialize an instance of this class.
+     * Use `Insert::into()` to initialize an instance of this class.
      *
      * @param string $table
      */
