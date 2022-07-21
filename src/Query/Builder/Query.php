@@ -89,7 +89,7 @@ abstract class Query implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return property_exists($this, $offset) && isset($this->$offset);
     }
@@ -97,7 +97,7 @@ abstract class Query implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         // Ensure property exists
         if (!$this->offsetExists($offset)) {
@@ -110,7 +110,7 @@ abstract class Query implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         throw new BadMethodCallException("Query builder properties are read-only");
     }
@@ -118,7 +118,7 @@ abstract class Query implements ArrayAccess
     /**
      * @inheritDoc
      */
-    public function offsetUnset($offset)
+    public function offsetUnset(mixed $offset): void
     {
         throw new BadMethodCallException("Query builder properties are read-only");
     }
