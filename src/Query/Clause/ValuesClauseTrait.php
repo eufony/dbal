@@ -25,7 +25,7 @@ trait ValuesClauseTrait
 
     public function values(array $values): static
     {
-        foreach($values as $key => $value) {
+        foreach ($values as $key => $value) {
             $placeholder = hash("md5", uniqid(more_entropy: true));
             $this->context[$placeholder] = $value;
             $this->values[$key] = ":$placeholder";

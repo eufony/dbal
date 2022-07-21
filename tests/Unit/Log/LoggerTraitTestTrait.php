@@ -65,7 +65,7 @@ trait LoggerTraitTestTrait
             "{bar}",
             "value1 value2",
             "value2 value1",
-            (string) $logged_events[6][2]["foo"],
+            (string)$logged_events[6][2]["foo"],
             "",
         ];
 
