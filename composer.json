@@ -24,12 +24,14 @@
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
+    "eufony/dbal-driver-implementation": "Virtual package for database driver implementations.",
     "monolog/monolog": "Well-maintained and popular logging library.",
     "psr/cache-implementation": "Virtual package for PSR-6 caching implementations.",
     "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
     "psr/simple-cache-implementation": "Virutal package for PSR-16 caching implementations."
   },
   "provide": {
+    "eufony/dbal-driver-implemtation": "*",
     "psr/log-implementation": "^1.0 || ^2.0 || ^3.0"
   },
   "autoload": {
