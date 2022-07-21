@@ -87,17 +87,17 @@ class Expr
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function eq(string $field, int|float|string|bool|null $value): static
-    {
-        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
-    }
-
     public static function ge(string $field, int|float|string $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
     public static function gt(string $field, int|float|string $value): static
+    {
+        return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
+    }
+
+    public static function eq(string $field, int|float|string|bool|null $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
@@ -133,7 +133,7 @@ class Expr
             case "le":
             case "ge":
             case "gt":
-                if(is_string($this->props['value'])) {
+                if (is_string($this->props['value'])) {
                     break;
                 }
             case "eq":
