@@ -37,9 +37,9 @@ class Select extends Query
     protected string $alias;
     protected array $fields;
 
-    public static function from(string $table, ?string $alias = null): static
+    public static function from(string $table, ?string $as = null): static
     {
-        return new static($table, $alias);
+        return new static($table, $as);
     }
 
     /**
@@ -48,15 +48,15 @@ class Select extends Query
      * Use `Select::from()` to initialize an instance of this class.
      *
      * @param string $table
-     * @param string|null $alias
+     * @param string|null $as
      */
-    protected function __construct(string $table, string|null $alias)
+    protected function __construct(string $table, string|null $as)
     {
         parent::__construct();
         $this->table = $table;
 
-        if (isset($alias)) {
-            $this->alias = $alias;
+        if (isset($as)) {
+            $this->alias = $as;
         }
     }
 

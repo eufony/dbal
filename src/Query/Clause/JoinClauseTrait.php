@@ -26,26 +26,26 @@ trait JoinClauseTrait
 {
     protected array $joins;
 
-    public function innerJoin(string $table, ?string $alias = null, ?Expr $on = null): static
+    public function innerJoin(string $table, ?string $as = null, ?Expr $on = null): static
     {
         $this->joins ??= [];
         $this->joins[] = [
             "type" => "inner",
             "table" => $table,
-            "alias" => $alias,
+            "alias" => $as,
             "on" => $on ?? throw new InvalidArgumentException("No ON predicate given for inner join")
         ];
 
         return $this;
     }
 
-    public function leftJoin(string $table, ?string $alias = null, ?Expr $on = null): static
+    public function leftJoin(string $table, ?string $as = null, ?Expr $on = null): static
     {
         $this->joins ??= [];
         $this->joins[] = [
             "type" => "left",
             "table" => $table,
-            "alias" => $alias,
+            "alias" => $as,
             "on" => $on ?? throw new InvalidArgumentException("No ON predicate given for left join")
         ];
 

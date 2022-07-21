@@ -72,6 +72,7 @@ class AnsiSQLDriver extends AbstractPDODriver
         $sql .= " FROM $table";
 
         if (isset($alias)) {
+            $alias = $this->quoteField($alias);
             $sql .= " AS $alias";
         }
 
@@ -237,6 +238,7 @@ class AnsiSQLDriver extends AbstractPDODriver
             $clause .= " $type JOIN $join_table";
 
             if ($alias !== null) {
+                $alias = $this->quoteField($alias);
                 $clause .= " AS $alias";
             }
 
@@ -340,7 +342,7 @@ class AnsiSQLDriver extends AbstractPDODriver
                 return "NOT ($inner)";
             case "and":
             case "or":
-                $inner = array_map(fn($expr) => "(" . $this->generateExpression($expr). ")", $expr->props()['expr']);
+                $inner = array_map(fn($expr) => "(" . $this->generateExpression($expr) . ")", $expr->props()['expr']);
                 $function = strtoupper($expr->type());
                 return implode(" $function ", $inner);
             case "same":
@@ -374,9 +376,9 @@ class AnsiSQLDriver extends AbstractPDODriver
 
                 $field = $this->quoteField($field);
 
-                if(in_array($expr->type(), ["eq", "ne"])) {
+                if (in_array($expr->type(), ["eq", "ne"])) {
                     $real_value = $expr->context()[trim($value, ":")];
-                    if($real_value === null) {
+                    if ($real_value === null) {
                         return "$field IS " . ($expr->type() === "eq" ? "" : "NOT ") . "NULL";
                     }
                 }
