@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,27 +17,20 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Builder;
+namespace Eufony\DBAL\Query\Clause;
 
-class Drop extends Query
+trait ValuesClauseTrait
 {
-    protected string $table;
+    protected array $values;
 
-    public static function table(string $table): static
+    public function values(array $values): static
     {
-        return new static($table);
-    }
+        foreach($values as $key => $value) {
+            $placeholder = hash("md5", uniqid(more_entropy: true));
+            $this->context[$placeholder] = $value;
+            $this->values[$key] = ":$placeholder";
+        }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Use `Drop::table()` to initialize and instance of this class.
-     *
-     * @param string $table
-     */
-    protected function __construct(string $table)
-    {
-        parent::__construct();
-        $this->table = $table;
+        return $this;
     }
 }

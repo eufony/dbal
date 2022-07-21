@@ -1,7 +1,7 @@
 {
-  "name": "eufony/orm",
-  "description": "Model-based zero-configuration extensible PHP ORM library.",
-  "keywords": [ "eufony", "orm", "dbal", "sql" ],
+  "name": "eufony/dbal",
+  "description": "Zero-configuration extensible PHP database abstraction layer library.",
+  "keywords": [ "eufony", "dbal", "sql" ],
   "type": "library",
   "license": "LGPL-3.0-or-later",
   "authors": [
@@ -15,7 +15,6 @@
     "php": "^8.0",
     "ext-pdo": "*",
     "eufony/cache": "^1.0@dev",
-    "eufony/inflector-doctrine-wrapper": "^1.0",
     "psr/log": "^1.0 || ^2.0 || ^3.0",
     "psr/simple-cache": "^1.0"
   },
@@ -25,7 +24,6 @@
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
-    "eufony/inflector-implementation": "Virtual package for inflection implementations.",
     "monolog/monolog": "Well-maintained and popular logging library.",
     "psr/cache-implementation": "Virtual package for PSR-6 caching implementations.",
     "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
@@ -36,13 +34,13 @@
   },
   "autoload": {
     "psr-4": {
-      "Eufony\\ORM\\": [ "src/Exception/", "src/" ]
+      "Eufony\\DBAL\\": [ "src/Exception/", "src/" ]
     }
   },
   "autoload-dev": {
     "psr-4": {
       "App\\": [ "tests/App/" ],
-      "Eufony\\ORM\\Tests\\": [ "tests/" ]
+      "Eufony\\DBAL\\Tests\\": [ "tests/" ]
     }
   },
   "scripts": {

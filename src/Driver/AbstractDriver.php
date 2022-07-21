@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,16 +17,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Driver;
+namespace Eufony\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Builder\Create;
-use Eufony\ORM\DBAL\Query\Builder\Delete;
-use Eufony\ORM\DBAL\Query\Builder\Drop;
-use Eufony\ORM\DBAL\Query\Builder\Insert;
-use Eufony\ORM\DBAL\Query\Builder\Query;
-use Eufony\ORM\DBAL\Query\Builder\Select;
-use Eufony\ORM\DBAL\Query\Builder\Update;
-use Eufony\ORM\DBAL\Query\Expr;
+use Eufony\DBAL\Query\Builder\Create;
+use Eufony\DBAL\Query\Builder\Delete;
+use Eufony\DBAL\Query\Builder\Drop;
+use Eufony\DBAL\Query\Builder\Insert;
+use Eufony\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Select;
+use Eufony\DBAL\Query\Builder\Update;
+use Eufony\DBAL\Query\Expr;
 use ReflectionClass;
 
 /**
@@ -72,7 +72,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from a `Select` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Select $query
+     * @param \Eufony\DBAL\Query\Builder\Select $query
      * @return string
      */
     abstract protected function generateSelect(Select $query): string;
@@ -80,7 +80,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from an `Insert` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Insert $query
+     * @param \Eufony\DBAL\Query\Builder\Insert $query
      * @return string
      */
     abstract protected function generateInsert(Insert $query): string;
@@ -88,7 +88,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from an `Update` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Update $query
+     * @param \Eufony\DBAL\Query\Builder\Update $query
      * @return string
      */
     abstract protected function generateUpdate(Update $query): string;
@@ -96,7 +96,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from a `Delete` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Delete $query
+     * @param \Eufony\DBAL\Query\Builder\Delete $query
      * @return string
      */
     abstract protected function generateDelete(Delete $query): string;
@@ -104,7 +104,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from a `Create` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Create $query
+     * @param \Eufony\DBAL\Query\Builder\Create $query
      * @return string
      */
     abstract protected function generateCreate(Create $query): string;
@@ -112,7 +112,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the query string to be executed from a `Drop` query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Drop $query
+     * @param \Eufony\DBAL\Query\Builder\Drop $query
      * @return string
      */
     abstract protected function generateDrop(Drop $query): string;
@@ -120,7 +120,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `GROUP BY` clause of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateGroupByClause(Query $query): string;
@@ -128,7 +128,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `JOIN` clauses of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateJoinClause(Query $query): string;
@@ -136,7 +136,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `LIMIT` and `OFFSET` clause of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateLimitClause(Query $query): string;
@@ -144,7 +144,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `ORDER BY` clause of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateOrderByClause(Query $query): string;
@@ -152,7 +152,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `VALUES` clause of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateValuesClause(Query $query): string;
@@ -160,7 +160,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Generates the `WHERE` clause of a query string.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     abstract protected function generateWhereClause(Query $query): string;
@@ -168,7 +168,7 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * Recursively generates the query string of an expression.
      *
-     * @param \Eufony\ORM\DBAL\Query\Expr $expr
+     * @param \Eufony\DBAL\Query\Expr $expr
      * @return string
      */
     abstract protected function generateExpression(Expr $expr): string;

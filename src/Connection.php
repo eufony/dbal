@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,17 +17,13 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL;
+namespace Eufony\DBAL;
 
 use BadMethodCallException;
 use DateInterval;
 use Eufony\Cache\ArrayCache;
-use Eufony\Inflector\DoctrineInflector;
-use Eufony\Inflector\InflectorInterface;
-use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\Log\DatabaseLogger;
-use Eufony\ORM\QueryException;
-use Eufony\ORM\TransactionException;
+use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\DBAL\Log\DatabaseLogger;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -43,7 +39,7 @@ class Connection
     /**
      * Stores the active instances of the database connections.
      *
-     * @var \Eufony\ORM\DBAL\Connection[] $connections
+     * @var \Eufony\DBAL\Connection[] $connections
      */
     protected static array $connections;
 
@@ -57,7 +53,7 @@ class Connection
     /**
      * A backend driver for building and executing queries.
      *
-     * @var \Eufony\ORM\DBAL\Driver\DriverInterface $driver
+     * @var \Eufony\DBAL\Driver\DriverInterface $driver
      */
     protected DriverInterface $driver;
 
@@ -71,18 +67,9 @@ class Connection
     protected CacheInterface $cache;
 
     /**
-     * An Inflector implementation.
-     *
-     * Defaults to an instance of `\Eufony\Inflector\DoctrineInflector`.
-     *
-     * @var \Eufony\Inflector\InflectorInterface $inflector
-     */
-    protected InflectorInterface $inflector;
-
-    /**
      * A PSR-3 compliant logger.
      *
-     * Defaults to an instance of `\Eufony\ORM\Log\DatabaseLogger`.
+     * Defaults to an instance of `\Eufony\DBAL\Log\DatabaseLogger`.
      *
      * @var \Psr\Log\LoggerInterface $logger
      */
@@ -93,7 +80,7 @@ class Connection
      * the default key if none is given.
      *
      * @param string|null $key
-     * @return \Eufony\ORM\DBAL\Connection
+     * @return \Eufony\DBAL\Connection
      */
     public static function get(?string $key = null): Connection
     {
@@ -114,10 +101,10 @@ class Connection
      *
      * The database key defaults to the value `default`.
      *
-     * Sets up an array cache for caching, and a `\Eufony\ORM\Log\DatabaseLogger`
+     * Sets up an array cache for caching, and a `\Eufony\DBAL\Log\DatabaseLogger`
      * for logging.
      *
-     * @param \Eufony\ORM\DBAL\Driver\DriverInterface $driver
+     * @param \Eufony\DBAL\Driver\DriverInterface $driver
      * @param string|null $key
      */
     public function __construct(DriverInterface $driver, ?string $key = null)
@@ -126,9 +113,7 @@ class Connection
         static::$connections[$this->key] = $this;
 
         $this->driver = $driver;
-
         $this->cache = new ArrayCache();
-        $this->inflector = new DoctrineInflector();
         $this->logger = new DatabaseLogger($this);
     }
 
@@ -161,7 +146,7 @@ class Connection
      *
      * Returns the current database driver.
      *
-     * @return \Eufony\ORM\DBAL\Driver\DriverInterface
+     * @return \Eufony\DBAL\Driver\DriverInterface
      */
     public function driver(): DriverInterface
     {
@@ -181,23 +166,6 @@ class Connection
     {
         $prev = $this->cache;
         $this->cache = $cache ?? $this->cache;
-        return $prev;
-    }
-
-    /**
-     * Combined getter / setter for the Inflector implementation.
-     *
-     * Returns the current inflector.
-     * If `$inflector` is set, sets the new inflector and returns the previous
-     * instance.
-     *
-     * @param \Eufony\Inflector\InflectorInterface|null $inflector
-     * @return \Eufony\Inflector\InflectorInterface
-     */
-    public function inflector(?InflectorInterface $inflector = null): InflectorInterface
-    {
-        $prev = $this->inflector;
-        $this->inflector = $inflector ?? $this->inflector;
         return $prev;
     }
 
@@ -230,7 +198,7 @@ class Connection
      * The default expiration is 1 minute.
      * If `$ttl` is set to null, the query result will not be cached.
      *
-     * Throws a `\Eufony\ORM\QueryException` on failure.
+     * Throws a `\Eufony\DBAL\QueryException` on failure.
      *
      * @param string $query
      * @param mixed[] $context
@@ -299,7 +267,7 @@ class Connection
      * in an exception.
      *
      * If an exception occurs, the changes are rolled back and a
-     * `\Eufony\ORM\TransactionException` is thrown.
+     * `\Eufony\DBAL\TransactionException` is thrown.
      *
      * This method can be nested within itself.
      * This does not actually nest "real" transactions, the nested call to start a

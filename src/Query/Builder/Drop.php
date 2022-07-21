@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,35 +17,27 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Clause;
+namespace Eufony\DBAL\Query\Builder;
 
-use InvalidArgumentException;
-
-trait OrderByClauseTrait
+class Drop extends Query
 {
-    protected array $order;
+    protected string $table;
 
-    public function orderBy(string|array $fields): static
+    public static function table(string $table): static
     {
-        if (is_string($fields)) {
-            $fields = [$fields];
-        }
+        return new static($table);
+    }
 
-        $this->order = [];
-
-        foreach ($fields as $key => $value) {
-            if (is_int($key)) {
-                $key = $value;
-                $value = "asc";
-            }
-
-            if (!in_array($value, ["asc", "desc"])) {
-                throw new InvalidArgumentException("Unknown order modifier");
-            }
-
-            $this->order[$key] = $value;
-        }
-
-        return $this;
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Drop::table()` to initialize and instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
+        $this->table = $table;
     }
 }

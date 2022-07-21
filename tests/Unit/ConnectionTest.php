@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Tests\Unit\DBAL;
+namespace Eufony\DBAL\Tests\Unit;
 
-use Eufony\Inflector\InflectorInterface;
-use Eufony\ORM\DBAL\Connection;
-use Eufony\ORM\DBAL\Driver\DriverInterface;
-use Eufony\ORM\QueryException;
-use Eufony\ORM\TransactionException;
+use Eufony\DBAL\Connection;
+use Eufony\DBAL\Driver\DriverInterface;
+use Eufony\DBAL\QueryException;
+use Eufony\DBAL\TransactionException;
 use InvalidArgumentException;
 use Mockery;
 use PHPUnit\Framework\TestCase;
@@ -31,14 +30,14 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Unit tests for `Eufony\ORM\DBAL\Connection`.
+ * Unit tests for `Eufony\DBAL\Connection`.
  */
 class ConnectionTest extends TestCase
 {
     /**
      * The `Connection` object to test.
      *
-     * @var \Eufony\ORM\DBAL\Connection
+     * @var \Eufony\DBAL\Connection
      */
     protected Connection $connection;
 
@@ -46,7 +45,7 @@ class ConnectionTest extends TestCase
      * The internal mock `DriverInterface` object used to test the database
      * connection.
      *
-     * @var \Eufony\ORM\DBAL\Driver\DriverInterface $internalDriver
+     * @var \Eufony\DBAL\Driver\DriverInterface $internalDriver
      */
     protected DriverInterface $internalDriver;
 
@@ -65,14 +64,6 @@ class ConnectionTest extends TestCase
     protected CacheInterface $internalCache;
 
     /**
-     * The internal mock `InflectorInterface` object used to test the database
-     * connection.
-     *
-     * @var \Eufony\Inflector\InflectorInterface $internalInflector
-     */
-    protected InflectorInterface $internalInflector;
-
-    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -80,11 +71,9 @@ class ConnectionTest extends TestCase
         $this->internalDriver = Mockery::mock(DriverInterface::class);
         $this->internalLogger = Mockery::mock(LoggerInterface::class);
         $this->internalCache = Mockery::mock(CacheInterface::class);
-        $this->internalInflector = Mockery::mock(InflectorInterface::class);
         $this->connection = new Connection($this->internalDriver);
         $this->connection->logger($this->internalLogger);
         $this->connection->cache($this->internalCache);
-        $this->connection->inflector($this->internalInflector);
 
         $this->internalLogger->allows(
             [
@@ -126,11 +115,6 @@ class ConnectionTest extends TestCase
     public function testGetInternalCache()
     {
         $this->assertSame($this->internalCache, $this->connection->cache());
-    }
-
-    public function testGetInternalInflector()
-    {
-        $this->assertSame($this->internalInflector, $this->connection->inflector());
     }
 
     public function testQueryReadNoCache()

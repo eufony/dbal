@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,31 +17,30 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Driver;
+namespace Eufony\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Query;
 
 /**
- * Provides a database driver implementation for MySQL using the PDO extension.
+ * Provides a database driver implementation for SQLite using the PDO
+ * extension.
  */
-class MySQLDriver extends AnsiSQLDriver
+class SQLiteDriver extends AnsiSQLDriver
 {
     /**
      * Class constructor.
-     * Creates a new connection to the database using the PHP `pdo_mysql`
+     * Creates a new connection to the database using the PHP `pdo_sqlite`
      * extension.
      *
-     * Requires the server host, database name, and user credentials to establish
-     * the connection.
+     * Requires the file path of the database file to establish the connection.
+     * If the path is `:memory:`, an in-memory database will be created.
+     * It will be destroyed at the end of the PHP process.
      *
-     * @param string $server
-     * @param string $name
-     * @param string $user
-     * @param string $password
+     * @param string $path
      */
-    public function __construct(string $server, string $name, string $user, string $password)
+    public function __construct(string $path)
     {
-        parent::__construct("mysql:host=$server;dbname=$name", $user, $password);
+        parent::__construct("sqlite:" . $path);
     }
 
     /**
@@ -68,13 +67,5 @@ class MySQLDriver extends AnsiSQLDriver
 
         // Return result
         return $clause;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function quoteField(string $field): string
-    {
-        return preg_replace("/\"/", "`", parent::quoteField($field));
     }
 }

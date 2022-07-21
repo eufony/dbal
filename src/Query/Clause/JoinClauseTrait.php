@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Clause;
+namespace Eufony\DBAL\Query\Clause;
 
-use Eufony\ORM\DBAL\Query\Expr;
+use Eufony\DBAL\Query\Expr;
 use InvalidArgumentException;
 
 trait JoinClauseTrait

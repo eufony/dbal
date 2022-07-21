@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query;
+namespace Eufony\DBAL\Query;
 
-use Eufony\ORM\DBAL\Query\Builder\Select;
+use Eufony\DBAL\Query\Builder\Select;
 
 class Expr
 {
@@ -77,12 +77,12 @@ class Expr
         return new static(__FUNCTION__, ["primary" => $primary, "foreign" => $foreign]);
     }
 
-    public static function lt(string $field, int|float $value): static
+    public static function lt(string $field, int|float|string $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function le(string $field, int|float $value): static
+    public static function le(string $field, int|float|string $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
@@ -92,12 +92,12 @@ class Expr
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function ge(string $field, int|float $value): static
+    public static function ge(string $field, int|float|string $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
 
-    public static function gt(string $field, int|float $value): static
+    public static function gt(string $field, int|float|string $value): static
     {
         return new static(__FUNCTION__, ["field" => $field, "value" => $value]);
     }
@@ -131,9 +131,12 @@ class Expr
         switch ($type) {
             case "lt":
             case "le":
-            case "eq":
             case "ge":
             case "gt":
+                if(is_string($this->props['value'])) {
+                    break;
+                }
+            case "eq":
             case "ne":
             case "like":
                 $value = &$this->props['value'];
@@ -169,14 +172,10 @@ class Expr
             return $this->context;
         }
 
-        if ($this->type === "not") {
-            return array_merge($this->context, $this->props['expr']->context);
-        }
-
-        if (in_array($this->type, ["and", "or"])) {
-            return array_merge($this->context, ...array_map(fn($expr) => $expr->context, $this->props['expr']));
-        }
-
-        return $this->context;
+        return match ($this->type) {
+            "not" => array_merge($this->context, $this->props['expr']->context),
+            "and", "or" => array_merge($this->context, ...array_map(fn($expr) => $expr->context, $this->props['expr'])),
+            default => $this->context,
+        };
     }
 }

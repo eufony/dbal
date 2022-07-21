@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,24 +17,40 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Clause;
+namespace Eufony\DBAL\Query\Builder;
 
-use Eufony\ORM\DBAL\Query\Expr;
+use Eufony\DBAL\Query\Clause\ValuesClauseTrait;
+use Eufony\DBAL\Query\Clause\WhereClauseTrait;
 
-trait GroupByClauseTrait
+/**
+ * Represents an `UPDATE` SQL query.
+ */
+class Update extends Query
 {
-    protected array $groupBy;
-    protected Expr $having;
+    use ValuesClauseTrait;
+    use WhereClauseTrait;
 
-    public function groupBy(string ...$fields): static
+    protected string $table;
+
+    /**
+     * @param string $table
+     * @return static
+     */
+    public static function table(string $table): static
     {
-        $this->groupBy = $fields;
-        return $this;
+        return new static($table);
     }
 
-    public function having(Expr $expr): static
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Update::table()` to initialize an instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
     {
-        $this->having = $expr;
-        return $this;
+        parent::__construct();
+        $this->table = $table;
     }
 }

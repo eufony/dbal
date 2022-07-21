@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,12 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Query\Builder;
+namespace Eufony\DBAL\Query\Builder;
 
 use ArrayAccess;
 use BadMethodCallException;
 use DateInterval;
-use Eufony\ORM\DBAL\Connection;
+use Eufony\DBAL\Connection;
 use OutOfBoundsException;
 
 /**
@@ -34,7 +34,7 @@ use OutOfBoundsException;
  * correct syntax by a database driver.
  *
  * Allows retrieval of the query builder properties using the array access.
- * However, does not allow modification of any query properties.
+ * However, any modification of the query properties is not allowed.
  *
  * Cloning a query builder will result in a deep copy of all of its properties.
  */

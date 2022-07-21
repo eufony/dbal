@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\Tests\Unit\Log;
+namespace Eufony\DBAL\Tests\Unit\Log;
 
-use Eufony\ORM\DBAL\Connection;
-use Eufony\ORM\Log\DatabaseLogger;
+use Eufony\DBAL\Connection;
+use Eufony\DBAL\Log\DatabaseLogger;
 use Mockery;
 use Psr\Log\LoggerInterface;
 
 /**
- * Unit tests for `\Eufony\ORM\Log\DatabaseLogger`.
+ * Unit tests for `\Eufony\DBAL\Log\DatabaseLogger`.
  */
 class DatabaseLoggerTest extends AbstractLogTest
 {
@@ -34,7 +34,7 @@ class DatabaseLoggerTest extends AbstractLogTest
     /**
      * The internal mock `Connection` object used to test the `DatabaseLogger`.
      *
-     * @var \Eufony\ORM\DBAL\Connection $internalDatabase
+     * @var \Eufony\DBAL\Connection $internalDatabase
      */
     protected Connection $internalDatabase;
 

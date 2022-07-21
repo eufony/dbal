@@ -1,6 +1,6 @@
 <?php
 /*
- * The Eufony ORM
+ * The Eufony DBAL Package
  * Copyright (c) 2021 Alpin Gencer
  *
  * This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-namespace Eufony\ORM\DBAL\Driver;
+namespace Eufony\DBAL\Driver;
 
-use Eufony\ORM\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Query;
 
 /**
  * Provides a common interface for connecting to and querying different
@@ -36,7 +36,7 @@ interface DriverInterface
     /**
      * Generates the query string to be executed from the given query builder.
      *
-     * @param \Eufony\ORM\DBAL\Query\Builder\Query $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @return string
      */
     public function generate(Query $query): string;
@@ -58,7 +58,7 @@ interface DriverInterface
      * the context array don't match the parameters in the query, an
      * `\InvalidArgumentException` MUST be thrown.
      *
-     * If the query fails, a `\Eufony\ORM\QueryException` MUST be thrown.
+     * If the query fails, a `\Eufony\DBAL\QueryException` MUST be thrown.
      * If another exception is re-thrown as a `QueryException`, the original
      * exception SHOULD be chained onto the `QueryException` using the `previous`
      * parameter in the exception constructor.
