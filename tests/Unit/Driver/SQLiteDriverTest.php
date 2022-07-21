@@ -42,6 +42,9 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SELECT * FROM "test"
                 SQL,
             <<< SQL
+                SELECT * FROM "foo" AS "bar"
+                SQL,
+            <<< SQL
                 SELECT "foo" FROM "test"
                 SQL,
             <<< SQL
@@ -83,21 +86,21 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
-                    INNER JOIN "b" AS b1 ON "a"."b1_id" = "b1"."id"
-                    INNER JOIN "b" AS b2 ON "a"."b2_id" = "b2"."id"
+                    INNER JOIN "b" AS "b1" ON "a"."b1_id" = "b1"."id"
+                    INNER JOIN "b" AS "b2" ON "a"."b2_id" = "b2"."id"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
-                    LEFT JOIN "b" AS b1 ON "a"."b1_id" = "b1"."id"
-                    LEFT JOIN "b" AS b2 ON "a"."b2_id" = "b2"."id"
+                    LEFT JOIN "b" AS "b1" ON "a"."b1_id" = "b1"."id"
+                    LEFT JOIN "b" AS "b2" ON "a"."b2_id" = "b2"."id"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
-                    INNER JOIN "a" AS a2 ON "a"."a2_id" = "a2"."id"
+                    INNER JOIN "a" AS "a2" ON "a"."a2_id" = "a2"."id"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
-                    LEFT JOIN "a" AS a2 ON "a"."a2_id" = "a2"."id"
+                    LEFT JOIN "a" AS "a2" ON "a"."a2_id" = "a2"."id"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"

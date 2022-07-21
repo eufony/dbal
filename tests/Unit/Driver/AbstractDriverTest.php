@@ -100,6 +100,7 @@ abstract class AbstractDriverTest extends TestCase
     {
         $queries = [
             Select::from("test"),
+            Select::from("foo", as: "bar"),
             Select::from("test")->fields("foo"),
             Select::from("test")->fields("foo", "bar"),
         ];
@@ -217,11 +218,11 @@ abstract class AbstractDriverTest extends TestCase
                 ["c", "on" => Expr::same("b.c_id", "c.id")]
             ],
             [
-                ["b", "b1", "on" => Expr::same("a.b1_id", "b1.id")],
-                ["b", "b2", "on" => Expr::same("a.b2_id", "b2.id")],
+                ["b", "as" => "b1", "on" => Expr::same("a.b1_id", "b1.id")],
+                ["b", "as" => "b2", "on" => Expr::same("a.b2_id", "b2.id")],
             ],
             [
-                ["a", "a2", "on" => Expr::same("a.a2_id", "a2.id")],
+                ["a", "as" => "a2", "on" => Expr::same("a.a2_id", "a2.id")],
             ],
         ];
     }
