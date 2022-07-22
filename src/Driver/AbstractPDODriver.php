@@ -47,6 +47,8 @@ abstract class AbstractPDODriver extends AbstractDriver
     /**
      * {@inheritDoc}
      *
+     * Uses the PHP PDO extension for interfacing with the database.
+     *
      * The given parameters are passed directly to the underlying PDO object.
      * Refer to the official PDO documentation for more details.
      *
