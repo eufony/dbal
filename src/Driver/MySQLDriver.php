@@ -27,24 +27,6 @@ use Eufony\DBAL\Query\Builder\Query;
 class MySQLDriver extends AnsiSQLDriver
 {
     /**
-     * Class constructor.
-     * Creates a new connection to the database using the PHP `pdo_mysql`
-     * extension.
-     *
-     * Requires the server host, database name, and user credentials to establish
-     * the connection.
-     *
-     * @param string $server
-     * @param string $name
-     * @param string $user
-     * @param string $password
-     */
-    public function __construct(string $server, string $name, string $user, string $password)
-    {
-        parent::__construct("mysql:host=$server;dbname=$name", $user, $password);
-    }
-
-    /**
      * @inheritDoc
      */
     protected function generateLimitClause(Query $query): string
