@@ -22,15 +22,16 @@ namespace Eufony\DBAL\Driver;
 use Eufony\DBAL\Query\Builder\Query;
 
 /**
- * Provides a database driver implementation for SQLite using the PDO
+ * Provides a database driver implementation for SQLite using the `pdo_sqlite`
  * extension.
  */
 class SQLiteDriver extends AnsiSQLDriver
 {
     /**
      * Class constructor.
-     * Creates a new connection to the database using the PHP `pdo_sqlite`
-     * extension.
+     * Creates a new connection to the database.
+     *
+     * Uses the PHP PDO extension for interfacing with the database.
      *
      * Requires the file path of the database file to establish the connection.
      * If the path is `:memory:`, an in-memory database will be created.

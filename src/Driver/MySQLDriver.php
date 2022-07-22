@@ -22,7 +22,8 @@ namespace Eufony\DBAL\Driver;
 use Eufony\DBAL\Query\Builder\Query;
 
 /**
- * Provides a database driver implementation for MySQL using the PDO extension.
+ * Provides a database driver implementation for MySQL using the `pdo_mysql`
+ * extension.
  */
 class MySQLDriver extends AnsiSQLDriver
 {
