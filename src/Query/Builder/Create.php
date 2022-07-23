@@ -21,30 +21,36 @@ namespace Eufony\DBAL\Query\Builder;
 
 class Create extends Query
 {
-    protected string $table;
+    protected string $type;
+    protected string $name;
     protected array $fields;
+    protected array $props;
 
-    public static function table(string $table): static
+    public static function table(string $name, bool $idempotent = false): static
     {
-        return new static($table);
+        return new static(__FUNCTION__, $name, ["idempotent" => $idempotent]);
     }
 
-    public static function tableIfNotExists(string $table): static
+    public static function index(string $name, bool $unique = false, bool $idempotent = false): static
     {
-        return new static($table);
+        return new static(__FUNCTION__, $name, ["unique" => $unique, "idempotent" => $idempotent]);
     }
 
     /**
      * {@inheritDoc}
      *
-     * Use `Create::table()` to initialize an instance of this class.
+     * Use `Create::table()` or `Create::index()` to initialize an instance of this
+     * class.
      *
-     * @param string $table
+     * @param string $name
+     * @param bool $idempotent
      */
-    protected function __construct(string $table)
+    protected function __construct(string $type, string $name, array $props)
     {
         parent::__construct();
-        $this->table = $table;
+        $this->type = $type;
+        $this->name = $name;
+        $this->props = $props;
     }
 
     public function fields(array $fields): static
