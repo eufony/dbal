@@ -19,6 +19,7 @@
 
 namespace Eufony\DBAL\Driver;
 
+use Eufony\DBAL\Query\Builder\Alter;
 use Eufony\DBAL\Query\Builder\Create;
 use Eufony\DBAL\Query\Builder\Delete;
 use Eufony\DBAL\Query\Builder\Drop;
@@ -108,6 +109,14 @@ abstract class AbstractDriver implements DriverInterface
      * @return string
      */
     abstract protected function generateCreate(Create $query): string;
+
+    /**
+     * Generates the query string to be executed from a `Alter` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Alter $query
+     * @return string
+     */
+    abstract protected function generateAlter(Alter $query): string;
 
     /**
      * Generates the query string to be executed from a `Drop` query builder.

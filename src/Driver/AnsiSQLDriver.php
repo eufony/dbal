@@ -19,6 +19,7 @@
 
 namespace Eufony\DBAL\Driver;
 
+use Eufony\DBAL\Query\Builder\Alter;
 use Eufony\DBAL\Query\Builder\Create;
 use Eufony\DBAL\Query\Builder\Delete;
 use Eufony\DBAL\Query\Builder\Drop;
@@ -167,6 +168,15 @@ class AnsiSQLDriver extends AbstractPDODriver
     protected function generateCreate(Create $query): string
     {
         // TODO: Implement Create query builder.
+        return ";";
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function generateAlter(Alter $query): string
+    {
+        // TODO: Implement Alter query builder.
         return ";";
     }
 
