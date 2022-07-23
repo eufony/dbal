@@ -189,6 +189,12 @@ abstract class AbstractDriverTest extends TestCase
         ];
     }
 
+    public function alterBuilders(): array
+    {
+        return [
+        ];
+    }
+
     public function dropBuilders(): array
     {
         return [
@@ -340,6 +346,7 @@ abstract class AbstractDriverTest extends TestCase
             $this->updateBuilders(),
             $this->deleteBuilders(),
             $this->createBuilders(),
+            $this->alterBuilders(),
             $this->dropBuilders(),
         );
     }

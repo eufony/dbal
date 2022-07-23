@@ -126,6 +126,10 @@ See the [WHERE](#where-and-having) clause for more examples.
 
 *The `Create` query builder is currently not yet implemented.*
 
+### Alter
+
+*The `Alter` query builder is currently not yet implemented.*
+
 ### Drop
 
 Drop the `users` table:
