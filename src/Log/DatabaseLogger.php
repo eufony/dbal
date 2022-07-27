@@ -20,7 +20,6 @@
 namespace Eufony\DBAL\Log;
 
 use Eufony\DBAL\Connection;
-use Eufony\DBAL\Query\Builder\Create;
 use Eufony\DBAL\Query\Builder\Insert;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
@@ -86,7 +85,8 @@ class DatabaseLogger extends AbstractLogger
         // Temporarily turn off logging (creates an infinite loop otherwise)
         $logger = $this->database->logger(new NullLogger());
 
-        // Ensure log table exists
+        // TODO: Ensure log table exists.
+        /*
         $fields = [
             "id" => [
                 "type" => "int",
@@ -99,7 +99,8 @@ class DatabaseLogger extends AbstractLogger
                 "nullable" => false,
             ],
             "level" => [
-                "type" => "varchar(9)",
+                "type" => "varchar",
+                "length" => 9,
                 "nullable" => false,
             ],
             "message" => [
@@ -111,7 +112,8 @@ class DatabaseLogger extends AbstractLogger
             ],
         ];
 
-        Create::tableIfNotExists("__log")->fields($fields)->execute();
+        Create::table("__log", idempotent: true)->fields($fields)->execute();
+        */
 
         // Execute log query
         $values = [

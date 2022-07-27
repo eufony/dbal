@@ -87,7 +87,7 @@ trait LoggerTrait
     }
 
     /**
-     * Returns if a given log level should be logged according to a given minimum
+     * Returns if the given log level should be logged according to a given minimum
      * and maximum log level.
      *
      * Returns true if the log level is within the set range, false otherwise.
