@@ -21,4 +21,23 @@ namespace Eufony\DBAL\Query\Builder;
 
 class Alter extends Query
 {
+    protected string $table;
+
+    public static function table(string $table): static
+    {
+        return new static($table);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Use `Alter::table()` to initialize an instance of this class.
+     *
+     * @param string $table
+     */
+    protected function __construct(string $table)
+    {
+        parent::__construct();
+        $this->table = $table;
+    }
 }
