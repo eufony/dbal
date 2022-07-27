@@ -65,4 +65,13 @@ class Select extends Query
         $this->fields = $fields;
         return $this;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function affectedTables(): array
+    {
+        $join_tables = isset($this->joins) ? array_map(fn($join) => $join['table'], $this->joins) : [];
+        return [$this->table, ...$join_tables];
+    }
 }

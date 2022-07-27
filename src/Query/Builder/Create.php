@@ -58,4 +58,12 @@ class Create extends Query
         $this->fields = $fields;
         return $this;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function affectedTables(): array
+    {
+        return ($this->type === "table") ? [$this->name] : [];
+    }
 }
