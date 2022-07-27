@@ -21,17 +21,46 @@ namespace Eufony\DBAL\Query\Clause;
 
 use Eufony\DBAL\Query\Expr;
 
+/**
+ * Provides properties and methods for query builders that support the `GROUP
+ * BY` and `HAVING` clauses.
+ */
 trait GroupByClauseTrait
 {
+    /**
+     * An array of field names to group the query results by.
+     *
+     * @var string[] $groupBy
+     */
     protected array $groupBy;
+
+    /**
+     * An optional expression to filter the selected groups.
+     *
+     * @var Expr $having
+     */
     protected Expr $having;
 
+    /**
+     * Sets the field names to group the query results by.
+     *
+     * @param string[] $fields
+     * @return $this
+     */
     public function groupBy(string ...$fields): static
     {
         $this->groupBy = $fields;
         return $this;
     }
 
+    /**
+     * Sets the expression to filter the selected groups.
+     *
+     * Must be used in conjunction with the `groupBy()` method.
+     *
+     * @param \Eufony\DBAL\Query\Expr $expr
+     * @return $this
+     */
     public function having(Expr $expr): static
     {
         $this->having = $expr;
