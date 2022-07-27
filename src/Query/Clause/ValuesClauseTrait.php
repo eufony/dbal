@@ -36,7 +36,7 @@ trait ValuesClauseTrait
     /**
      * Sets the key-value pair of field names and values.
      *
-     * @param array $values
+     * @param mixed[] $values
      * @return $this
      */
     public function values(array $values): static

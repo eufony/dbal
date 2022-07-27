@@ -40,4 +40,12 @@ class Drop extends Query
         parent::__construct();
         $this->table = $table;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function affectedTables(): array
+    {
+        return [$this->table];
+    }
 }

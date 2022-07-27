@@ -47,7 +47,7 @@ abstract class Query implements ArrayAccess
      * The values in any expressions or clauses of the query builder are replaced
      * by random 32-character alphanumeric named parameters.
      *
-     * @var array $context
+     * @var mixed[] $context
      */
     protected array $context = [];
 
@@ -70,7 +70,7 @@ abstract class Query implements ArrayAccess
     }
 
     /**
-     * Executes this query in a given database connection.
+     * Executes this query in the given database connection.
      *
      * If no database key is given, defaults to the default connection.
      * Optionally allows setting the expiration time of the query's cached result.
@@ -85,6 +85,14 @@ abstract class Query implements ArrayAccess
         $query_string = $connection->driver()->generate($this);
         return $connection->query($query_string, $this['context'], $ttl);
     }
+
+    /**
+     * Returns a list of tables that are either read from or written to by this
+     * query.
+     *
+     * @return string[]
+     */
+    abstract public function affectedTables(): array;
 
     /**
      * @inheritDoc
