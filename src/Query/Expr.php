@@ -173,7 +173,7 @@ class Expr
         }
 
         return match ($this->type) {
-            "not" => array_merge($this->context, $this->props['expr']->context),
+            "not" => [...$this->context, ...$this->props['expr']->context],
             "and", "or" => array_merge($this->context, ...array_map(fn($expr) => $expr->context, $this->props['expr'])),
             default => $this->context,
         };
