@@ -21,10 +21,36 @@ namespace Eufony\DBAL\Query\Clause;
 
 use InvalidArgumentException;
 
+/**
+ * Provides properties and methods for query builders that support the `ORDER
+ * BY` clause.
+ */
 trait OrderByClauseTrait
 {
+    /**
+     * An array of key-value pairs that define the field names that the result
+     * should be ordered by.
+     *
+     * For each field, the array key specifies the field name, and the value is one
+     * of `asc` or `desc`, for ascending or descending order, respectively.
+     *
+     * @var string[] $order
+     */
     protected array $order;
 
+    /**
+     * Sets the fields that the result should be ordered by.
+     *
+     * If a string parameter is passed, the result will be ordered by the given
+     * field name in ascending order.
+     * If instead an array parameter is passed, for each field the array may
+     * contain either a string value, which is assumed to mean a field name to sort
+     * by in ascending order; or a string key-value pair, where the array key is
+     * the field name and the value is one of `asc` or `desc`.
+     *
+     * @param string|array $fields
+     * @return $this
+     */
     public function orderBy(string|array $fields): static
     {
         if (is_string($fields)) {

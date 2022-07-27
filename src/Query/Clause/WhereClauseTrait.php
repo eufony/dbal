@@ -21,10 +21,25 @@ namespace Eufony\DBAL\Query\Clause;
 
 use Eufony\DBAL\Query\Expr;
 
+/**
+ * Provides properties and methods for query builders that support the `WHERE`
+ * clause.
+ */
 trait WhereClauseTrait
 {
+    /**
+     * An expression to filter the rows that are affected by the query.
+     *
+     * @var \Eufony\DBAL\Query\Expr $where
+     */
     protected Expr $where;
 
+    /**
+     * Sets the expression to filter the affected rows.
+     *
+     * @param \Eufony\DBAL\Query\Expr $expr
+     * @return $this
+     */
     public function where(Expr $expr): static
     {
         $this->where = $expr;

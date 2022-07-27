@@ -19,10 +19,26 @@
 
 namespace Eufony\DBAL\Query\Clause;
 
+/**
+ * Provides properties and methods for query builders that support receiving a
+ * key-value pair of field names and values.
+ */
 trait ValuesClauseTrait
 {
+    /**
+     * An array of key-value pairs, where the array keys are field names and the
+     * values the field values.
+     *
+     * @var mixed[] $values
+     */
     protected array $values;
 
+    /**
+     * Sets the key-value pair of field names and values.
+     *
+     * @param array $values
+     * @return $this
+     */
     public function values(array $values): static
     {
         foreach ($values as $key => $value) {
