@@ -20,17 +20,15 @@
 namespace Eufony\DBAL\Driver;
 
 use BadMethodCallException;
-use Eufony\DBAL\QueryException;
 use PDO;
-use PDOException;
 
 /**
  * Provides an abstract database driver implementation that other drivers can
  * inherit from.
  *
- * Uses the PHP PDO extension to implement most of the methods in the
- * `DriverInterface`.
- * Subclasses of this class only need to implement the `generate()` method.
+ * Uses the PHP PDO extension to interface with the database.
+ * Implements all transaction-related methods in the `DriverInterface`.
+ * Subclasses only need to implement the `execute()` and `generate()` methods.
  *
  * Inherits from the `AbstractDriver` class to delegate the `generate()` method
  * correspond methods for each of the query builders.
@@ -63,26 +61,6 @@ abstract class AbstractPDODriver extends AbstractDriver
         parent::__construct();
         $this->pdo = new PDO($dsn, $user, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function execute(string $query, array $context): array
-    {
-        try {
-            // Prepare statement from the given query
-            $statement = $this->pdo->prepare($query);
-
-            // Execute prepared statement with the given context array
-            $statement->execute($context);
-        } catch (PDOException $e) {
-            // TODO: MUST throw an InvalidArgumentException if the placeholders are invalid / mismatched.
-            throw new QueryException(previous: $e);
-        }
-
-        // Return result as an associative array
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

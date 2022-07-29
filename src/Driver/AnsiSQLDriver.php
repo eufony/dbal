@@ -30,6 +30,8 @@ use Eufony\DBAL\Query\Builder\Update;
 use Eufony\DBAL\Query\Expr;
 use Eufony\DBAL\QueryException;
 use InvalidArgumentException;
+use PDO;
+use PDOException;
 
 /**
  * Provides a database driver implementation that strictly complies with the
@@ -48,6 +50,27 @@ use InvalidArgumentException;
  */
 class AnsiSQLDriver extends AbstractPDODriver
 {
+    /**
+     * @inheritDoc
+     */
+    public function execute(Query $query, string $query_string, array $context): array
+    {
+        // TODO: Handle UnsupportedExceptions.
+        try {
+            // Prepare statement from the given query
+            $statement = $this->pdo->prepare($query_string);
+
+            // Execute prepared statement with the given context array
+            $statement->execute($context);
+        } catch (PDOException $e) {
+            // TODO: MUST throw an InvalidArgumentException if the placeholders are invalid / mismatched.
+            throw new QueryException(previous: $e);
+        }
+
+        // Return result as an associative array
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /**
      * @inheritDoc
      */

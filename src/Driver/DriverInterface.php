@@ -42,7 +42,8 @@ interface DriverInterface
     public function generate(Query $query): string;
 
     /**
-     * Executes the generated query and returns the result as a PHP array.
+     * Executes the pre-generated query and returns the result as a PHP array.
+     * Also requires the original, unmodified query builder.
      *
      * The array MUST return each numerically indexed row as a nested array,
      * indexed by the field name as returned by the result set.
@@ -63,11 +64,12 @@ interface DriverInterface
      * exception SHOULD be chained onto the `QueryException` using the `previous`
      * parameter in the exception constructor.
      *
-     * @param string $query
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @param string $query_string
      * @param mixed[] $context
      * @return mixed[][]
      */
-    public function execute(string $query, array $context): array;
+    public function execute(Query $query, string $query_string, array $context): array;
 
     /**
      * Checks whether the database is currently in a transaction.

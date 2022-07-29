@@ -79,11 +79,20 @@ abstract class Query implements ArrayAccess
      * @param int|\DateInterval|null $ttl
      * @return mixed[][]
      */
-    public function execute(?string $database = null, int|DateInterval|null $ttl = 1): array
+    public function execute(?string $database = null, int|DateInterval|null $ttl = 60): array
     {
         $connection = Connection::get($database);
-        $query_string = $connection->driver()->generate($this);
-        return $connection->query($query_string, $this['context'], $ttl);
+        return $connection->query($this, $ttl);
+    }
+
+    /**
+     * Getter for the context array.
+     *
+     * @return mixed[]
+     */
+    public function context(): array
+    {
+        return $this->context;
     }
 
     /**

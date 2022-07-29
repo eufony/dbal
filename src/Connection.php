@@ -24,6 +24,8 @@ use DateInterval;
 use Eufony\Cache\ArrayCache;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Log\DatabaseLogger;
+use Eufony\DBAL\Query\Builder\Query;
+use Eufony\DBAL\Query\Builder\Select;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -186,29 +188,33 @@ class Connection
     }
 
     /**
-     * Executes the given query string.
+     * Executes the given query.
      *
      * Additionally handles caching (for read-only queries) and logging.
      *
      * The query is passed to the `DriverInterface::execute()` method along with
-     * the context array, providing easy protection against SQL injection attacks.
+     * its context array, providing easy protection against SQL injection attacks.
      *
      * The cached result's expiration time can be set using the `$ttl` parameter;
-     * either as a `DateInterval` object or as an integer number of minutes.
+     * either as a `DateInterval` object or as an integer number of seconds.
      * The default expiration is 1 minute.
      * If `$ttl` is set to null, the query result will not be cached.
      *
      * Throws a `\Eufony\DBAL\QueryException` on failure.
      *
-     * @param string $query
-     * @param mixed[] $context
+     * @param \Eufony\DBAL\Query\Builder\Query $query
      * @param int|\DateInterval|null $ttl
      * @return mixed[][]
      */
-    public function query(string $query, array $context = [], int|DateInterval|null $ttl = 1): array
+    public function query(Query $query, int|DateInterval|null $ttl = 60): array
     {
-        // Determine if query mutates data in the database depending on the first keyword
-        $is_mutation = !str_starts_with($query, "SELECT");
+        $context = $query->context();
+
+        // Pre-generate the query string (we'll pass it to the driver later)
+        $query_string = $this->driver->generate($query);
+
+        // Determine if query mutates data in the database
+        $is_mutation = !($query instanceof Select);
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false && $ttl !== null) {
@@ -216,44 +222,63 @@ class Connection
             // the PSR-16 standards on the valid character set and maximum supported length
             // Sorting the context array ensures predictability when hashing
             asort($context);
-            $cache_key = hash("sha256", $query . implode("|", $context));
-            $cache_result = $this->cache->get($cache_key);
+            $query_cache_key = hash("sha256", $query_string . serialize($context));
+            $cache_result = $this->cache->get($query_cache_key);
 
             if ($cache_result !== null) {
-                $this->logger->debug("Cache hit for query: $query");
+                $this->logger->debug("Cache hit for query: $query_string");
                 return $cache_result;
+            } else {
+                $this->logger->debug("Cache miss for query: $query_string");
             }
         }
 
         // Execute query
         try {
-            $query_result = $this->driver->execute($query, $context);
+            $query_result = $this->driver->execute($query, $query_string, $context);
         } catch (InvalidArgumentException|QueryException $e) {
             // Log error for query exceptions
             if ($e instanceof QueryException) {
-                $this->logger->error("Query failed: $query", context: ["exception" => $e]);
+                $this->logger->error("Query failed: $query_string", context: ["exception" => $e]);
             }
 
             throw $e;
         }
 
-        if ($is_mutation === false) {
-            if ($ttl !== null) {
-                // Log info for read operations
-                $this->logger->info("Query read: $query");
+        // Determine the tables that are affected by the query
+        $tables = $query->affectedTables();
+        $table_cache_keys = array_map(fn($table) => hash("sha256", $table), $tables);
 
-                // Cache result
-                $this->cache->set($cache_key, $query_result, ttl: $ttl);
-                $this->logger->debug("Cache set for query: $query");
+        if ($is_mutation === false) {
+            // Log info for read operations
+            $this->logger->info("Query read: $query_string");
+
+            // Cache result
+            if ($ttl !== null) {
+                $this->cache->set($query_cache_key, $query_result, ttl: $ttl);
+
+                $cache_keys_by_tables = $this->cache->getMultiple($table_cache_keys, default: []);
+
+                foreach ($cache_keys_by_tables as &$cache_keys_by_table) {
+                    $cache_keys_by_table[] = $query_cache_key;
+                }
+
+                $this->cache->setMultiple($cache_keys_by_tables);
+                $this->logger->debug("Cache set for query: $query_string");
             }
         } else {
             // Log notice for write operations
-            $this->logger->notice("Query mutation: $query");
+            $this->logger->notice("Query mutation: $query_string");
 
             // Invalidate cache
-            // TODO: Don't need to invalidate the entire cache, only the tables that were altered
-            $this->cache->clear();
-            $this->logger->debug("Cache clear");
+            $cache_keys_by_tables = $this->cache->getMultiple($table_cache_keys, default: []);
+
+            foreach ($cache_keys_by_tables as $cache_keys_by_table) {
+                $this->cache->deleteMultiple($cache_keys_by_table);
+            }
+
+            $this->cache->deleteItems($table_cache_keys);
+            $this->logger->debug("Cache clear for tables: " . implode(", ", $tables));
         }
 
         // Return result
