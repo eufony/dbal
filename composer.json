@@ -41,7 +41,6 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "App\\": [ "tests/App/" ],
       "Eufony\\DBAL\\Tests\\": [ "tests/" ]
     }
   },
