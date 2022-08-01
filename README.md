@@ -1,10 +1,10 @@
-# The Eufony DBAL Package
+<h1 align="center">The Eufony DBAL Package</h1>
 
 <p align="center">
-  <img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/eufony/dbal?label=Packagist%20Downloads">
-  <img alt="GitHub Stars" src="https://img.shields.io/github/stars/eufony/dbal?label=GitHub%20Stars">
-  <img alt="Issues" src="https://img.shields.io/github/issues/eufony/dbal/open?label=Issues">
-  <img alt="License" src="https://img.shields.io/github/license/eufony/dbal?label=License">
+    <img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/eufony/dbal?label=Packagist%20Downloads">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/eufony/dbal?label=GitHub%20Stars">
+    <img alt="Issues" src="https://img.shields.io/github/issues/eufony/dbal/open?label=Issues">
+    <img alt="License" src="https://img.shields.io/github/license/eufony/dbal?label=License">
 </p>
 
 - GitHub: https://github.com/eufony/dbal
@@ -107,7 +107,7 @@ $postgres = new PostgreSQLDriver($dsn, $user, $password);
 $mysql = new MySQLDriver($dsn, $user, $password);
 
 // SQLite
-$sqlite = new SQLiteDriver($path); // $path can also be `:memory:` for an ephemeral database 
+$sqlite = new SQLiteDriver($path); // $path can also be `:memory:` for an ephemeral database
 ```
 
 All three drivers use the PHP PDO extension under the hood.
