@@ -18,13 +18,16 @@ namespace Eufony\DBAL;
 
 use BadMethodCallException;
 use DateInterval;
-use Eufony\Cache\ArrayCache;
+use Eufony\Cache\Adapter\TagAwarePsr16Adapter;
+use Eufony\Cache\Pool\NullCache;
+use Eufony\Cache\TagAwareInterface;
+use Eufony\Cache\Utils\CacheKeyProvider;
 use Eufony\DBAL\Driver\DriverInterface;
-use Eufony\DBAL\Log\DatabaseLogger;
 use Eufony\DBAL\Query\Builder\Query;
 use Eufony\DBAL\Query\Builder\Select;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Throwable;
 
@@ -59,16 +62,16 @@ class Connection
     /**
      * A PSR-16 compliant cache.
      *
-     * Defaults to an instance of `\Eufony\Cache\ArrayCache`.
+     * Defaults to an instance of a null cache.
      *
-     * @var \Psr\SimpleCache\CacheInterface
+     * @var \Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface
      */
-    protected CacheInterface $cache;
+    protected CacheInterface&TagAwareInterface $cache;
 
     /**
      * A PSR-3 compliant logger.
      *
-     * Defaults to an instance of `\Eufony\DBAL\Log\DatabaseLogger`.
+     * Defaults to an instance of a null logger.
      *
      * @var \Psr\Log\LoggerInterface $logger
      */
@@ -100,9 +103,6 @@ class Connection
      *
      * The database key defaults to the value `default`.
      *
-     * Sets up an array cache for caching, and a `\Eufony\DBAL\Log\DatabaseLogger`
-     * for logging.
-     *
      * @param \Eufony\DBAL\Driver\DriverInterface $driver
      * @param string|null $key
      */
@@ -112,8 +112,8 @@ class Connection
         static::$connections[$this->key] = $this;
 
         $this->driver = $driver;
-        $this->cache = new ArrayCache();
-        $this->logger = new DatabaseLogger($this);
+        $this->cache = new TagAwarePsr16Adapter(new NullCache());
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -158,11 +158,15 @@ class Connection
      * Returns the current PSR-16 cache.
      * If `$cache` is set, sets the new cache and returns the previous instance.
      *
-     * @param \Psr\SimpleCache\CacheInterface|null $cache
-     * @return \Psr\SimpleCache\CacheInterface
+     * @param \Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface|null $cache
+     * @return \Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface
      */
-    public function cache(?CacheInterface $cache = null): CacheInterface
+    public function cache(CacheInterface $cache = null): CacheInterface&TagAwareInterface
     {
+        if ($cache !== null && !($cache instanceof TagAwareInterface)) {
+            throw new InvalidArgumentException("Cache implementation must support TagAwareInterface.");
+        }
+
         $prev = $this->cache;
         $this->cache = $cache ?? $this->cache;
         return $prev;
@@ -215,12 +219,10 @@ class Connection
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false && $ttl !== null) {
-            // Hashing the query along with the context array ensures the cache key matches
-            // the PSR-16 standards on the valid character set and maximum supported length
-            // Sorting the context array ensures predictability when hashing
+            // Sorting the context array ensures predictability when dispensing the cache key
             asort($context);
-            $query_cache_key = hash("sha256", $query_string . serialize($context));
-            $cache_result = $this->cache->get($query_cache_key);
+            $cache_key = CacheKeyProvider::get($query_string . serialize($context));
+            $cache_result = $this->cache->get($cache_key);
 
             if ($cache_result !== null) {
                 $this->logger->debug("Cache hit for query: $query_string");
@@ -244,7 +246,6 @@ class Connection
 
         // Determine the tables that are affected by the query
         $tables = $query->affectedTables();
-        $table_cache_keys = array_map(fn($table) => hash("sha256", $table), $tables);
 
         if ($is_mutation === false) {
             // Log info for read operations
@@ -252,15 +253,8 @@ class Connection
 
             // Cache result
             if ($ttl !== null) {
-                $this->cache->set($query_cache_key, $query_result, ttl: $ttl);
-
-                $cache_keys_by_tables = $this->cache->getMultiple($table_cache_keys, default: []);
-
-                foreach ($cache_keys_by_tables as &$cache_keys_by_table) {
-                    $cache_keys_by_table[] = $query_cache_key;
-                }
-
-                $this->cache->setMultiple($cache_keys_by_tables);
+                $this->cache->set($cache_key, $query_result, ttl: $ttl);
+                $this->cache->tag($cache_key, $tables);
                 $this->logger->debug("Cache set for query: $query_string");
             }
         } else {
@@ -268,13 +262,7 @@ class Connection
             $this->logger->notice("Query mutation: $query_string");
 
             // Invalidate cache
-            $cache_keys_by_tables = $this->cache->getMultiple($table_cache_keys, default: []);
-
-            foreach ($cache_keys_by_tables as $cache_keys_by_table) {
-                $this->cache->deleteMultiple($cache_keys_by_table);
-            }
-
-            $this->cache->deleteItems($table_cache_keys);
+            $this->cache->invalidateTags($tables);
             $this->logger->debug("Cache clear for tables: " . implode(", ", $tables));
         }
 
