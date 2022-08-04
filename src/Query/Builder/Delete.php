@@ -47,6 +47,6 @@ class Delete extends Query
      */
     public function affectedTables(): array
     {
-        return [$this->table];
+        return [$this->table, ...$this->where->affectedTables()];
     }
 }

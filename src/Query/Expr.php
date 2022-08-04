@@ -175,4 +175,10 @@ class Expr
             default => $this->context,
         };
     }
+
+    public function affectedTables(): array
+    {
+        // TODO: Additional tables might be referenced in field names.
+        return $this->type === "exists" ? $this->props['query']->affectedTables() : [];
+    }
 }

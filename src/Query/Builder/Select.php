@@ -68,7 +68,8 @@ class Select extends Query
      */
     public function affectedTables(): array
     {
-        $join_tables = isset($this->joins) ? array_map(fn($join) => $join['table'], $this->joins) : [];
-        return [$this->table, ...$join_tables];
+        $callback = fn($join) => [$join['table'], ...$join['on']->affectedTables()];
+        $join_tables = isset($this->joins) ? array_map($callback, $this->joins) : [];
+        return [$this->table, ...$join_tables, ...$this->having->affectedTables()];
     }
 }
