@@ -19,8 +19,8 @@ expressive syntax that is then translated on-the-fly to the appropriate syntax f
 enjoy all the benefits of plain SQL, plus:
 
 - Logging of interesting database events, such as read-only and mutation queries.
-- Transparent caching of query results using any [PSR-16](https://www.php-fig.org/psr/psr-16/) compliant caching
-  implementation.
+- Transparent caching of query results using any [PSR-6](https://www.php-fig.org/psr/psr-6/)
+  or [PSR-16](https://www.php-fig.org/psr/psr-16/) compliant caching implementation.
 - Easy protection against SQL injection attacks using prepared statements.
 - No-fuss serialization / unserialization of any valid PHP type.
 
