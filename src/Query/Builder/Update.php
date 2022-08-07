@@ -27,9 +27,18 @@ class Update extends Query
     use ValuesClauseTrait;
     use WhereClauseTrait;
 
+    /**
+     * The table to update rows in.
+     *
+     * @var string $table
+     */
     protected string $table;
 
     /**
+     * Initializes a new `Update` query builder instance.
+     *
+     * Requires the table name to update.
+     *
      * @param string $table
      * @return static
      */

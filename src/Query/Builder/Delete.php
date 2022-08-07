@@ -18,12 +18,28 @@ namespace Eufony\DBAL\Query\Builder;
 
 use Eufony\DBAL\Query\Clause\WhereClauseTrait;
 
+/**
+ * Represents a `DELETE` SQL query.
+ */
 class Delete extends Query
 {
     use WhereClauseTrait;
 
+    /**
+     * The table to delete rows from.
+     *
+     * @var string $table
+     */
     protected string $table;
 
+    /**
+     * Initializes a new `Delete` query builder instance.
+     *
+     * Requires the table name to delete from.
+     *
+     * @param string $table
+     * @return static
+     */
     public static function from(string $table): static
     {
         return new static($table);
