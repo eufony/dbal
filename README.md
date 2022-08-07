@@ -77,12 +77,12 @@ builders, as they are something that the end-user (you) can reasonably be expect
 *eufony/dbal* is released as a [Packagist](https://packagist.org/) package and can be easily installed
 via [Composer](https://getcomposer.org/) with:
 
-    composer require "eufony/dbal:^1.0@dev"
+    composer require "eufony/dbal:^1.0@alpha"
 
-> **Note:** Because *eufony/dbal* does not have any stable releases yet (not even a v0.x pre-release), currently the
-> only way to install it via Composer is to either reduce the minimum stability in your `composer.json` to `dev` (not
-> recommended), or to override it for this package specifically using `@dev` in the dependency definition (such as in
-> the command above).
+> **Note:** This package ***does not have any stable releases*** yet (not even a v0.x pre-release) and is currently in
+> the ***alpha stage***. As such, to install it you either need to reduce the minimum stability in your `composer.json`
+> to `alpha` (not recommended), or override it for this package only using `@alpha` in the dependency definition (such
+> as in the command above).
 
 ### Usage
 
