@@ -22,6 +22,9 @@ use Eufony\DBAL\Query\Clause\LimitClauseTrait;
 use Eufony\DBAL\Query\Clause\OrderByClauseTrait;
 use Eufony\DBAL\Query\Clause\WhereClauseTrait;
 
+/**
+ * Represents a `SELECT` SQL query.
+ */
 class Select extends Query
 {
     use GroupByClauseTrait;
@@ -30,10 +33,39 @@ class Select extends Query
     use OrderByClauseTrait;
     use WhereClauseTrait;
 
+    /**
+     * The main table to select from.
+     *
+     * @var string $table
+     */
     protected string $table;
+
+    /**
+     * An optional alias for the main table.
+     *
+     * @var string $alias
+     */
     protected string $alias;
+
+    /**
+     * An optional array of fields to select from the main and joined tables.
+     *
+     * Defaults to select all fields.
+     *
+     * @var string[] $fields
+     */
     protected array $fields;
 
+    /**
+     * Initializes a new `Select` query builder instance.
+     *
+     * Requires the table name to select from, and (optionally) an alias for the
+     * table.
+     *
+     * @param string $table
+     * @param string|null $as
+     * @return static
+     */
     public static function from(string $table, ?string $as = null): static
     {
         return new static($table, $as);
@@ -57,6 +89,13 @@ class Select extends Query
         }
     }
 
+    /**
+     * Specifies the fields that should be selected from the main table or other
+     * joined tables.
+     *
+     * @param string[] $fields
+     * @return $this
+     */
     public function fields(string ...$fields): static
     {
         $this->fields = $fields;

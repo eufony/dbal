@@ -18,12 +18,28 @@ namespace Eufony\DBAL\Query\Builder;
 
 use Eufony\DBAL\Query\Clause\ValuesClauseTrait;
 
+/**
+ * Represents an `INSERT` SQL query.
+ */
 class Insert extends Query
 {
     use ValuesClauseTrait;
 
+    /**
+     * The table to insert a row into.
+     *
+     * @var string $table
+     */
     protected string $table;
 
+    /**
+     * Initializes a new `Insert` query builder instance.
+     *
+     * Requires the table name to insert into.
+     *
+     * @param string $table
+     * @return static
+     */
     public static function into(string $table): static
     {
         return new static($table);
