@@ -19,7 +19,6 @@ namespace Eufony\DBAL\Tests\Unit\Driver;
 use BadMethodCallException;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Query\Builder\Delete;
-use Eufony\DBAL\Query\Builder\Drop;
 use Eufony\DBAL\Query\Builder\Insert;
 use Eufony\DBAL\Query\Builder\Query;
 use Eufony\DBAL\Query\Builder\Select;
@@ -195,7 +194,6 @@ abstract class AbstractDriverTest extends TestCase
     public function dropBuilders(): array
     {
         return [
-            Drop::table("test"),
         ];
     }
 

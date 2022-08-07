@@ -1004,9 +1004,6 @@ class SQLiteDriverTest extends AbstractDriverTest
                 DELETE FROM "test"
                     WHERE "associative_array" IN (?)
                 SQL,
-            <<< SQL
-                DROP TABLE "test"
-                SQL,
         ];
     }
 }

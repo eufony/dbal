@@ -180,14 +180,8 @@ class AnsiSQLDriver extends AbstractDriver
 
     protected function generateDrop(Drop $query): string
     {
-        // Get query props
-        $table = $query['table'];
-
-        $table = $this->quoteField($table);
-        $sql = "DROP TABLE $table";
-
-        // Return result
-        return $sql;
+        // TODO: Implement Drop query builder.
+        return ";";
     }
 
     protected function generateGroupByClause(Query $query): string

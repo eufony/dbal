@@ -132,11 +132,7 @@ See the [WHERE](#where-and-having) clause for more examples.
 
 ### Drop
 
-Drop the `users` table:
-
-```php
-$query = Drop::table("users");
-```
+*The `Drop` query builder is currently not yet implemented.*
 
 # Clauses
 
