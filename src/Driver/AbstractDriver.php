@@ -16,37 +16,48 @@
 
 namespace Eufony\DBAL\Driver;
 
-use Eufony\DBAL\Query\Builder\Alter;
-use Eufony\DBAL\Query\Builder\Create;
-use Eufony\DBAL\Query\Builder\Delete;
-use Eufony\DBAL\Query\Builder\Drop;
-use Eufony\DBAL\Query\Builder\Insert;
-use Eufony\DBAL\Query\Builder\Query;
-use Eufony\DBAL\Query\Builder\Select;
-use Eufony\DBAL\Query\Builder\Update;
-use Eufony\DBAL\Query\Expr;
-use ReflectionClass;
+use BadMethodCallException;
+use Eufony\DBAL\QueryException;
+use PDO;
+use PDOException;
 
 /**
  * Provides an abstract database driver implementation that other drivers can
  * inherit from.
  *
- * Delegates the `generate()` method to other methods that correspond to each
- * of the query builders.
- * This reduces the boilerplate code that a driver has to implement to check
- * for the types of the queries.
- *
- * Additionally defines abstract methods to generate the query strings of an
- * expression and each of the query clauses.
+ * Uses the PHP PDO extension to interface with the database.
+ * Implements the `execute()` method all transaction-related methods in the
+ * `DriverInterface`.
+ * Inheriting classes only need to implement the `query()` method.
  */
 abstract class AbstractDriver implements DriverInterface
 {
     /**
+     * The PDO object used internally to interface with SQL databases.
+     *
+     * @var \PDO $pdo
+     */
+    protected PDO $pdo;
+
+    /**
      * Class constructor.
      * Creates a new connection to the database.
+     *
+     * Uses the PHP PDO extension for interfacing with the database.
+     *
+     * The given parameters are passed directly to the underlying PDO object.
+     * Refer to the official PDO documentation for more details.
+     *
+     * @see https://www.php.net/manual/en/pdo.construct.php
+     *
+     * @param string $dsn
+     * @param string|null $user
+     * @param string|null $password
      */
-    public function __construct()
+    public function __construct(string $dsn, ?string $user = null, ?string $password = null)
     {
+        $this->pdo = new PDO($dsn, $user, $password);
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     /**
@@ -60,122 +71,69 @@ abstract class AbstractDriver implements DriverInterface
     /**
      * @inheritDoc
      */
-    public function generate(Query $query): string
+    public function execute(string $query, array $context = []): array
     {
-        $short_name = (new ReflectionClass(get_class($query)))->getShortName();
-        $method_name = "generate" . ucfirst($short_name);
-        return $this->$method_name($query);
+        try {
+            // Prepare statement from the given query
+            $statement = $this->pdo->prepare($query);
+
+            // Execute prepared statement with the given context array
+            $statement->execute($context);
+        } catch (PDOException $e) {
+            // TODO: MUST throw an InvalidArgumentException if the placeholders are invalid / mismatched.
+            if (str_starts_with($e->getMessage(), 'SQLSTATE[')) {
+                preg_match("/SQLSTATE\[\w+\]: ([\w ]+): \w+ (.*)/", $e->getMessage(), $matches);
+                $message = $matches[1] . ": " . ucfirst($matches[2]);
+            }
+
+            throw new QueryException($message ?? "", previous: $e);
+        }
+
+        // Return result as an associative array
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Generates the query string to be executed from a `Select` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Select $query
-     * @return string
+     * @inheritDoc
      */
-    abstract protected function generateSelect(Select $query): string;
+    public function inTransaction(): bool
+    {
+        return $this->pdo->inTransaction();
+    }
 
     /**
-     * Generates the query string to be executed from an `Insert` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Insert $query
-     * @return string
+     * @inheritDoc
      */
-    abstract protected function generateInsert(Insert $query): string;
+    public function beginTransaction(): void
+    {
+        if ($this->inTransaction()) {
+            throw new BadMethodCallException("A transaction is already active");
+        }
+
+        $this->pdo->beginTransaction();
+    }
 
     /**
-     * Generates the query string to be executed from an `Update` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Update $query
-     * @return string
+     * @inheritDoc
      */
-    abstract protected function generateUpdate(Update $query): string;
+    public function commit(): void
+    {
+        if (!$this->inTransaction()) {
+            throw new BadMethodCallException("No transaction to commit");
+        }
+
+        $this->pdo->commit();
+    }
 
     /**
-     * Generates the query string to be executed from a `Delete` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Delete $query
-     * @return string
+     * @inheritDoc
      */
-    abstract protected function generateDelete(Delete $query): string;
+    public function rollback(): void
+    {
+        if (!$this->inTransaction()) {
+            throw new BadMethodCallException("No transaction to roll back to");
+        }
 
-    /**
-     * Generates the query string to be executed from a `Create` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Create $query
-     * @return string
-     */
-    abstract protected function generateCreate(Create $query): string;
-
-    /**
-     * Generates the query string to be executed from a `Alter` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Alter $query
-     * @return string
-     */
-    abstract protected function generateAlter(Alter $query): string;
-
-    /**
-     * Generates the query string to be executed from a `Drop` query builder.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Drop $query
-     * @return string
-     */
-    abstract protected function generateDrop(Drop $query): string;
-
-    /**
-     * Generates the `GROUP BY` clause of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateGroupByClause(Query $query): string;
-
-    /**
-     * Generates the `JOIN` clauses of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateJoinClause(Query $query): string;
-
-    /**
-     * Generates the `LIMIT` and `OFFSET` clause of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateLimitClause(Query $query): string;
-
-    /**
-     * Generates the `ORDER BY` clause of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateOrderByClause(Query $query): string;
-
-    /**
-     * Generates the `VALUES` clause of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateValuesClause(Query $query): string;
-
-    /**
-     * Generates the `WHERE` clause of a query string.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
-     */
-    abstract protected function generateWhereClause(Query $query): string;
-
-    /**
-     * Recursively generates the query string of an expression.
-     *
-     * @param \Eufony\DBAL\Query\Expr $expr
-     * @return string
-     */
-    abstract protected function generateExpression(Expr $expr): string;
+        $this->pdo->rollBack();
+    }
 }

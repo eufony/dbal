@@ -20,6 +20,6 @@ namespace Eufony\DBAL;
  * Exception class thrown if an implementation of an interface does not support
  * a requested feature.
  */
-class UnsupportedException extends \RuntimeException
+class UnsupportedException extends QueryException
 {
 }

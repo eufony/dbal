@@ -17,56 +17,59 @@
 namespace Eufony\DBAL\Driver;
 
 use Eufony\DBAL\Query\Builder\Query;
+use Generator;
 
 /**
  * Provides a common interface for connecting to and querying different
  * database backends.
  *
- * The connection to the database MUST be kept alive for as long as the
- * lifetime of the driver instance.
- *
- * If the database requires specific instructions to finish a session, these
- * instructions SHOULD be issued in the destructor of the object class.
+ * The connection to the database is kept alive for as long as the lifetime of
+ * the driver instance.
  */
 interface DriverInterface
 {
     /**
-     * Generates the query string to be executed from the given query builder.
+     * Generates then executes the query string from the given query builder.
+     *
+     * Returns a `Generator` object that yields exactly 2 values:
+     *
+     * The first value is the flavor-specific query string, exactly as it will be
+     * executed in the database.
+     *
+     * The second value is the result set of the query builder as a PHP array.
+     * The array returns each numerically indexed row as a nested array, indexed by
+     * the field name as returned by the result set.
+     *
+     * The query string is yielded before it is executed in the database.
+     *
+     * The result of the query string might not match the yielded value from this
+     * method exactly, as features that are unsupported by the database backend
+     * will be emulated in PHP.
      *
      * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @return string
+     * @return Generator
      */
-    public function generate(Query $query): string;
+    public function query(Query $query): Generator;
 
     /**
-     * Executes the pre-generated query and returns the result as a PHP array.
-     * Also requires the original, unmodified query builder.
+     * Executes the given query string and returns the result as a PHP array.
      *
-     * The array MUST return each numerically indexed row as a nested array,
-     * indexed by the field name as returned by the result set.
+     * The array returns each numerically indexed row as a nested array, indexed by
+     * the field name as returned by the result set.
      *
-     * The query MAY contain positional (`?`) or named (`:foo`) parameters
-     * (exclusively), which MUST be passed in through the context array.
-     * The values in the context array MUST be treated as literal data, the
-     * database MUST NOT interpret them as part of the query.
-     * If the database provides functionality for prepared statements, taking
-     * advantage of it is highly RECOMMENDED.
+     * The query may contain positional (`?`) or named (`:foo`) parameters
+     * (exclusively), whose values can be passed in through the context array.
+     * The values in the context array are treated as literal data, they
+     * are not interpreted as being part of the query.
      *
-     * If the query mixes both positional and named parameters, or if the keys in
-     * the context array don't match the parameters in the query, an
-     * `\InvalidArgumentException` MUST be thrown.
-     *
-     * If the query fails, a `\Eufony\DBAL\QueryException` MUST be thrown.
-     * If another exception is re-thrown as a `QueryException`, the original
-     * exception SHOULD be chained onto the `QueryException` using the `previous`
-     * parameter in the exception constructor.
-     *
-     * @param \Eufony\DBAL\Query\Builder\Query $query
-     * @param string $query_string
+     * @param string $query
      * @param mixed[] $context
      * @return mixed[][]
+     *
+     * @internal Executing SQL queries directly defeats the purpose of the database
+     * abstraction layer. Use an appropriate query builder instead.
      */
-    public function execute(Query $query, string $query_string, array $context): array;
+    public function execute(string $query, array $context = []): array;
 
     /**
      * Checks whether the database is currently in a transaction.
@@ -80,33 +83,24 @@ interface DriverInterface
     /**
      * Initiates a transaction.
      *
-     * While in a transaction, any modifications to the database MUST be buffered
-     * until either `commit()` or `rollback()` is called.
+     * While in a transaction, any modifications to the database are buffered until
+     * either `commit()` or `rollback()` is called.
      *
      * Transactions cannot be nested.
-     * If this method is called when a transaction is already active, a
-     * `\BadMethodCallException` MUST be thrown.
      */
     public function beginTransaction(): void;
 
     /**
      * Commits a transaction.
      *
-     * Previously buffered modifications to the database MUST be applied
-     * immediately.
-     *
-     * If this method is called when a transaction is not active a
-     * `\BadMethodCallException` MUST be thrown.
+     * Immediately applies previously buffered modifications to the database.
      */
     public function commit(): void;
 
     /**
      * Rolls back a transaction.
      *
-     * Previously buffered modifications to the database MUST be discarded.
-     *
-     * If this method is called when a transaction is not active a
-     * `\BadMethodCallException` MUST be thrown.
+     * Discards previously buffered modifications to the database.
      */
     public function rollback(): void;
 }

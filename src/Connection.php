@@ -209,13 +209,13 @@ class Connection
      */
     public function query(Query $query, int|DateInterval|null $ttl = 60): array
     {
-        $context = $query->context();
-
-        // Pre-generate the query string (we'll pass it to the driver later)
-        $query_string = $this->driver->generate($query);
-
         // Determine if query mutates data in the database
         $is_mutation = !($query instanceof Select);
+
+        // Fetch the query string and context array (we'll use them for logging)
+        $generator = $this->driver->query($query);
+        $query_string = $generator->current();
+        $context = $query->context();
 
         // For read-only queries, check if the result is cached first
         if ($is_mutation === false && $ttl !== null) {
@@ -234,13 +234,10 @@ class Connection
 
         // Execute query
         try {
-            $query_result = $this->driver->execute($query, $query_string, $context);
-        } catch (InvalidArgumentException|QueryException $e) {
-            // Log error for query exceptions
-            if ($e instanceof QueryException) {
-                $this->logger->error("Query failed: $query_string", context: ["exception" => $e]);
-            }
-
+            $generator->next();
+            $query_result = $generator->current();
+        } catch (QueryException $e) {
+            $this->logger->error("Query failed: $query_string", context: ["exception" => $e]);
             throw $e;
         }
 
