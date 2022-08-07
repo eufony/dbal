@@ -25,10 +25,10 @@ use Eufony\DBAL\Query\Builder\Query;
 use Eufony\DBAL\Query\Builder\Select;
 use Eufony\DBAL\Query\Builder\Update;
 use Eufony\DBAL\Query\Expr;
-use Eufony\DBAL\QueryException;
+use Eufony\DBAL\UnsupportedException;
+use Generator;
 use InvalidArgumentException;
-use PDO;
-use PDOException;
+use ReflectionClass;
 
 /**
  * Provides a database driver implementation that strictly complies with the
@@ -45,32 +45,25 @@ use PDOException;
  * support for some queries.
  * In such cases, a `\Eufony\DBAL\UnsupportedException` will be thrown.
  */
-class AnsiSQLDriver extends AbstractPDODriver
+class AnsiSQLDriver extends AbstractDriver
 {
     /**
      * @inheritDoc
      */
-    public function execute(Query $query, string $query_string, array $context): array
+    public function query(Query $query): Generator
     {
-        // TODO: Handle UnsupportedExceptions.
-        try {
-            // Prepare statement from the given query
-            $statement = $this->pdo->prepare($query_string);
-
-            // Execute prepared statement with the given context array
-            $statement->execute($context);
-        } catch (PDOException $e) {
-            // TODO: MUST throw an InvalidArgumentException if the placeholders are invalid / mismatched.
-            throw new QueryException(previous: $e);
-        }
-
-        // Return result as an associative array
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        $query_string = $this->generate($query);
+        yield $query_string;
+        yield $this->execute($query_string, $query->context());
     }
 
-    /**
-     * @inheritDoc
-     */
+    public function generate(Query $query): string
+    {
+        $short_name = (new ReflectionClass(get_class($query)))->getShortName();
+        $method_name = "generate" . ucfirst($short_name);
+        return $this->$method_name($query);
+    }
+
     protected function generateSelect(Select $query): string
     {
         // Get query props
@@ -108,9 +101,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateInsert(Insert $query): string
     {
         // Get query props
@@ -134,9 +124,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateUpdate(Update $query): string
     {
         // Get query props
@@ -164,9 +151,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateDelete(Delete $query): string
     {
         // Get query props
@@ -182,27 +166,18 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateCreate(Create $query): string
     {
         // TODO: Implement Create query builder.
         return ";";
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateAlter(Alter $query): string
     {
         // TODO: Implement Alter query builder.
         return ";";
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateDrop(Drop $query): string
     {
         // Get query props
@@ -215,9 +190,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $sql;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateGroupByClause(Query $query): string
     {
         // Get query props
@@ -240,9 +212,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $clause;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateJoinClause(Query $query): string
     {
         // Get query props
@@ -281,9 +250,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return $clause;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateLimitClause(Query $query): string
     {
         // Get query props
@@ -300,16 +266,13 @@ class AnsiSQLDriver extends AbstractPDODriver
 
         // Cannot build offset: No support in ANSI SQL
         if (isset($offset)) {
-            throw new QueryException("No OFFSET clause support in ANSI SQL");
+            throw new UnsupportedException("No OFFSET clause support in ANSI SQL");
         }
 
         // Return result
         return $clause;
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateOrderByClause(Query $query): string
     {
         // Get query props
@@ -329,19 +292,11 @@ class AnsiSQLDriver extends AbstractPDODriver
         return " ORDER BY $order";
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * **Note**: This method is unused by SQL drivers.
-     */
     protected function generateValuesClause(Query $query): string
     {
         return "";
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateWhereClause(Query $query): string
     {
         // Get query props
@@ -359,9 +314,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         return " WHERE $where";
     }
 
-    /**
-     * @inheritDoc
-     */
     protected function generateExpression(Expr $expr): string
     {
         switch ($expr->type()) {
@@ -435,14 +387,6 @@ class AnsiSQLDriver extends AbstractPDODriver
         }
     }
 
-    /**
-     * Wraps identifiers in a field string with quotes.
-     *
-     * Also works with table-field pairs separated by a period (`"table"."field"`).
-     *
-     * @param string $field
-     * @return string
-     */
     protected function quoteField(string $field): string
     {
         $parts = explode(".", $field);
