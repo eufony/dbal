@@ -10,15 +10,17 @@ Select all fields from all entries in the `users` table:
 $query = Select::from("users");
 ```
 
-Select only the `id` and `name` fields from all entries in the `users table:
+Select only the `id` and `name` fields from all entries in the `users` table:
 
 ```php
-$query = Select::from("users")->fields("id", "name");
+$query = Select::from("users")->fields(["id", "name"]);
+```
 
-// Or, alternatively:
+Select only the `id` and `name` fields from all entires in the `users` table, while aliasing the `name` field
+to `username`:
 
-$fields = [ "id", "name" ];
-$query = Select::from("users")->fields(...$fields);
+```php
+$query = Select::from("users")->fields(["id", "name" => "username"]);
 ```
 
 Select all fields from all entries in the `users` table, grouped by the `name` and `lucky_number` fields:

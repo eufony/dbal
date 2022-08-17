@@ -120,7 +120,7 @@ $query = Select::from("users");
 
 // You can also extend the query using loops, conditional logic, etc.
 if ($fetch_ids_only) {
-    $query = $query->fields("id");
+    $query = $query->fields(["id"]);
 }
 
 // Generate the query string and send it to the database for execution

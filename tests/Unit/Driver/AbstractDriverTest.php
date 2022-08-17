@@ -97,8 +97,8 @@ abstract class AbstractDriverTest extends TestCase
         $queries = [
             Select::from("test"),
             Select::from("foo", as: "bar"),
-            Select::from("test")->fields("foo"),
-            Select::from("test")->fields("foo", "bar"),
+            Select::from("test")->fields(["foo"]),
+            Select::from("test")->fields(["foo", "bar" => "baz"]),
         ];
 
         foreach ($this->groupByClauseParams() as $params) {
@@ -357,7 +357,6 @@ abstract class AbstractDriverTest extends TestCase
     public function invalidQueryBuilders(): array
     {
         return [
-            Select::from("test")->fields(),
             Select::from("test")->leftJoin("a")->leftJoin("b"),
             Select::from("test")->limit(7, 2),
             Select::from("test")->orderBy(["foo" => "invalid"]),
