@@ -56,8 +56,8 @@ trait LimitClauseTrait
         if ($y === null) {
             $this->limit = $x;
         } else {
-            $this->limit = $y - $x;
-            $this->offset = $x;
+            $this->limit = $y - $x + 1;
+            $this->offset = $x - 1;
         }
 
         return $this;
