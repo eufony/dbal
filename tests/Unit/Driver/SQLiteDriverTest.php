@@ -105,7 +105,7 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
-                    LIMIT 7 OFFSET 2
+                    LIMIT 6 OFFSET 1
                 SQL,
             <<< SQL
                 SELECT * FROM "test"
