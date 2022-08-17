@@ -45,7 +45,7 @@ class SQLiteDriverTest extends AbstractDriverTest
                 SELECT "foo" FROM "test"
                 SQL,
             <<< SQL
-                SELECT "foo", "bar" FROM "test"
+                SELECT "foo", "bar" AS "baz" FROM "test"
                 SQL,
             <<< SQL
                 SELECT * FROM "test"

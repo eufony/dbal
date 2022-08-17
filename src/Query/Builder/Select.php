@@ -48,7 +48,13 @@ class Select extends Query
     protected string $alias;
 
     /**
-     * An optional array of fields to select from the main and joined tables.
+     * An optional array of key-value pairs that define the fields to select from
+     * the main and joined tables.
+     *
+     * For each field, the array key specifies the field name, and the value
+     * specifies an alias for the field.
+     * The key and the value may be the same, in which case no additional aliasing
+     * is required.
      *
      * Defaults to select all fields.
      *
@@ -91,14 +97,27 @@ class Select extends Query
 
     /**
      * Specifies the fields that should be selected from the main table or other
-     * joined tables.
+     * joined tables, and (optionally) their aliases.
+     *
+     * For each field, the array may contain a string value, which is assumed to
+     * mean a field name to fetch the value of; or a string key-value pair, where
+     * the array key is the field name and the value is an alias for the field.
      *
      * @param string[] $fields
      * @return $this
      */
-    public function fields(string ...$fields): static
+    public function fields(array $fields): static
     {
-        $this->fields = $fields;
+        $this->fields = [];
+
+        foreach ($fields as $key => $value) {
+            if (is_int($key)) {
+                $key = $value;
+            }
+
+            $this->fields[$key] = $value;
+        }
+
         return $this;
     }
 

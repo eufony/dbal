@@ -75,8 +75,17 @@ class AnsiSQLDriver extends AbstractDriver
 
         // Build fields
         if (isset($fields)) {
-            $fields = array_map(fn($field) => $this->quoteField($field), $fields);
-            $sql .= implode(", ", $fields);
+            $field_strings = [];
+
+            foreach ($fields as $field => $field_alias) {
+                if ($field === $field_alias) {
+                    $field_strings[] = $this->quoteField($field);
+                } else {
+                    $field_strings[] = $this->quoteField($field) . " AS " . $this->quoteField($field_alias);
+                }
+            }
+
+            $sql .= implode(", ", $field_strings);
         } else {
             $sql .= "*";
         }
