@@ -15,6 +15,7 @@
     "php": "^8.1",
     "ext-pdo": "*",
     "eufony/cache": "^0.4.0",
+    "eufony/log": "^0.1.0",
     "psr/log": "^1.0 || ^2.0 || ^3.0",
     "psr/simple-cache": "^1.0"
   },
@@ -24,15 +25,10 @@
     "phpunit/phpunit": "^9.5"
   },
   "suggest": {
-    "eufony/dbal-driver-implementation": "Virtual package for database driver implementations.",
-    "monolog/monolog": "Well-maintained and popular logging library.",
-    "psr/cache-implementation": "Virtual package for PSR-6 caching implementations.",
-    "psr/log-implementation": "Virtual package for PSR-3 logging implementations.",
-    "psr/simple-cache-implementation": "Virutal package for PSR-16 caching implementations."
+    "eufony/dbal-driver-implementation": "Virtual package for database driver implementations."
   },
   "provide": {
-    "eufony/dbal-driver-implemtation": "*",
-    "psr/log-implementation": "^1.0 || ^2.0 || ^3.0"
+    "eufony/dbal-driver-implemtation": "self.version"
   },
   "autoload": {
     "psr-4": {

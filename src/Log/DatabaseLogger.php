@@ -18,11 +18,12 @@ namespace Eufony\DBAL\Log;
 
 use Eufony\DBAL\Connection;
 use Eufony\DBAL\Query\Builder\Insert;
+use Eufony\Log\Utils\LoggerTrait;
 use Psr\Log\AbstractLogger;
 use Psr\Log\NullLogger;
 
 /**
- * Provides a logging implementation for logging into the database directly.
+ * Provides a logging implementation for logging into the database.
  *
  * The messages are logged into the `__log` table in the database connection;
  * along with the log level, current timestamp, and, if one occurred, the
@@ -74,10 +75,6 @@ class DatabaseLogger extends AbstractLogger
     {
         [$level, $message, $context] = $this->psr3_validateParams($level, $message, $context);
         $message = $this->psr3_interpolateMessage($message, $context);
-
-        if (!$this->psr3_compareLevels($level, $this->minLevel, $this->maxLevel)) {
-            return;
-        }
 
         // Temporarily turn off logging (creates an infinite loop otherwise)
         $logger = $this->database->logger(new NullLogger());
