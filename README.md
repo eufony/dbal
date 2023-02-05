@@ -77,7 +77,7 @@ builders, as they are something that the end-user (you) can reasonably be expect
 *eufony/dbal* is released as a [Packagist](https://packagist.org/) package and can be easily installed
 via [Composer](https://getcomposer.org/) with:
 
-    composer require "eufony/dbal:^1.0@beta"
+    composer require "eufony/dbal:^0.1.0@beta"
 
 > **Note:** This package ***does not have any stable releases*** yet (not even a v0.x pre-release) and is currently in
 > the ***beta stage***. As such, to install it you either need to reduce the minimum stability in your `composer.json`

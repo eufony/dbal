@@ -26,7 +26,7 @@ use PDOException;
  * inherit from.
  *
  * Uses the PHP PDO extension to interface with the database.
- * Implements the `execute()` method all transaction-related methods in the
+ * Implements the `execute()` method and all transaction-related methods in the
  * `DriverInterface`.
  * Inheriting classes only need to implement the `query()` method.
  */
