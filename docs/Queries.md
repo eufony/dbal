@@ -142,7 +142,7 @@ See the [WHERE](#where-and-having) clause for more examples.
 
 ### JOIN
 
-> **Note:** For all following examples, the `leftJoin()` and `innerJoin()` functions are (syntactically) equivalent.
+> **Note:** For all following examples, the `leftJoin()` and `innerJoin()` functions are syntactically equivalent.
 
 Join tables `a` and `b` on `a.id = b.a_id` (one-to-many):
 

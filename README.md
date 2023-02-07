@@ -1,15 +1,23 @@
 <h1 align="center">The Eufony DBAL Package</h1>
 
 <p align="center">
-    <img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/eufony/dbal?label=Packagist%20Downloads">
-    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/eufony/dbal?label=GitHub%20Stars">
-    <img alt="Issues" src="https://img.shields.io/github/issues/eufony/dbal/open?label=Issues">
-    <img alt="License" src="https://img.shields.io/github/license/eufony/dbal?label=License">
+    <a href="https://packagist.org/packages/eufony/dbal">
+        <img alt="Packagist Downloads" src="https://img.shields.io/packagist/dt/eufony/dbal?label=Packagist%20Downloads">
+    </a>
+    <a href="https://github.com/eufony/dbal">
+        <img alt="GitHub Stars" src="https://img.shields.io/github/stars/eufony/dbal?label=GitHub%20Stars">
+    </a>
+    <a href="https://github.com/eufony/dbal/issues">
+        <img alt="Issues" src="https://img.shields.io/github/issues/eufony/dbal/open?label=Issues">
+    </a>
+    <br>
+    <a href="https://github.com/eufony/dbal#license">
+        <img alt="License" src="https://img.shields.io/github/license/eufony/dbal?label=License">
+    </a>
+    <a href="https://github.com/eufony/dbal#contributing">
+        <img alt="Community Built" src="https://img.shields.io/badge/Made%20with-%E2%9D%A4-red">
+    </a>
 </p>
-
-- GitHub: https://github.com/eufony/dbal
-- Packagist: https://packagist.org/packages/eufony/dbal
-- Issues: https://github.com/eufony/dbal/issues
 
 *eufony/dbal provides an abstraction layer over SQL to ease development using relational database management systems and
 to prevent lock-in to a specific SQL flavor.*
@@ -18,13 +26,15 @@ to prevent lock-in to a specific SQL flavor.*
 expressive syntax that is then translated on-the-fly to the appropriate syntax for your SQL flavor. Using it, you'll
 enjoy all the benefits of plain SQL, plus:
 
-- Logging of interesting database events, such as read-only and mutation queries.
+- [PSR-3](https://www.php-fig.org/psr/psr-3/) compatible logging of database events.
 - Transparent caching of query results using any [PSR-6](https://www.php-fig.org/psr/psr-6/)
   or [PSR-16](https://www.php-fig.org/psr/psr-16/) compliant caching implementation.
 - Easy protection against SQL injection attacks using prepared statements.
 - No-fuss serialization / unserialization of any valid PHP type.
 
 Interested? [Here's how to get started.](#getting-started)
+
+## FAQ
 
 ### Why not write my own SQL queries directly?
 
@@ -48,7 +58,7 @@ you'll quickly face two problems when trying to write queries that comply with i
    in very subtle ways that might otherwise go unnoticed. Trying to take these into account will add significant
    overhead to development and will generally make it unmotivating to work on the backend infrastructure.
 
-*eufony/dbal* takes care of this problem for you. As an abstraction layer, you, as a developer, don't have to worry at
+*eufony/dbal* takes care of these problem for you. As an abstraction layer, you, as a developer, don't have to worry at
 all about the syntax that comes out the other end. If you want to migrate flavors, you only need to switch to any of the
 ready-made [driver implementations](https://packagist.org/providers/eufony/dbal-driver-implemtation); or, if one doesn't
 exist, [contribute](#contributing) and [make your own](docs/Supporting_other_Databases.md). Additionally, you'll get to
