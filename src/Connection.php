@@ -25,7 +25,6 @@ use Eufony\Cache\Utils\CacheKeyProvider;
 use Eufony\DBAL\Driver\DriverInterface;
 use Eufony\DBAL\Query\Builder\Query;
 use Eufony\DBAL\Query\Builder\Select;
-use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
@@ -158,15 +157,11 @@ class Connection
      * Returns the current PSR-16 cache.
      * If `$cache` is set, sets the new cache and returns the previous instance.
      *
-     * @param \Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface|null $cache
+     * @param (\Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface)|null $cache
      * @return \Psr\SimpleCache\CacheInterface&\Eufony\Cache\TagAwareInterface
      */
-    public function cache(CacheInterface $cache = null): CacheInterface&TagAwareInterface
+    public function cache((CacheInterface&TagAwareInterface)|null $cache = null): CacheInterface&TagAwareInterface
     {
-        if ($cache !== null && !($cache instanceof TagAwareInterface)) {
-            throw new InvalidArgumentException("Cache implementation must support TagAwareInterface.");
-        }
-
         $prev = $this->cache;
         $this->cache = $cache ?? $this->cache;
         return $prev;
@@ -218,7 +213,7 @@ class Connection
         $context = $query->context();
 
         // For read-only queries, check if the result is cached first
-        if ($is_mutation === false && $ttl !== null) {
+        if (!$is_mutation && $ttl !== null) {
             // Sorting the context array ensures predictability when dispensing the cache key
             asort($context);
             $cache_key = CacheKeyProvider::get($query_string . serialize($context));
@@ -244,7 +239,7 @@ class Connection
         // Determine the tables that are affected by the query
         $tables = $query->affectedTables();
 
-        if ($is_mutation === false) {
+        if (!$is_mutation) {
             // Log info for read operations
             $this->logger->info("Query read: $query_string");
 

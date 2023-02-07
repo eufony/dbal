@@ -12,7 +12,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": "^8.1",
+    "php": "^8.2",
     "ext-pdo": "*",
     "eufony/cache": "^1.0",
     "eufony/log": "^0.1.0",

@@ -20,6 +20,7 @@ use BadMethodCallException;
 use Eufony\DBAL\QueryException;
 use PDO;
 use PDOException;
+use SensitiveParameter;
 
 /**
  * Provides an abstract database driver implementation that other drivers can
@@ -54,7 +55,7 @@ abstract class AbstractDriver implements DriverInterface
      * @param string|null $user
      * @param string|null $password
      */
-    public function __construct(string $dsn, ?string $user = null, ?string $password = null)
+    public function __construct(string $dsn, ?string $user = null, #[SensitiveParameter] ?string $password = null)
     {
         $this->pdo = new PDO($dsn, $user, $password);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
