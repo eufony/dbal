@@ -94,7 +94,7 @@ via [Composer](https://getcomposer.org/) with:
 > to `beta` (not recommended), or override it for this package only using `@beta` in the dependency definition (such as
 > in the command above).
 
-### Usage
+### Basic Usage
 
 *For a more detailed documentation, see [here](docs).*
 
