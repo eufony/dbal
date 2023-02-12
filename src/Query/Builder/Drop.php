@@ -18,17 +18,12 @@ namespace Eufony\DBAL\Query\Builder;
 
 class Drop extends Query
 {
-    protected string $type;
-    protected string $name;
+    protected string $table;
+    protected array $props;
 
-    public static function table(string $name): static
+    public static function table(string $table): static
     {
-        return new static(__FUNCTION__, $name);
-    }
-
-    public static function index(string $name): static
-    {
-        return new static(__FUNCTION__, $name);
+        return new static($table);
     }
 
     /**
@@ -36,14 +31,20 @@ class Drop extends Query
      *
      * Use `Drop::table()` to initialize and instance of this class.
      *
-     * @param string $type
-     * @param string $name
+     * @param string $table
+     * @param mixed[] $props
      */
-    protected function __construct(string $type, string $name)
+    protected function __construct(string $table, array $props = [])
     {
         parent::__construct();
-        $this->type = $type;
-        $this->name = $name;
+        $this->table = $table;
+        $this->props = $props;
+    }
+
+    public function idempotent(): static
+    {
+        $this->props['idempotent'] = true;
+        return $this;
     }
 
     /**
@@ -51,6 +52,6 @@ class Drop extends Query
      */
     public function affectedTables(): array
     {
-        return ($this->type === "table") ? [$this->name] : [];
+        return [$this->table];
     }
 }

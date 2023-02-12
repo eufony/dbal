@@ -18,41 +18,36 @@ namespace Eufony\DBAL\Query\Builder;
 
 class Create extends Query
 {
-    protected string $type;
-    protected string $name;
+    protected string $table;
+
     protected array $fields;
     protected array $props;
 
-    public static function table(string $name, bool $idempotent = false): static
+    public static function table(string $table, array $fields): static
     {
-        return new static(__FUNCTION__, $name, ["idempotent" => $idempotent]);
-    }
-
-    public static function index(string $name, bool $unique = false, bool $idempotent = false): static
-    {
-        return new static(__FUNCTION__, $name, ["unique" => $unique, "idempotent" => $idempotent]);
+        return new static($table, $fields);
     }
 
     /**
      * {@inheritDoc}
      *
-     * Use `Create::table()` or `Create::index()` to initialize an instance of this
-     * class.
+     * Use `Create::table()` to initialize an instance of this class.
      *
-     * @param string $name
-     * @param bool $idempotent
+     * @param string $table
+     * @param mixed[][] $fields
+     * @param mixed[] $props
      */
-    protected function __construct(string $type, string $name, array $props)
+    protected function __construct(string $table, array $fields, array $props = [])
     {
         parent::__construct();
-        $this->type = $type;
-        $this->name = $name;
+        $this->table = $table;
+        $this->fields = $fields;
         $this->props = $props;
     }
 
-    public function fields(array $fields): static
+    public function idempotent(): static
     {
-        $this->fields = $fields;
+        $this->props['idempotent'] = true;
         return $this;
     }
 
@@ -61,6 +56,6 @@ class Create extends Query
      */
     public function affectedTables(): array
     {
-        return ($this->type === "table") ? [$this->name] : [];
+        return [$this->table];
     }
 }
