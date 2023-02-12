@@ -41,9 +41,9 @@ entries in the group:
 $query = Select::from("users")->groupBy("name")->having(Expr::ge("count(*)", 2));
 ```
 
-> **Note:** Currently, the Eufony DBAL only has *partial* support for aggregate functions.
+> **Note**: Currently, the Eufony DBAL only has *partial* support for aggregate functions.
 
-See the [HAVING](#where-and-having) clause for more example Expressions.
+See the [HAVING](#where-and-having) clause for more examples of Expressions.
 
 Select all fields from all entires in the joined `users` and `emails` tables:
 
@@ -60,7 +60,7 @@ Select all fields from the first 5 entries in the `users` table:
 $query = Select::from("users")->limit(5);
 ```
 
-> **Note:** You would probably only use this in conjunction with the [ORDER BY](#order-by) clause.
+> **Note**: You would probably only use this in conjunction with the [ORDER BY](#order-by) clause.
 
 Select all fields from the 2nd until the 7th entry in the `users` table:
 
@@ -68,7 +68,7 @@ Select all fields from the 2nd until the 7th entry in the `users` table:
 $query = Select::from("users")->limit(2, 7);
 ```
 
-> **Note:** You would probably only use this in conjunction with the [ORDER BY](#order-by) clause.
+> **Note**: You would probably only use this in conjunction with the [ORDER BY](#order-by) clause.
 
 Select all fields from all entries in the `users` table, sorted alphabetically by the `name` field in ascending order:
 
@@ -142,7 +142,7 @@ See the [WHERE](#where-and-having) clause for more examples.
 
 ### JOIN
 
-> **Note:** For all following examples, the `leftJoin()` and `innerJoin()` functions are syntactically equivalent.
+> **Note**: For all following examples, the `leftJoin()` and `innerJoin()` functions are syntactically equivalent.
 
 Join tables `a` and `b` on `a.id = b.a_id` (one-to-many):
 
@@ -223,7 +223,7 @@ $query = Select::from("users")->orderBy([ "id", "name" => "desc" ]);
 $query = Select::from("users")->orderBy([ "id" => "asc", "name" => "desc" ]);
 ```
 
-Order by `id` and `name, both in descending order:
+Order by `id` and `name`, both in descending order:
 
 ```php
 $query = Select::from("users")->orderBy([ "id" => "desc", "name" => "desc" ]);
@@ -233,13 +233,14 @@ $query = Select::from("users")->orderBy([ "id" => "desc", "name" => "desc" ]);
 
 Both the WHERE and HAVING clauses accept any valid expression (Expr) as a parameter. These expressions can be:
 
-Always evaluate to be `true`:
+Always evaluate to be `true` or `false`:
 
 ```php
 $expr = Expr::true();
+$expr = Expr::false();
 ```
 
-Always evaluate to be `false` (using NOT for negation):
+Negate another expression:
 
 ```php
 $expr = Expr::not(Expr::true());
@@ -289,7 +290,7 @@ $expr = Expr::eq("id", 5)
 $expr = Expr::ne("name", "Euphie")
 ```
 
-> **Note:** A literal can be of any type (including `null`) except for `array`.
+> **Note**: A literal can be of any type (including `null`) except for `array`.
 
 Compare a numerical (`int` or `float`) field and a literal:
 
@@ -309,7 +310,7 @@ $expr = Expr::ge("primary", "foreign");
 $expr = Expr::gt("primary", "foreign");
 ```
 
-Compare similarity between a field and a string literal:
+Compare similarity between a field and a string literal (using `%` as a wildcard):
 
 ```php
 $expr = Expr::like("exact", "Euphie");
@@ -324,7 +325,7 @@ Check if a field's value is in a list of literals:
 $expr = Expr::in("id", [ 1, 3, 5, 7, 9 ]);
 ```
 
-Check if a subquery returns at least one result:
+Check if a subquery returns at least one matching row:
 
 ```php
 $expr = Expr::exists(Select::from(/* ... */));

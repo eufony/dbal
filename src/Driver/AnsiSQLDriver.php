@@ -64,6 +64,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $this->$method_name($query);
     }
 
+    /**
+     * Generates the full SQL string of a `Select` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Select $query
+     * @return string
+     */
     protected function generateSelect(Select $query): string
     {
         // Get query props
@@ -110,6 +116,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $sql;
     }
 
+    /**
+     * Generates the full SQL string of an `Insert` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Insert $query
+     * @return string
+     */
     protected function generateInsert(Insert $query): string
     {
         // Get query props
@@ -133,6 +145,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $sql;
     }
 
+    /**
+     * Generates the full SQL string of an `Update` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Update $query
+     * @return string
+     */
     protected function generateUpdate(Update $query): string
     {
         // Get query props
@@ -160,6 +178,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $sql;
     }
 
+    /**
+     * Generates the full SQL string of a `Delete` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Delete $query
+     * @return string
+     */
     protected function generateDelete(Delete $query): string
     {
         // Get query props
@@ -175,24 +199,48 @@ class AnsiSQLDriver extends AbstractDriver
         return $sql;
     }
 
+    /**
+     * Generates the full SQL string of a `Create` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Create $query
+     * @return string
+     */
     protected function generateCreate(Create $query): string
     {
         // TODO: Implement Create query builder.
         return ";";
     }
 
+    /**
+     * Generates the full SQL string of an `Alter` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Alter $query
+     * @return string
+     */
     protected function generateAlter(Alter $query): string
     {
         // TODO: Implement Alter query builder.
         return ";";
     }
 
+    /**
+     * Generates the full SQL string of a `Drop` query builder.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Drop $query
+     * @return string
+     */
     protected function generateDrop(Drop $query): string
     {
         // TODO: Implement Drop query builder.
         return ";";
     }
 
+    /**
+     * Generates the SQL string of a query builder's `GROUP BY` clause.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateGroupByClause(Query $query): string
     {
         // Get query props
@@ -215,6 +263,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $clause;
     }
 
+    /**
+     * Generates the SQL string of a query builder's `JOIN` clauses.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateJoinClause(Query $query): string
     {
         // Get query props
@@ -253,6 +307,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $clause;
     }
 
+    /**
+     * Generates the SQL string of a query builder's `LIMIT` clause.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateLimitClause(Query $query): string
     {
         // Get query props
@@ -276,6 +336,12 @@ class AnsiSQLDriver extends AbstractDriver
         return $clause;
     }
 
+    /**
+     * Generates the SQL string of a query builder's `ORDER BY` clause.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateOrderByClause(Query $query): string
     {
         // Get query props
@@ -295,11 +361,26 @@ class AnsiSQLDriver extends AbstractDriver
         return " ORDER BY $order";
     }
 
+    /**
+     * Generates the SQL string of a query builder's `VALUES` clause.
+     *
+     * This function is currently a no-op, as the `VALUES` clauses are handled by
+     * `generateInsert()` and `generateUpdate()`, respectively.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateValuesClause(Query $query): string
     {
         return "";
     }
 
+    /**
+     * Generates the SQL string of a query builder's `WHERE` clause.
+     *
+     * @param \Eufony\DBAL\Query\Builder\Query $query
+     * @return string
+     */
     protected function generateWhereClause(Query $query): string
     {
         // Get query props
@@ -317,6 +398,12 @@ class AnsiSQLDriver extends AbstractDriver
         return " WHERE $where";
     }
 
+    /**
+     * Generates the SQL string of an expression.
+     *
+     * @param \Eufony\DBAL\Query\Expr $expr
+     * @return string
+     */
     protected function generateExpression(Expr $expr): string
     {
         switch ($expr->type()) {
@@ -390,6 +477,13 @@ class AnsiSQLDriver extends AbstractDriver
         }
     }
 
+    /**
+     * Properly quotes fields names such that they are not treated as literals in
+     * SQL.
+     *
+     * @param string $field
+     * @return string
+     */
     protected function quoteField(string $field): string
     {
         $parts = explode(".", $field);

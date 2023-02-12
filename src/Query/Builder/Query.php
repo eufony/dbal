@@ -27,11 +27,11 @@ use OutOfBoundsException;
  *
  * Provides abstraction away from vendor-specific query language syntax using
  * object-oriented query builders.
- * The query builder representation can then be translated back into the
- * correct syntax by a database driver.
+ * The query builder representation can then be translated into the correct
+ * syntax by a database driver.
  *
  * Allows retrieval of the query builder properties using the array access.
- * However, any modification of the query properties is not allowed.
+ * However, any modifications of the query properties are not allowed.
  *
  * Cloning a query builder will result in a deep copy of all of its properties.
  */
