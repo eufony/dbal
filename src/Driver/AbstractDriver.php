@@ -27,9 +27,11 @@ use SensitiveParameter;
  * inherit from.
  *
  * Uses the PHP PDO extension to interface with the database.
- * Implements the `execute()` method and all transaction-related methods in the
- * `DriverInterface`.
+ * Implements the all transaction-related methods in the * `DriverInterface`.
  * Inheriting classes only need to implement the `query()` method.
+ *
+ * Also implements an `execute()` method for executing an SQL query string and
+ * returning the result as a PHP array.
  */
 abstract class AbstractDriver implements DriverInterface
 {
@@ -70,7 +72,22 @@ abstract class AbstractDriver implements DriverInterface
     }
 
     /**
-     * @inheritDoc
+     * Executes the given query string and returns the result as a PHP array.
+     *
+     * The array returns each numerically indexed row as a nested array, indexed by
+     * the field name as returned by the result set.
+     *
+     * The query may contain positional (`?`) or named (`:foo`) parameters
+     * (exclusively), whose values can be passed in through the context array.
+     * The values in the context array are treated as literal data, they
+     * are not interpreted as part of the query.
+     *
+     * @param string $query
+     * @param mixed[] $context
+     * @return mixed[][]
+     *
+     * @internal Executing SQL queries directly defeats the purpose of the database
+     * abstraction layer. Use an appropriate query builder instead.
      */
     public function execute(string $query, array $context = []): array
     {

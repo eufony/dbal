@@ -52,26 +52,6 @@ interface DriverInterface
     public function query(Query $query): Generator;
 
     /**
-     * Executes the given query string and returns the result as a PHP array.
-     *
-     * The array returns each numerically indexed row as a nested array, indexed by
-     * the field name as returned by the result set.
-     *
-     * The query may contain positional (`?`) or named (`:foo`) parameters
-     * (exclusively), whose values can be passed in through the context array.
-     * The values in the context array are treated as literal data, they
-     * are not interpreted as being part of the query.
-     *
-     * @param string $query
-     * @param mixed[] $context
-     * @return mixed[][]
-     *
-     * @internal Executing SQL queries directly defeats the purpose of the database
-     * abstraction layer. Use an appropriate query builder instead.
-     */
-    public function execute(string $query, array $context = []): array;
-
-    /**
      * Checks whether the database is currently in a transaction.
      *
      * Returns `true` if a transaction is active, `false` otherwise.
