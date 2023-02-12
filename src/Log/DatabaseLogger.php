@@ -106,7 +106,7 @@ class DatabaseLogger extends AbstractLogger
             ],
         ];
 
-        Create::table("__log", idempotent: true)->fields($fields)->execute();
+        Create::table("__log", $fields)->idempotent()->execute($this->database->key());
         */
 
         // Execute log query
@@ -117,7 +117,7 @@ class DatabaseLogger extends AbstractLogger
             "exception" => $context['exception'] ?? null,
         ];
 
-        Insert::into("__log")->values($values)->execute();
+        Insert::into("__log")->values($values)->execute($this->database->key());
 
         // Restore previous logger
         $this->database->logger($logger);
